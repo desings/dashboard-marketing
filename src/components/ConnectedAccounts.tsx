@@ -27,10 +27,10 @@ const PROVIDER_LABELS = {
 }
 
 const PROVIDER_ICONS = {
-  facebook: '📘',
-  instagram: '📷',
-  google: '🔍',
-  pinterest: '📌'
+  facebook: <i className="fab fa-facebook text-blue-600"></i>,
+  instagram: <i className="fab fa-instagram text-pink-500"></i>,
+  google: <i className="fab fa-google text-red-500"></i>,
+  pinterest: <i className="fab fa-pinterest text-red-600"></i>
 }
 
 const STATUS_LABELS = {
@@ -70,9 +70,24 @@ export default function ConnectedAccounts({ userId }: ConnectedAccountsProps) {
     
     const oauthSuccess = urlParams.get('oauth_success')
     const account = urlParams.get('account')
+    const accountData = urlParams.get('account_data')
     
     if (oauthSuccess && account) {
       alert(`Éxito: Cuenta ${oauthSuccess} conectada: ${decodeURIComponent(account)}`)
+      
+      // Guardar cuenta en localStorage si tenemos los datos
+      if (accountData) {
+        try {
+          const parsedAccount = JSON.parse(decodeURIComponent(accountData))
+          const existingAccounts = JSON.parse(localStorage.getItem('connected_accounts') || '[]')
+          const updatedAccounts = existingAccounts.filter((acc: any) => acc.provider !== parsedAccount.provider)
+          updatedAccounts.push(parsedAccount)
+          localStorage.setItem('connected_accounts', JSON.stringify(updatedAccounts))
+        } catch (error) {
+          console.error('Error saving account to localStorage:', error)
+        }
+      }
+      
       // Limpiar URL y recargar cuentas
       window.history.replaceState({}, document.title, window.location.pathname)
       setTimeout(loadAccounts, 1000)
@@ -85,13 +100,34 @@ export default function ConnectedAccounts({ userId }: ConnectedAccountsProps) {
       const response = await fetch(`/api/social-accounts?user_id=${userId}`)
       const data = await response.json()
 
+      let accounts = []
+      
       if (response.ok) {
-        setAccounts(data.accounts || [])
+        accounts = data.accounts || []
       } else {
         console.error('Error cargando cuentas:', data.error)
       }
+      
+      // Si no hay cuentas del servidor, cargar desde localStorage como fallback
+      if (accounts.length === 0) {
+        try {
+          const localAccounts = JSON.parse(localStorage.getItem('connected_accounts') || '[]')
+          accounts = localAccounts
+        } catch (error) {
+          console.error('Error loading from localStorage:', error)
+        }
+      }
+      
+      setAccounts(accounts)
     } catch (error) {
       console.error('Error:', error)
+      // Fallback a localStorage si falla la API
+      try {
+        const localAccounts = JSON.parse(localStorage.getItem('connected_accounts') || '[]')
+        setAccounts(localAccounts)
+      } catch (localError) {
+        console.error('Error loading from localStorage:', localError)
+      }
     } finally {
       setLoading(false)
     }

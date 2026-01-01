@@ -70,9 +70,21 @@ export async function GET(request: NextRequest) {
       }, { status: 400 })
     }
 
+    // Guardar cuenta conectada para mostrar en la UI
+    const connectedAccount = {
+      id: `facebook-${profileData.id}`,
+      provider: 'facebook',
+      provider_account_name: profileData.name,
+      account_type: 'user',
+      status: 'active',
+      scopes: ['public_profile'],
+      expires_at: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(), // 60 días
+      created_at: new Date().toISOString()
+    }
+
     // Éxito - redirigir al dashboard
     return NextResponse.redirect(
-      `https://dashboard-marketing-a62m.vercel.app/dashboard/settings?oauth_success=facebook&account=${encodeURIComponent(profileData.name)}`
+      `https://dashboard-marketing-a62m.vercel.app/dashboard/settings?oauth_success=facebook&account=${encodeURIComponent(profileData.name)}&account_data=${encodeURIComponent(JSON.stringify(connectedAccount))}`
     )
 
   } catch (error) {
