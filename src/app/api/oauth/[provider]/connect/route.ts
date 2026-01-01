@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { headers } from 'next/headers'
 import { isSupabaseConfigured } from '@/lib/supabase'
 
 export async function GET(
@@ -34,9 +35,15 @@ export async function GET(
     }
 
     // Si no hay configuración OAuth, mostrar error
-    const baseUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    // Detectar la URL base dinámicamente
+    const headersList = await headers()
+    const host = headersList.get('host')
+    const protocol = host?.includes('localhost') ? 'http' : 'https'
+    const baseUrl = host ? `${protocol}://${host}` : (
+      process.env.VERCEL_URL 
+        ? `https://${process.env.VERCEL_URL}` 
+        : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    )
     const facebookId = process.env.FACEBOOK_CLIENT_ID || process.env.FACEBOOK_APP_ID
     const googleId = process.env.GOOGLE_CLIENT_ID
     
