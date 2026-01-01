@@ -34,7 +34,9 @@ export async function GET(
     }
 
     // Si no hay configuración OAuth, mostrar error
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+    const baseUrl = process.env.VERCEL_URL 
+      ? `https://${process.env.VERCEL_URL}` 
+      : process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
     const facebookId = process.env.FACEBOOK_CLIENT_ID || process.env.FACEBOOK_APP_ID
     const googleId = process.env.GOOGLE_CLIENT_ID
     
