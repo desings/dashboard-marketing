@@ -103,6 +103,38 @@ export async function GET(request: NextRequest) {
       pageToken: pageInfo?.pageToken
     }
 
+    // Guardar también en el servidor para el scheduler
+    try {
+      const fs = require('fs')
+      const path = require('path')
+      const connectedAccountsFile = path.join(process.cwd(), 'data', 'connected-accounts.json')
+      
+      // Ensure data directory exists
+      const dataDir = path.dirname(connectedAccountsFile)
+      if (!fs.existsSync(dataDir)) {
+        fs.mkdirSync(dataDir, { recursive: true })
+      }
+      
+      let accounts = []
+      if (fs.existsSync(connectedAccountsFile)) {
+        try {
+          const data = fs.readFileSync(connectedAccountsFile, 'utf-8')
+          accounts = JSON.parse(data)
+        } catch (error) {
+          console.error('Error reading accounts file:', error)
+        }
+      }
+      
+      // Remove existing Facebook account and add new one
+      accounts = accounts.filter((acc: any) => acc.provider !== 'facebook')
+      accounts.push(connectedAccount)
+      
+      fs.writeFileSync(connectedAccountsFile, JSON.stringify(accounts, null, 2))
+      console.log('✅ Account saved to server file system')
+    } catch (error) {
+      console.error('Error saving account to server:', error)
+    }
+
     // Éxito - redirigir al dashboard
     return NextResponse.redirect(
       `https://dashboard-marketing-a62m.vercel.app/dashboard/settings?oauth_success=facebook&account=${encodeURIComponent(pageInfo ? pageInfo.pageName : profileData.name)}&account_data=${encodeURIComponent(JSON.stringify(connectedAccount))}`

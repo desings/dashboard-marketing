@@ -599,30 +599,9 @@ export default function ProgramacionPage() {
       const savedPost = await saveScheduledPost(newPostData)
       console.log('✅ Post guardado:', savedPost)
       
-      // También programar en las APIs externas si es necesario
-      for (const platform of selectedAccounts) {
-        console.log(`Programando para ${platform}: ${postText}`)
-        
-        const response = await fetch('/api/publish-via-n8n', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            platform: platform,
-            content: postText,
-            publishNow: false,  // Corregido: era immediate: false
-            scheduledFor: scheduledDateTime.toISOString(),  // Corregido: era scheduledDateTime
-            platforms: [platform],  // Añadido: la API necesita este campo
-            tenantId: 'demo-tenant',  // Añadido: tenant por defecto
-            type: postType,
-            media: mediaData
-          }),
-        })
-
-        const result = await response.json()
-        console.log(`Resultado programado de ${platform}:`, result)
-      }
+      // Para posts programados, solo guardamos la información
+      // El sistema de cron se encargará de ejecutarlos con los tokens OAuth
+      console.log(`Post programado para ${selectedAccounts.join(', ')} el ${publishDate} a las ${publishTime}`)
 
       alert('Post programado exitosamente!')
       setPostText('')
@@ -631,6 +610,9 @@ export default function ProgramacionPage() {
       setPublishTime('')
       setMediaFiles([])
       setShowScheduleForm(false)
+      
+      // Recargar la lista de posts programados
+      await loadScheduledPosts()
     } catch (error) {
       console.error('Error al programar:', error)
       alert('Error al programar el post')

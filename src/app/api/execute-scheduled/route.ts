@@ -42,7 +42,7 @@ async function publishPost(post: any) {
   try {
     console.log('📤 [SCHEDULER] Publicando post programado:', post.id);
     
-    const publishResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/publish-real`, {
+    const publishResponse = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/publish-scheduled`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -50,8 +50,6 @@ async function publishPost(post: any) {
       body: JSON.stringify({
         content: post.content,
         platforms: post.platforms,
-        publishNow: true,
-        tenantId: post.tenantId,
         media: post.media
       })
     });
