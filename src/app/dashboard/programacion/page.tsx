@@ -67,16 +67,135 @@ export default function ProgramacionPage() {
   // Cargar datos al inicializar
   useEffect(() => {
     loadScheduledPosts()
+    checkAndExecuteDuePosts() // Verificar inmediatamente al cargar
   }, [])
 
   // Auto-refresh cada 30 segundos para mostrar cambios de estado automáticos
   useEffect(() => {
     const interval = setInterval(() => {
       loadScheduledPosts()
+      checkAndExecuteDuePosts() // Agregar ejecución automática
     }, 30000) // 30 segundos
 
     return () => clearInterval(interval)
   }, [])
+
+  // Función para verificar y ejecutar posts que están listos
+  const checkAndExecuteDuePosts = async () => {
+    try {
+      const localPosts = JSON.parse(localStorage.getItem('scheduled_posts') || '[]')
+      const now = new Date()
+      
+      console.log('📋 Verificando posts programados:', {
+        total: localPosts.length,
+        pendientes: localPosts.filter((p: any) => p.status === 'pending').length,
+        hora_actual: now.toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })
+      })
+      
+      for (const post of localPosts) {
+        if (post.status === 'pending') {
+          const scheduledTime = new Date(`${post.date}T${post.time}`)
+          
+          console.log('⏰ Verificando post:', {
+            id: post.id,
+            programado_para: scheduledTime.toLocaleString('es-ES', { timeZone: 'Europe/Madrid' }),
+            hora_actual: now.toLocaleString('es-ES', { timeZone: 'Europe/Madrid' }),
+            debe_ejecutarse: scheduledTime <= now
+          })
+          
+          // Si la hora programada ya pasó, ejecutar el post
+          if (scheduledTime <= now) {
+            console.log('🕒 Ejecutando post programado:', post.id)
+            await executeScheduledPost(post)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error checking due posts:', error)
+    }
+  }
+
+  // Función para ejecutar un post programado específico
+  const executeScheduledPost = async (post: any) => {
+    try {
+      console.log('🚀 Iniciando ejecución de post:', {
+        id: post.id,
+        contenido: post.content.substring(0, 50) + '...',
+        fecha: `${post.date} ${post.time}`
+      })
+
+      // Obtener cuentas conectadas
+      const connectedAccounts = JSON.parse(localStorage.getItem('connected_accounts') || '[]')
+      const fbAccount = connectedAccounts.find((acc: any) => acc.provider === 'facebook')
+      
+      console.log('🔑 Verificando cuenta de Facebook:', {
+        tiene_cuenta: !!fbAccount,
+        tiene_token: !!fbAccount?.pageToken,
+        page_id: fbAccount?.pageId
+      })
+
+      if (!fbAccount?.pageToken) {
+        console.error('❌ No hay cuenta de Facebook conectada para ejecutar:', post.id)
+        updatePostStatus(post.id, 'failed', 'Facebook no conectado')
+        return
+      }
+
+      console.log('📤 Enviando a Facebook...')
+
+      // Ejecutar publicación en Facebook
+      const response = await fetch('/api/facebook-publish-oauth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: post.content,
+          pageToken: fbAccount.pageToken,
+          pageId: fbAccount.pageId
+        })
+      })
+
+      const result = await response.json()
+
+      console.log('📬 Respuesta de Facebook:', result)
+
+      if (result.success) {
+        console.log('✅ Post ejecutado exitosamente:', post.id, result.postId)
+        updatePostStatus(post.id, 'published', null, result.postId)
+      } else {
+        console.error('❌ Error ejecutando post:', post.id, result.error)
+        updatePostStatus(post.id, 'failed', result.error)
+      }
+    } catch (error) {
+      console.error('Error executing scheduled post:', error)
+      updatePostStatus(post.id, 'failed', error instanceof Error ? error.message : 'Error desconocido')
+    }
+  }
+
+  // Función para actualizar el estado de un post
+  const updatePostStatus = (postId: string, status: string, error?: string | null, facebookPostId?: string) => {
+    try {
+      const localPosts = JSON.parse(localStorage.getItem('scheduled_posts') || '[]')
+      const updatedPosts = localPosts.map((post: any) => {
+        if (post.id === postId) {
+          return {
+            ...post,
+            status,
+            error,
+            facebookPostId,
+            updatedAt: new Date().toISOString(),
+            executedAt: new Date().toISOString()
+          }
+        }
+        return post
+      })
+      
+      localStorage.setItem('scheduled_posts', JSON.stringify(updatedPosts))
+      
+      // Recargar la lista para mostrar cambios
+      loadScheduledPosts()
+    } catch (error) {
+      console.error('Error updating post status:', error)
+    }
+  }
 
   const loadScheduledPosts = async () => {
     try {
@@ -710,6 +829,16 @@ export default function ProgramacionPage() {
             }`}
           >
             📅 Vista Calendario
+          </button>
+          <button
+            onClick={async () => {
+              console.log('🚀 Ejecutando manualmente posts pendientes...')
+              await checkAndExecuteDuePosts()
+              loadScheduledPosts() // Recargar para mostrar cambios
+            }}
+            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm font-medium"
+          >
+            ⚡ Ejecutar Pendientes
           </button>
         </div>
 
