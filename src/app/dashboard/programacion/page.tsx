@@ -465,12 +465,6 @@ export default function ProgramacionPage() {
     try {
       setPublishing(true)
       
-      // Use test mode if enabled
-      // Usar n8n para Facebook (OAuth2) y directo para otras plataformas
-      const endpoint = testMode ? '/api/publish-test' : (
-        selectedAccounts.includes('facebook') ? '/api/publish-via-n8n' : '/api/publish-real'
-      )
-      
       // Preparar URLs de multimedia
       const mediaUrls = mediaFiles.map(file => ({
         url: file.url,
@@ -478,41 +472,71 @@ export default function ProgramacionPage() {
         fileName: file.fileName
       }))
       
+      // Obtener cuentas conectadas desde localStorage
+      const connectedAccounts = JSON.parse(localStorage.getItem('connected_accounts') || '[]')
+      
       for (const platform of selectedAccounts) {
         console.log(`Publicando en ${platform}: ${postText}`)
         console.log('Con multimedia:', mediaUrls)
         
-        const response = await fetch(endpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            platform: platform,
-            content: postText,
-            publishNow: true,  // Corregido: era immediate: true
-            media: mediaUrls // Incluir archivos multimedia
-          }),
-        })
+        if (platform === 'facebook') {
+          // Usar OAuth para Facebook
+          const fbAccount = connectedAccounts.find((acc: any) => acc.provider === 'facebook')
+          
+          if (!fbAccount?.pageToken) {
+            alert(`❌ Facebook no está conectado.\n\nVe a Settings → Cuentas Conectadas → Conectar Facebook`)
+            setPublishing(false)
+            return
+          }
+          
+          const response = await fetch('/api/facebook-publish-oauth', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              content: postText,
+              pageToken: fbAccount.pageToken,
+              pageId: fbAccount.pageId,
+              media: mediaUrls
+            }),
+          })
+          
+          const result = await response.json()
+          console.log(`Resultado de ${platform}:`, result)
+          
+          if (!result.success) {
+            console.error(`Error detallado de ${platform}:`, result)
+            alert(`❌ Error en Facebook: ${result.error}`)
+            setPublishing(false)
+            return
+          }
+        } else {
+          // Para otras plataformas, usar endpoint directo
+          const endpoint = testMode ? '/api/publish-test' : '/api/publish-real'
+          
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              platform: platform,
+              content: postText,
+              publishNow: true,
+              media: mediaUrls
+            }),
+          })
 
-        const result = await response.json()
-        console.log(`Resultado de ${platform}:`, result)
-        
-        if (!result.success) {
-          // Show detailed error message for Facebook permission issues
-          if (result.results?.facebook?.solution?.type === 'permissions_needed') {
-            alert(`❌ Error de permisos de Facebook:\n\n${result.results.facebook.error}\n\nPor ahora, puedes usar el MODO DE PRUEBA para simular publicaciones.`)
+          const result = await response.json()
+          console.log(`Resultado de ${platform}:`, result)
+          
+          if (!result.success) {
+            console.error(`Error detallado de ${platform}:`, result)
+            alert(`❌ Error en ${platform}: ${result.error || 'Error desconocido'}`)
+            setPublishing(false)
             return
           }
-          
-          // Show specific error for Facebook token issues
-          if (result.error && result.error.includes('token')) {
-            alert(`❌ Error de token de Facebook:\n\n${result.error}\n\n📋 Para solucionarlo:\n1. Ve a n8n: https://vmi2907616.contaboserver.net\n2. Reconecta la credencial 'FB TOKEN'\n3. Asegúrate de seleccionar tu página de Facebook`)
-            return
-          }
-          
-          console.error(`Error detallado de ${platform}:`, result)
-          throw new Error(result.error || `Error en ${platform}`)
         }
       }
 
