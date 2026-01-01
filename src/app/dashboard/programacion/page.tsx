@@ -82,58 +82,82 @@ export default function ProgramacionPage() {
     try {
       setLoading(true)
       
-      // Solo cargar del sistema nuevo (execute-scheduled) para evitar duplicaciones
-      const response = await fetch('/api/execute-scheduled?tenantId=demo-tenant')
-      const data = await response.json()
-      
       let allPosts: ScheduledPost[] = []
-      
-      if (data.success) {
-        // Convertir posts del sistema nuevo al formato del dashboard
-        const newSystemPosts = [
-          // Posts programados
-          ...data.posts.scheduled.map((post: any) => ({
-            id: post.id,
-            content: post.content,
-            date: post.scheduledFor.split('T')[0],
-            time: post.scheduledFor.split('T')[1].slice(0, 5),
-            platforms: post.platforms,
-            type: 'post' as const,
-            media: post.media || [],
-            status: 'pending' as const,
-            createdAt: post.createdAt,
-            updatedAt: post.createdAt
-          })),
-          // Posts publicados exitosamente
-          ...data.posts.published.map((post: any) => ({
-            id: post.id,
-            content: post.content,
-            date: post.scheduledFor.split('T')[0],
-            time: post.scheduledFor.split('T')[1].slice(0, 5),
-            platforms: post.platforms,
-            type: 'post' as const,
-            media: post.media || [],
-            status: (post.publishResult?.success !== false) ? 'published' as const : 'failed' as const,
-            facebookPostId: post.publishResult?.results?.facebook?.postId,
-            createdAt: post.createdAt,
-            updatedAt: post.publishedAt || post.failedAt
-          })),
-          // Posts que fallaron
-          ...data.posts.failed.map((post: any) => ({
-            id: post.id,
-            content: post.content,
-            date: post.scheduledFor.split('T')[0],
-            time: post.scheduledFor.split('T')[1].slice(0, 5),
-            platforms: post.platforms,
-            type: 'post' as const,
-            media: post.media || [],
-            status: 'failed' as const,
-            createdAt: post.createdAt,
-            updatedAt: post.failedAt
-          }))
-        ]
-        
-        allPosts = newSystemPosts
+
+      // Primero intentar cargar desde localStorage
+      try {
+        const localPosts = JSON.parse(localStorage.getItem('scheduled_posts') || '[]')
+        allPosts = localPosts.map((post: any) => ({
+          ...post,
+          date: post.date,
+          time: post.time,
+          platforms: post.platforms || [],
+          status: post.status || 'pending'
+        }))
+        console.log('✅ Posts cargados desde localStorage:', allPosts.length)
+      } catch (localError) {
+        console.error('Error cargando desde localStorage:', localError)
+      }
+
+      // Si localStorage está vacío, intentar cargar desde el sistema viejo
+      if (allPosts.length === 0) {
+        try {
+          // Solo cargar del sistema nuevo (execute-scheduled) para evitar duplicaciones
+          const response = await fetch('/api/execute-scheduled?tenantId=demo-tenant')
+          const data = await response.json()
+          
+          if (data.success) {
+            // Convertir posts del sistema nuevo al formato del dashboard
+            const newSystemPosts = [
+              // Posts programados
+              ...data.posts.scheduled.map((post: any) => ({
+                id: post.id,
+                content: post.content,
+                date: post.scheduledFor.split('T')[0],
+                time: post.scheduledFor.split('T')[1].slice(0, 5),
+                platforms: post.platforms,
+                type: 'post' as const,
+                media: post.media || [],
+                status: 'pending' as const,
+                createdAt: post.createdAt,
+                updatedAt: post.createdAt
+              })),
+              // Posts publicados exitosamente
+              ...data.posts.published.map((post: any) => ({
+                id: post.id,
+                content: post.content,
+                date: post.scheduledFor.split('T')[0],
+                time: post.scheduledFor.split('T')[1].slice(0, 5),
+                platforms: post.platforms,
+                type: 'post' as const,
+                media: post.media || [],
+                status: (post.publishResult?.success !== false) ? 'published' as const : 'failed' as const,
+                facebookPostId: post.publishResult?.results?.facebook?.postId,
+                createdAt: post.createdAt,
+                updatedAt: post.publishedAt || post.failedAt
+              })),
+              // Posts que fallaron
+              ...data.posts.failed.map((post: any) => ({
+                id: post.id,
+                content: post.content,
+                date: post.scheduledFor.split('T')[0],
+                time: post.scheduledFor.split('T')[1].slice(0, 5),
+                platforms: post.platforms,
+                type: 'post' as const,
+                media: post.media || [],
+                status: 'failed' as const,
+                createdAt: post.createdAt,
+                updatedAt: post.failedAt
+              }))
+            ]
+            
+            if (newSystemPosts.length > 0) {
+              allPosts = newSystemPosts
+            }
+          }
+        } catch (apiError) {
+          console.error('Error cargando desde API:', apiError)
+        }
       }
       
       // Ordenar por fecha de creación (más recientes primero)
@@ -149,26 +173,24 @@ export default function ProgramacionPage() {
 
   const saveScheduledPost = async (postData: any) => {
     try {
-      const response = await fetch('/api/programming-posts', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(postData)
-      })
-
-      const data = await response.json()
+      // Usar localStorage en lugar de API backend (compatible con Vercel)
+      const existingPosts = JSON.parse(localStorage.getItem('scheduled_posts') || '[]')
       
-      if (data.success) {
-        // Recargar la lista de posts
-        await loadScheduledPosts()
-        return data.post
-      } else {
-        console.error('Error saving post:', data.error)
-        throw new Error(data.error)
+      const newPost = {
+        ...postData,
+        id: `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
       }
+      
+      existingPosts.push(newPost)
+      localStorage.setItem('scheduled_posts', JSON.stringify(existingPosts))
+      
+      console.log('✅ Post guardado en localStorage:', newPost.id)
+      return newPost
     } catch (error) {
-      console.error('Error saving scheduled post:', error)
+      console.error('Error saving scheduled post to localStorage:', error)
       throw error
     }
   }
