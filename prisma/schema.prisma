@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id        String   @id @default(cuid())
+  name      String
+  logoUrl   String?  // URL del logo del cliente
+  createdAt DateTime @default(now())
+
+  // Relaciones existentes
+  users     UserTenant[]
+  
+  // Nuevas relaciones para futuras funcionalidades
+  socialAccounts     SocialAccount[]
+  scheduledPosts     ScheduledPost[]
+  analyticsSnapshots AnalyticsSnapshot[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  tenants      UserTenant[]
+}
+
+model UserTenant {
+  userId   String
+  tenantId String
+  role     String   @default("owner")
+
+  user     User     @relation(fields: [userId], references: [id])
+  tenant   Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@id([userId, tenantId])
+  @@index([tenantId])
+}
+
+// ==============================================
+// ENTIDADES PARA FUNCIONALIDADES FUTURAS
+// ==============================================
+
+// Cuentas de redes sociales por cliente
+model SocialAccount {
+  id           String    @id @default(cuid())
+  tenantId     String
+  clientId     String?   // ID del cliente (para multi-cliente)
+  platform     String    // "instagram", "facebook", "twitter", "linkedin"
+  username     String
+  
+  // Configuración de API y OAuth
+  appId        String?   // App ID de la plataforma (ej: Facebook App ID)
+  clientSecret String?   // Client Secret (antes appSecret)
+  accessToken  String?   // Token de acceso OAuth
+  refreshToken String?   // Token para renovar acceso
+  pageId       String?   // ID de la página (Facebook/Instagram Business)
+  
+  // Metadatos de conexión
+  tokenType    String?   // "bearer", "oauth2", etc.
+  scope        String?   // Permisos otorgados
+  expiresAt    DateTime? // Cuándo expira el token
+  lastSyncAt   DateTime? // Última sincronización exitosa (renombrado de lastSync)
+  
+  // Estado y configuración
+  isActive     Boolean   @default(true)
+  isConnected  Boolean   @default(false) // Si está conectado a la API
+  connectionError String? // Último error de conexión
+  
+  // Configuración adicional (JSON flexible)
+  settings     Json?     // Configuraciones específicas por plataforma
+  
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now()) @updatedAt
+
+  tenant         Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  scheduledPosts ScheduledPost[]
+
+  @@unique([clientId, platform])
+  @@index([tenantId])
+  @@index([platform, isConnected])
+  @@index([clientId])
+}
+
+// Contenido programado para redes sociales
+model ScheduledPost {
+  id              String    @id @default(cuid())
+  tenantId        String
+  socialAccountId String?
+  
+  // Contenido del post
+  content         String    // Texto del post
+  mediaUrls       String[]  // URLs de imágenes/videos
+  mediaType       String?   // "image", "video", "carousel"
+  hashtags        String[]  // Hashtags extraídos
+  
+  // Programación
+  scheduledFor    DateTime  // Cuándo publicar
+  timezone        String    @default("UTC") // Zona horaria
+  publishedAt     DateTime? // Cuándo se publicó realmente
+  
+  // Estado y resultados
+  status          String    @default("draft") // "draft", "scheduled", "publishing", "published", "failed", "cancelled"
+  priority        Int       @default(1) // 1=normal, 2=alta, 3=urgente
+  errorMessage    String?   // Error si falló la publicación
+  
+  // Métricas del post publicado
+  externalPostId  String?   // ID del post en la plataforma
+  likes           Int?
+  comments        Int?
+  shares          Int?
+  impressions     Int?
+  reach           Int?
+  
+  // Metadatos
+  createdBy       String?   // ID del usuario que lo creó
+  approvedBy      String?   // ID del usuario que lo aprobó
+  notes           String?   // Notas internas
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  tenant        Tenant         @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  socialAccount SocialAccount? @relation(fields: [socialAccountId], references: [id])
+
+  @@index([tenantId, scheduledFor])
+  @@index([status, scheduledFor])
+  @@index([tenantId, status])
+}
+
+// Snapshots de métricas/analíticas por cliente
+model AnalyticsSnapshot {
+  id          String   @id @default(cuid())
+  tenantId    String
+  date        DateTime // Fecha del snapshot (diario/semanal)
+  platform    String   // "instagram", "facebook", "website", "overall"
+
+  // Métricas básicas
+  followers   Int?
+  engagement  Float?   // Porcentaje de engagement
+  impressions Int?     // Visualizaciones
+  clicks      Int?     // Clicks/interacciones
+  reach       Int?     // Alcance único
+
+  // Datos adicionales (JSON flexible para métricas específicas)
+  metadata Json?
+
+  createdAt DateTime @default(now())
+
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, date, platform])
+  @@index([tenantId, date])
+}

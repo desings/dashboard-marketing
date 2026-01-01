@@ -1,0 +1,104 @@
+{
+  "name": "Facebook Token Direct",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "facebook-token-direct",
+        "options": {}
+      },
+      "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        320,
+        300
+      ],
+      "webhookId": "facebook-token-direct"
+    },
+    {
+      "parameters": {
+        "url": "https://graph.facebook.com/v19.0/me/feed",
+        "authentication": "none",
+        "requestMethod": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer EAASr9vokZCZCMBQeqNZCIDycwM400RXmSDYqRqdO5ZA35ZArykTQS92Q5P7jZBVMm5AdhriTX93VIiYtZC7aPhHZCbG9hDY85x2zk5xp6qKQmZAx2jq0SnULX5Jo8LF24MHeqvdeIld5BFM10ticqBazKyRXvuk5GDviCeId5KngAZB3Dli9goQG7LZBvJN9NFkvLl7C02vdWetlZCmM1vumLypZBTPIxe1rdjY8r0dGNUV0rDZApJnilO4NhyTZAYZBGxVWeXhsgPzloE1etdNjKjZBKpMB1ZAGVAfwo01TZBrmLxepQyVd68pZBiurnD9RTfjWZCgqzM9ZAWB78kD1leZCrRK"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyContentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "={{ $json.text || $json.message || $json.content?.text }}"
+            }
+          ]
+        }
+      },
+      "id": "6c84fb90-12c4-11e1-840d-7b25c5ee775a",
+      "name": "Facebook Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [
+        620,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"postId\": $json.id || \"posted\", \"message\": \"Published via n8n successfully\", \"timestamp\": new Date().toISOString() } }}"
+      },
+      "id": "b1d07e9a-2e92-4c6d-9a4e-8f5a6b7c8d9e",
+      "name": "Respond Success", 
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        820,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Facebook Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Post": {
+      "main": [
+        [
+          {
+            "node": "Respond Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "responseMode": "lastNode"
+  },
+  "staticData": null,
+  "meta": {},
+  "pinData": {},
+  "versionId": "1"
+}

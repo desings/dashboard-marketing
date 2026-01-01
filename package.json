@@ -9,12 +9,21 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@prisma/client": "^6.19.1",
+    "@supabase/supabase-js": "^2.89.0",
+    "@types/bcrypt": "^6.0.0",
+    "axios": "^1.13.2",
+    "bcrypt": "^6.0.0",
+    "jsonwebtoken": "^9.0.3",
     "next": "16.1.0",
+    "prisma": "^6.19.1",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",

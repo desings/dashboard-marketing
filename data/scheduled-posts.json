@@ -1,0 +1,171 @@
+[
+  {
+    "id": "1766882021535",
+    "content": "🚀 POST PROGRAMADO PARA PRUEBA - Se debe publicar automáticamente en 2 minutos",
+    "platforms": [
+      "facebook"
+    ],
+    "media": [],
+    "tenantId": "demo-tenant",
+    "scheduledFor": "2025-12-28T00:35:40.000Z",
+    "createdAt": "2025-12-28T00:33:41.535Z",
+    "status": "published",
+    "publishedAt": "2025-12-28T00:36:00.992Z",
+    "publishResult": {
+      "success": true,
+      "message": "Published successfully",
+      "tenantId": "demo-tenant",
+      "platforms": [
+        "facebook"
+      ],
+      "results": {
+        "facebook": {
+          "status": "published",
+          "postId": "416378634882633_122176438730452315",
+          "platform": "facebook",
+          "content": "🚀 POST PROGRAMADO PARA PRUEBA - Se debe publicar automáticamente en 2 minutos",
+          "publishedAt": "2025-12-28T00:36:00.988Z"
+        }
+      },
+      "publishedAt": "2025-12-28T00:36:00.989Z"
+    }
+  },
+  {
+    "id": "1766882411612",
+    "content": "🗓️ PRUEBA DESDE DASHBOARD CORREGIDO - Para las 1:50",
+    "platforms": [
+      "facebook"
+    ],
+    "media": [],
+    "tenantId": "demo-tenant",
+    "scheduledFor": "2025-12-28T01:50:00.000Z",
+    "createdAt": "2025-12-28T00:40:11.612Z",
+    "status": "published",
+    "publishedAt": "2025-12-28T01:50:00.992Z",
+    "publishResult": {
+      "success": true,
+      "message": "Published successfully",
+      "tenantId": "demo-tenant",
+      "platforms": [
+        "facebook"
+      ],
+      "results": {
+        "facebook": {
+          "status": "published",
+          "postId": "simulated_1766886600983",
+          "platform": "facebook",
+          "content": "🗓️ PRUEBA DESDE DASHBOARD CORREGIDO - Para las 1:50",
+          "publishedAt": "2025-12-28T01:50:00.984Z"
+        }
+      },
+      "publishedAt": "2025-12-28T01:50:00.984Z"
+    }
+  },
+  {
+    "id": "1766882630034",
+    "content": "prueba 1:47",
+    "platforms": [
+      "facebook"
+    ],
+    "media": [],
+    "tenantId": "demo-tenant",
+    "scheduledFor": "2025-12-28T00:47:00.000Z",
+    "createdAt": "2025-12-28T00:43:50.034Z",
+    "status": "published",
+    "publishedAt": "2025-12-28T00:49:29.609Z",
+    "publishResult": {
+      "success": true,
+      "message": "Published successfully",
+      "tenantId": "demo-tenant",
+      "platforms": [
+        "facebook"
+      ],
+      "results": {
+        "facebook": {
+          "status": "published",
+          "postId": "416378634882633_122176439648452315",
+          "platform": "facebook",
+          "content": "prueba 1:47",
+          "publishedAt": "2025-12-28T00:49:29.606Z"
+        }
+      },
+      "publishedAt": "2025-12-28T00:49:29.606Z"
+    }
+  },
+  {
+    "id": "1766883326104",
+    "content": "🤖 AUTO CRON TEST - Post programado para ejecutarse automáticamente en 3 minutos",
+    "platforms": [
+      "facebook"
+    ],
+    "media": [],
+    "tenantId": "demo-tenant",
+    "scheduledFor": "2025-12-28T00:58:26.000Z",
+    "createdAt": "2025-12-28T00:55:26.104Z",
+    "status": "published",
+    "publishedAt": "2025-12-28T00:59:03.228Z",
+    "publishResult": {
+      "success": true,
+      "message": "Published successfully",
+      "tenantId": "demo-tenant",
+      "platforms": [
+        "facebook"
+      ],
+      "results": {
+        "facebook": {
+          "status": "published",
+          "postId": "416378634882633_122176440278452315",
+          "platform": "facebook",
+          "content": "🤖 AUTO CRON TEST - Post programado para ejecutarse automáticamente en 3 minutos",
+          "publishedAt": "2025-12-28T00:59:03.225Z"
+        }
+      },
+      "publishedAt": "2025-12-28T00:59:03.225Z"
+    }
+  },
+  {
+    "id": "1766883608957",
+    "content": "prueba 2:01",
+    "platforms": [
+      "facebook"
+    ],
+    "media": [],
+    "tenantId": "demo-tenant",
+    "scheduledFor": "2025-12-28T01:01:00.000Z",
+    "createdAt": "2025-12-28T01:00:08.957Z",
+    "status": "published",
+    "publishedAt": "2025-12-28T01:01:01.051Z",
+    "publishResult": {
+      "success": false,
+      "message": "Some publications failed",
+      "tenantId": "demo-tenant",
+      "platforms": [
+        "facebook"
+      ],
+      "results": {
+        "facebook": {
+          "status": "error",
+          "error": "Error validating access token: Session has expired on Saturday, 27-Dec-25 17:00:00 PST. The current time is Saturday, 27-Dec-25 17:01:01 PST.",
+          "details": {
+            "error": {
+              "message": "Error validating access token: Session has expired on Saturday, 27-Dec-25 17:00:00 PST. The current time is Saturday, 27-Dec-25 17:01:01 PST.",
+              "type": "OAuthException",
+              "code": 190,
+              "error_subcode": 463,
+              "fbtrace_id": "AlJLYH4myK2XxsGVb9aFfP8"
+            }
+          },
+          "solution": {
+            "type": "permissions_needed",
+            "required_permissions": [
+              "pages_read_engagement",
+              "pages_manage_posts"
+            ],
+            "help_url": "https://developers.facebook.com/docs/permissions/reference/pages_manage_posts"
+          }
+        }
+      },
+      "publishedAt": "2025-12-28T01:01:01.049Z"
+    }
+  }
+]

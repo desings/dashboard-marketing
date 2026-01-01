@@ -1,0 +1,291 @@
+{
+  "name": "Dashboard Marketing - Account Management",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "dashboard-account",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "f6g7h8i9-j0k1-2345-fghi-678901234567",
+      "name": "Account Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "1",
+              "leftValue": "={{ $json.trigger.source }}",
+              "rightValue": "dashboard-marketing",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combineOperation": "all"
+        },
+        "options": {}
+      },
+      "id": "g7h8i9j0-k1l2-3456-ghij-789012345678",
+      "name": "Validate Source",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "connect",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combineOperation": "all"
+              },
+              "renameOutput": true,
+              "outputKey": "connect"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "disconnect",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combineOperation": "all"
+              },
+              "renameOutput": true,
+              "outputKey": "disconnect"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.action }}",
+                    "rightValue": "validate",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combineOperation": "all"
+              },
+              "renameOutput": true,
+              "outputKey": "validate"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "h8i9j0k1-l2m3-4567-hijk-890123456789",
+      "name": "Route Action",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Procesar conexión de cuenta\nconst data = $input.all();\nconst accountData = data[0].json;\n\nconsole.log('🔗 Account connect request:', accountData);\n\nconst { tenantId, clientId, platform } = accountData;\n\n// URLs de autorización por plataforma\nconst authUrls = {\n  facebook: 'https://www.facebook.com/v18.0/dialog/oauth',\n  instagram: 'https://www.facebook.com/v18.0/dialog/oauth', // Usa Facebook OAuth\n  twitter: 'https://twitter.com/i/oauth2/authorize',\n  linkedin: 'https://www.linkedin.com/oauth/v2/authorization'\n};\n\n// En una implementación real, aquí generarías la URL completa con parámetros\nconst authUrl = `${authUrls[platform]}?client_id=YOUR_CLIENT_ID&redirect_uri=YOUR_CALLBACK&scope=publish&response_type=code&state=${tenantId}-${Date.now()}`;\n\nreturn {\n  success: true,\n  action: 'connect',\n  platform,\n  tenantId,\n  clientId,\n  authUrl,\n  requestId: `req_${Date.now()}`\n};"
+      },
+      "id": "i9j0k1l2-m3n4-5678-ijkl-901234567890",
+      "name": "Handle Connect",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 100]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Procesar desconexión de cuenta\nconst data = $input.all();\nconst accountData = data[0].json;\n\nconsole.log('🔌 Account disconnect request:', accountData);\n\nconst { tenantId, clientId, platform } = accountData;\n\n// En una implementación real, aquí revocarías el token de acceso\n// y actualizarías la base de datos\n\nreturn {\n  success: true,\n  action: 'disconnect',\n  platform,\n  tenantId,\n  clientId,\n  message: `Account ${platform} disconnected successfully`,\n  processedAt: new Date().toISOString()\n};"
+      },
+      "id": "j0k1l2m3-n4o5-6789-jklm-012345678901",
+      "name": "Handle Disconnect",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validar cuenta existente\nconst data = $input.all();\nconst accountData = data[0].json;\n\nconsole.log('✅ Account validate request:', accountData);\n\nconst { tenantId, clientId, platform } = accountData;\n\n// En una implementación real, aquí verificarías el estado de la cuenta\n// y la validez del token\n\nreturn {\n  success: true,\n  action: 'validate',\n  platform,\n  tenantId,\n  clientId,\n  isValid: true,\n  lastChecked: new Date().toISOString(),\n  accountStatus: 'active'\n};"
+      },
+      "id": "k1l2m3n4-o5p6-7890-klmn-123456789012",
+      "name": "Handle Validate",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}"
+      },
+      "id": "l2m3n4o5-p6q7-8901-lmno-234567890123",
+      "name": "Respond Result",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"error\": \"Invalid source\", \"expected\": \"dashboard-marketing\", \"received\": $json.trigger.source } }}",
+        "options": {
+          "responseCode": 401
+        }
+      },
+      "id": "m3n4o5p6-q7r8-9012-mnop-345678901234",
+      "name": "Respond Error",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1120, 400]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Account Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate Source": {
+      "main": [
+        [
+          {
+            "node": "Route Action",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Action": {
+      "main": [
+        [
+          {
+            "node": "Handle Connect",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Disconnect",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Handle Validate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Connect": {
+      "main": [
+        [
+          {
+            "node": "Respond Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Disconnect": {
+      "main": [
+        [
+          {
+            "node": "Respond Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Handle Validate": {
+      "main": [
+        [
+          {
+            "node": "Respond Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dashboard-marketing"
+  },
+  "id": "account-workflow",
+  "tags": [
+    {
+      "createdAt": "2025-12-20T15:00:00Z",
+      "updatedAt": "2025-12-20T15:00:00Z",
+      "id": "dashboard",
+      "name": "dashboard"
+    }
+  ]
+}

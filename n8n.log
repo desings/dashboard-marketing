@@ -1,0 +1,51 @@
+Initializing n8n process
+n8n ready on ::, port 5678
+n8n Task Broker ready on 127.0.0.1, port 5679
+Failed to start Python task runner in internal mode. because its virtual environment is missing from this system. Launching a Python runner in internal mode is intended only for debugging and is not recommended for production. Users are encouraged to deploy in external mode. See: https://docs.n8n.io/hosting/configuration/task-runners/#setting-up-external-mode
+[license SDK] Skipping renewal on init: license cert is not initialized
+Registered runner "JS Task Runner" (-FCgXpKl_Cy11BDyrv-Pj) 
+Version: 2.0.3
+
+Editor is now accessible via:
+http://localhost:5678
+Received request for unknown webhook: The requested webhook "POST facebook-publish-real" is not registered.
+404 The requested webhook "POST facebook-publish-real" is not registered.
+Pruning old insights data
+Pruning old insights data
+Pruning old insights data
+Error fetching feature flags Error [PostHogFetchNetworkError]: Network error while fetching PostHog
+    at new PostHogFetchNetworkError (/usr/local/lib/node_modules/n8n/node_modules/posthog-core/src/index.ts:41:5)
+    at PostHog.<anonymous> (/usr/local/lib/node_modules/n8n/node_modules/posthog-core/src/index.ts:546:17)
+    at step (/usr/local/lib/node_modules/n8n/node_modules/node_modules/tslib/tslib.es6.js:102:23)
+    at Object.throw (/usr/local/lib/node_modules/n8n/node_modules/node_modules/tslib/tslib.es6.js:83:53)
+    at rejected (/usr/local/lib/node_modules/n8n/node_modules/node_modules/tslib/tslib.es6.js:74:65)
+    at processTicksAndRejections (node:internal/process/task_queues:105:5) {
+  error: TypeError: fetch failed
+      at node:internal/deps/undici/undici:13510:13
+      at processTicksAndRejections (node:internal/process/task_queues:105:5) {
+    [cause]: Error: getaddrinfo ENOTFOUND us.i.posthog.com
+        at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:111:26) {
+      errno: -3008,
+      code: 'ENOTFOUND',
+      syscall: 'getaddrinfo',
+      hostname: 'us.i.posthog.com'
+    }
+  },
+  [cause]: TypeError: fetch failed
+      at node:internal/deps/undici/undici:13510:13
+      at processTicksAndRejections (node:internal/process/task_queues:105:5) {
+    [cause]: Error: getaddrinfo ENOTFOUND us.i.posthog.com
+        at GetAddrInfoReqWrap.onlookup [as oncomplete] (node:dns:111:26) {
+      errno: -3008,
+      code: 'ENOTFOUND',
+      syscall: 'getaddrinfo',
+      hostname: 'us.i.posthog.com'
+    }
+  }
+}
+2025-12-30T19:49:12.963Z [Rudder] error: Response error code: ENOTFOUND
+2025-12-30T19:49:13.171Z [Rudder] error: Error: ENOTFOUND
+getaddrinfo ENOTFOUND telemetry.n8n.io
+getaddrinfo ENOTFOUND telemetry.n8n.io
+Pruning old insights data
+Pruning old insights data

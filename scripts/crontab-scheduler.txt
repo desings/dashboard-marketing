@@ -1,0 +1,20 @@
+# Configuración de Cron para Dashboard Marketing
+# Ejecuta el scheduler de posts programados cada minuto
+
+# Para instalar este crontab, ejecuta:
+# crontab -l > /tmp/crontab.bak  # Backup del crontab actual
+# cat /Users/deivid/dashboard-marketing/scripts/crontab-scheduler.txt >> /tmp/crontab.bak
+# crontab /tmp/crontab.bak
+
+# Ejecutar scheduler cada minuto (cuando el servidor esté corriendo en localhost:3000)
+* * * * * cd /Users/deivid/dashboard-marketing && ./scripts/run-scheduler.sh >> ./logs/cron.log 2>&1
+
+# Alternativa: Ejecutar cada 5 minutos (menos frecuente)
+# */5 * * * * cd /Users/deivid/dashboard-marketing && ./scripts/run-scheduler.sh >> ./logs/cron.log 2>&1
+
+# Para ver logs del cron:
+# tail -f /Users/deivid/dashboard-marketing/logs/cron.log
+# tail -f /Users/deivid/dashboard-marketing/logs/scheduler.log
+
+# Para detener el cron job:
+# crontab -e  (y comentar o eliminar la línea)

@@ -1,0 +1,156 @@
+[
+  {
+    "id": "1",
+    "content": "Bienvenidos a nuestra nueva temporada de productos!",
+    "date": "2025-01-15",
+    "time": "09:00",
+    "platforms": [
+      "facebook",
+      "instagram"
+    ],
+    "type": "post",
+    "status": "pending",
+    "createdAt": "2025-12-26T00:51:43.537Z",
+    "updatedAt": "2025-12-26T00:51:43.537Z"
+  },
+  {
+    "id": "2",
+    "content": "No te pierdas nuestras ofertas especiales.",
+    "date": "2025-01-15",
+    "time": "14:30",
+    "platforms": [
+      "facebook"
+    ],
+    "type": "story",
+    "status": "pending",
+    "createdAt": "2025-12-26T00:51:43.537Z",
+    "updatedAt": "2025-12-26T00:51:43.537Z"
+  },
+  {
+    "id": "3",
+    "content": "Nueva colección disponible ahora! 🎉",
+    "date": "2025-12-26",
+    "time": "10:00",
+    "platforms": [
+      "facebook",
+      "twitter"
+    ],
+    "type": "post",
+    "status": "published",
+    "facebookPostId": "416378634882633_122176225838452315",
+    "createdAt": "2025-12-26T00:51:43.537Z",
+    "updatedAt": "2025-12-26T00:51:43.537Z"
+  },
+  {
+    "id": "post_1766710303537_mdz3082a3",
+    "content": "prueba de foto",
+    "date": "2025-12-26",
+    "time": "01:56",
+    "platforms": [
+      "facebook"
+    ],
+    "type": "post",
+    "media": [
+      {
+        "id": "media_1766710289820_m3np67pfh",
+        "fileName": "1766710289820-sofia_dibujo.jpg",
+        "url": "/uploads/media/1766710289820-sofia_dibujo.jpg",
+        "type": "image"
+      }
+    ],
+    "status": "pending",
+    "createdAt": "2025-12-26T00:51:43.537Z",
+    "updatedAt": "2025-12-26T00:55:09.403Z"
+  },
+  {
+    "id": "post_1766788202082_e26c6ivd0",
+    "content": "prueba real de hoy",
+    "date": "2025-12-26",
+    "time": "23:31",
+    "platforms": [
+      "facebook"
+    ],
+    "type": "post",
+    "media": [
+      {
+        "id": "media_1766788182091_s4curous6",
+        "fileName": "1766788182091-sofia_dibujo.jpg",
+        "url": "/uploads/media/1766788182091-sofia_dibujo.jpg",
+        "type": "image"
+      }
+    ],
+    "status": "pending",
+    "createdAt": "2025-12-26T22:30:02.082Z",
+    "updatedAt": "2025-12-26T22:30:02.082Z"
+  },
+  {
+    "id": "post_1766881511388_m2bni1eo8",
+    "content": "prigramado",
+    "date": "2025-12-28",
+    "time": "01:26",
+    "platforms": [
+      "facebook"
+    ],
+    "type": "post",
+    "media": [],
+    "status": "pending",
+    "createdAt": "2025-12-28T00:25:11.388Z",
+    "updatedAt": "2025-12-28T00:25:11.388Z"
+  },
+  {
+    "id": "post_1766881599858_6izknugcx",
+    "content": "progrmado 5 min",
+    "date": "2025-12-28",
+    "time": "01:31",
+    "platforms": [
+      "facebook"
+    ],
+    "type": "post",
+    "media": [],
+    "status": "pending",
+    "createdAt": "2025-12-28T00:26:39.859Z",
+    "updatedAt": "2025-12-28T00:26:39.859Z"
+  },
+  {
+    "id": "post_1766882263594_v8ca8eg08",
+    "content": "prueba 1:40",
+    "date": "2025-12-28",
+    "time": "01:40",
+    "platforms": [
+      "facebook"
+    ],
+    "type": "post",
+    "media": [],
+    "status": "pending",
+    "createdAt": "2025-12-28T00:37:43.594Z",
+    "updatedAt": "2025-12-28T00:37:43.594Z"
+  },
+  {
+    "id": "post_1766882630006_84hj3q6lr",
+    "content": "prueba 1:47",
+    "date": "2025-12-28",
+    "time": "01:47",
+    "platforms": [
+      "facebook"
+    ],
+    "type": "post",
+    "media": [],
+    "status": "pending",
+    "createdAt": "2025-12-28T00:43:50.006Z",
+    "updatedAt": "2025-12-28T00:43:50.006Z"
+  },
+  {
+    "id": "post_1766883608920_1sf25980l",
+    "content": "prueba 2:01",
+    "date": "2025-12-28",
+    "time": "02:01",
+    "platforms": [
+      "facebook"
+    ],
+    "type": "post",
+    "media": [],
+    "status": "pending",
+    "createdAt": "2025-12-28T01:00:08.920Z",
+    "updatedAt": "2025-12-28T01:00:08.920Z"
+  }
+]

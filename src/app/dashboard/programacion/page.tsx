@@ -1,0 +1,1485 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import DashboardLayout from '@/components/DashboardLayout'
+import FacebookConfig from '@/components/FacebookConfig'
+
+interface SocialAccount {
+  platform: string
+  name: string
+  connected: boolean
+}
+
+interface ScheduledPost {
+  id: string
+  content: string
+  date: string
+  time: string
+  platforms: string[]
+  type: 'post' | 'story'
+  media?: any[]
+  status: 'pending' | 'published' | 'failed'
+  facebookPostId?: string
+  createdAt?: string
+  updatedAt?: string
+}
+
+interface MediaFile {
+  id: string
+  file: File
+  preview: string
+  type: 'image' | 'video'
+  fileName?: string
+  url?: string
+}
+
+export default function ProgramacionPage() {
+  const [postText, setPostText] = useState('')
+  const [selectedAccounts, setSelectedAccounts] = useState<string[]>([])
+  const [publishDate, setPublishDate] = useState('')
+  const [publishTime, setPublishTime] = useState('')
+  const [showScheduleForm, setShowScheduleForm] = useState(false)
+  const [showFacebookConfig, setShowFacebookConfig] = useState(false)
+  const [publishing, setPublishing] = useState(false)
+  const [testMode, setTestMode] = useState(false)
+  const [activeView, setActiveView] = useState<'create' | 'scheduled' | 'calendar'>('create')
+  const [postType, setPostType] = useState<'post' | 'story'>('post')
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([])
+  const [loading, setLoading] = useState(true)
+  const [uploading, setUploading] = useState(false)
+  
+  // Modal states
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showCalendarModal, setShowCalendarModal] = useState(false)
+  const [selectedPost, setSelectedPost] = useState<ScheduledPost | null>(null)
+  
+  // Filter states
+  const [platformFilter, setPlatformFilter] = useState<string>('all')
+  const [statusFilter, setStatusFilter] = useState<string>('all')
+  const [typeFilter, setTypeFilter] = useState<string>('all')
+  
+  // Calendar states
+  const [currentMonth, setCurrentMonth] = useState(new Date())
+  
+  const [scheduledPosts, setScheduledPosts] = useState<ScheduledPost[]>([])
+
+  // Cargar datos al inicializar
+  useEffect(() => {
+    loadScheduledPosts()
+  }, [])
+
+  // Auto-refresh cada 30 segundos para mostrar cambios de estado automáticos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadScheduledPosts()
+    }, 30000) // 30 segundos
+
+    return () => clearInterval(interval)
+  }, [])
+
+  const loadScheduledPosts = async () => {
+    try {
+      setLoading(true)
+      
+      // Solo cargar del sistema nuevo (execute-scheduled) para evitar duplicaciones
+      const response = await fetch('/api/execute-scheduled?tenantId=demo-tenant')
+      const data = await response.json()
+      
+      let allPosts: ScheduledPost[] = []
+      
+      if (data.success) {
+        // Convertir posts del sistema nuevo al formato del dashboard
+        const newSystemPosts = [
+          // Posts programados
+          ...data.posts.scheduled.map((post: any) => ({
+            id: post.id,
+            content: post.content,
+            date: post.scheduledFor.split('T')[0],
+            time: post.scheduledFor.split('T')[1].slice(0, 5),
+            platforms: post.platforms,
+            type: 'post' as const,
+            media: post.media || [],
+            status: 'pending' as const,
+            createdAt: post.createdAt,
+            updatedAt: post.createdAt
+          })),
+          // Posts publicados exitosamente
+          ...data.posts.published.map((post: any) => ({
+            id: post.id,
+            content: post.content,
+            date: post.scheduledFor.split('T')[0],
+            time: post.scheduledFor.split('T')[1].slice(0, 5),
+            platforms: post.platforms,
+            type: 'post' as const,
+            media: post.media || [],
+            status: (post.publishResult?.success !== false) ? 'published' as const : 'failed' as const,
+            facebookPostId: post.publishResult?.results?.facebook?.postId,
+            createdAt: post.createdAt,
+            updatedAt: post.publishedAt || post.failedAt
+          })),
+          // Posts que fallaron
+          ...data.posts.failed.map((post: any) => ({
+            id: post.id,
+            content: post.content,
+            date: post.scheduledFor.split('T')[0],
+            time: post.scheduledFor.split('T')[1].slice(0, 5),
+            platforms: post.platforms,
+            type: 'post' as const,
+            media: post.media || [],
+            status: 'failed' as const,
+            createdAt: post.createdAt,
+            updatedAt: post.failedAt
+          }))
+        ]
+        
+        allPosts = newSystemPosts
+      }
+      
+      // Ordenar por fecha de creación (más recientes primero)
+      allPosts.sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())
+      
+      setScheduledPosts(allPosts)
+    } catch (error) {
+      console.error('Error loading scheduled posts:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const saveScheduledPost = async (postData: any) => {
+    try {
+      const response = await fetch('/api/programming-posts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(postData)
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        // Recargar la lista de posts
+        await loadScheduledPosts()
+        return data.post
+      } else {
+        console.error('Error saving post:', data.error)
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      console.error('Error saving scheduled post:', error)
+      throw error
+    }
+  }
+
+  const updateScheduledPost = async (postId: string, updateData: any) => {
+    try {
+      const response = await fetch('/api/programming-posts', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: postId, ...updateData })
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        await loadScheduledPosts()
+        return data.post
+      } else {
+        console.error('Error updating post:', data.error)
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      console.error('Error updating scheduled post:', error)
+      throw error
+    }
+  }
+
+  const deleteScheduledPost = async (postId: string) => {
+    try {
+      const response = await fetch('/api/programming-posts', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ id: postId })
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        await loadScheduledPosts()
+        return true
+      } else {
+        console.error('Error deleting post:', data.error)
+        throw new Error(data.error)
+      }
+    } catch (error) {
+      console.error('Error deleting scheduled post:', error)
+      throw error
+    }
+  }
+
+  const mockAccounts: SocialAccount[] = [
+    { platform: 'facebook', name: 'Mi Empresa - Facebook', connected: true },
+    { platform: 'instagram', name: 'Mi Empresa - Instagram', connected: false },
+    { platform: 'twitter', name: 'Mi Empresa - Twitter', connected: false },
+    { platform: 'linkedin', name: 'Mi Empresa - LinkedIn', connected: false }
+  ]
+
+  const handleAccountToggle = (platform: string) => {
+    if (selectedAccounts.includes(platform)) {
+      setSelectedAccounts(selectedAccounts.filter(p => p !== platform))
+    } else {
+      setSelectedAccounts([...selectedAccounts, platform])
+    }
+  }
+
+  const handleMediaUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (!files || files.length === 0) return
+
+    try {
+      setUploading(true)
+      
+      // Crear FormData para enviar archivos
+      const formData = new FormData()
+      Array.from(files).forEach(file => {
+        formData.append('files', file)
+      })
+
+      // Subir archivos al servidor
+      const response = await fetch('/api/upload-media', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+      
+      if (data.success) {
+        // Agregar archivos subidos a mediaFiles
+        const uploadedFiles: MediaFile[] = data.files.map((file: any) => ({
+          id: file.id,
+          file: null, // Ya está en el servidor
+          fileName: file.fileName,
+          url: file.url,
+          preview: file.url,
+          type: file.type
+        }))
+        
+        setMediaFiles(prev => [...prev, ...uploadedFiles])
+        console.log('✅ Archivos subidos correctamente:', uploadedFiles)
+      } else {
+        console.error('Error uploading files:', data.error)
+        alert('Error al subir archivos: ' + data.error)
+      }
+    } catch (error) {
+      console.error('Error uploading media:', error)
+      alert('Error al subir archivos')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const removeMediaFile = (id: string) => {
+    setMediaFiles(prev => {
+      const fileToRemove = prev.find(f => f.id === id)
+      if (fileToRemove) {
+        URL.revokeObjectURL(fileToRemove.preview)
+      }
+      return prev.filter(f => f.id !== id)
+    })
+  }
+
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('es-ES', { 
+      day: '2-digit', 
+      month: '2-digit', 
+      year: 'numeric' 
+    })
+  }
+
+  const getPlatformIcon = (platform: string) => {
+    const icons = {
+      facebook: '📘',
+      instagram: '📷',
+      twitter: '🐦',
+      linkedin: '💼'
+    }
+    return icons[platform as keyof typeof icons] || '📱'
+  }
+
+  const getStatusBadge = (status: string) => {
+    const statusConfig = {
+      pending: { text: 'Pendiente', color: 'bg-yellow-100 text-yellow-800' },
+      published: { text: 'Publicado', color: 'bg-green-100 text-green-800' },
+      failed: { text: 'Falló', color: 'bg-red-100 text-red-800' }
+    }
+    const config = statusConfig[status as keyof typeof statusConfig]
+    return (
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
+        {config.text}
+      </span>
+    )
+  }
+
+  // Calendar functions
+  const navigateMonth = (direction: 'prev' | 'next') => {
+    const newDate = new Date(currentMonth)
+    if (direction === 'prev') {
+      newDate.setMonth(newDate.getMonth() - 1)
+    } else {
+      newDate.setMonth(newDate.getMonth() + 1)
+    }
+    setCurrentMonth(newDate)
+  }
+
+  const getDaysInMonth = () => {
+    const year = currentMonth.getFullYear()
+    const month = currentMonth.getMonth()
+    const firstDay = new Date(year, month, 1)
+    const lastDay = new Date(year, month + 1, 0)
+    const startDate = new Date(firstDay)
+    startDate.setDate(startDate.getDate() - firstDay.getDay())
+
+    const days = []
+    for (let i = 0; i < 42; i++) {
+      const day = new Date(startDate)
+      day.setDate(startDate.getDate() + i)
+      days.push(day)
+    }
+    return days
+  }
+
+  const getPostsForDate = (date: Date) => {
+    const dateStr = date.toISOString().split('T')[0]
+    return scheduledPosts.filter(post => post.date === dateStr)
+  }
+
+  // Modal functions
+  const openEditModal = (post: ScheduledPost) => {
+    setSelectedPost(post)
+    setPostText(post.content)
+    setSelectedAccounts([...post.platforms])
+    setPublishDate(post.date)
+    setPublishTime(post.time)
+    setPostType(post.type)
+    setShowEditModal(true)
+  }
+
+  const openDeleteModal = (post: ScheduledPost) => {
+    setSelectedPost(post)
+    setShowDeleteModal(true)
+  }
+
+  const openCalendarModal = (post: ScheduledPost) => {
+    setSelectedPost(post)
+    setShowCalendarModal(true)
+  }
+
+  const closeModals = () => {
+    setShowEditModal(false)
+    setShowDeleteModal(false)
+    setShowCalendarModal(false)
+    setSelectedPost(null)
+    setPostText('')
+    setSelectedAccounts([])
+    setPublishDate('')
+    setPublishTime('')
+    setMediaFiles([])
+  }
+
+  const saveEditedPost = async () => {
+    if (!selectedPost) return
+    
+    try {
+      setPublishing(true)
+      
+      const mediaData = mediaFiles.map(file => ({
+        id: file.id,
+        fileName: file.fileName,
+        url: file.url,
+        type: file.type
+      }))
+
+      const updateData = {
+        content: postText,
+        platforms: [...selectedAccounts],
+        date: publishDate,
+        time: publishTime,
+        type: postType,
+        media: mediaData
+      }
+
+      await updateScheduledPost(selectedPost.id, updateData)
+      
+      closeModals()
+      alert('Publicación actualizada exitosamente!')
+    } catch (error) {
+      console.error('Error updating post:', error)
+      alert('Error al actualizar la publicación')
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  const deletePost = async () => {
+    if (!selectedPost) return
+    
+    try {
+      await deleteScheduledPost(selectedPost.id)
+      
+      closeModals()
+      alert('Publicación eliminada exitosamente!')
+    } catch (error) {
+      console.error('Error deleting post:', error)
+      alert('Error al eliminar la publicación')
+    }
+  }
+
+  // Filter function
+  const getFilteredPosts = () => {
+    return scheduledPosts.filter(post => {
+      const platformMatch = platformFilter === 'all' || post.platforms.includes(platformFilter)
+      const statusMatch = statusFilter === 'all' || post.status === statusFilter
+      const typeMatch = typeFilter === 'all' || post.type === typeFilter
+      return platformMatch && statusMatch && typeMatch
+    })
+  }
+
+  const publishNow = async () => {
+    if (!postText.trim()) {
+      alert('Por favor escribe el contenido del post')
+      return
+    }
+
+    if (selectedAccounts.length === 0) {
+      alert('Por favor selecciona al menos una red social')
+      return
+    }
+
+    try {
+      setPublishing(true)
+      
+      // Use test mode if enabled
+      // Usar n8n para Facebook (OAuth2) y directo para otras plataformas
+      const endpoint = testMode ? '/api/publish-test' : (
+        selectedAccounts.includes('facebook') ? '/api/publish-via-n8n' : '/api/publish-real'
+      )
+      
+      // Preparar URLs de multimedia
+      const mediaUrls = mediaFiles.map(file => ({
+        url: file.url,
+        type: file.type,
+        fileName: file.fileName
+      }))
+      
+      for (const platform of selectedAccounts) {
+        console.log(`Publicando en ${platform}: ${postText}`)
+        console.log('Con multimedia:', mediaUrls)
+        
+        const response = await fetch(endpoint, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            platform: platform,
+            content: postText,
+            publishNow: true,  // Corregido: era immediate: true
+            media: mediaUrls // Incluir archivos multimedia
+          }),
+        })
+
+        const result = await response.json()
+        console.log(`Resultado de ${platform}:`, result)
+        
+        if (!result.success) {
+          // Show detailed error message for Facebook permission issues
+          if (result.results?.facebook?.solution?.type === 'permissions_needed') {
+            alert(`❌ Error de permisos de Facebook:\n\n${result.results.facebook.error}\n\nPor ahora, puedes usar el MODO DE PRUEBA para simular publicaciones.`)
+            return
+          }
+          
+          // Show specific error for Facebook token issues
+          if (result.error && result.error.includes('token')) {
+            alert(`❌ Error de token de Facebook:\n\n${result.error}\n\n📋 Para solucionarlo:\n1. Ve a n8n: https://vmi2907616.contaboserver.net\n2. Reconecta la credencial 'FB TOKEN'\n3. Asegúrate de seleccionar tu página de Facebook`)
+            return
+          }
+          
+          console.error(`Error detallado de ${platform}:`, result)
+          throw new Error(result.error || `Error en ${platform}`)
+        }
+      }
+
+      const modeText = testMode ? ' (MODO DE PRUEBA)' : ''
+      alert(`✅ Post publicado exitosamente${modeText}!`)
+      setPostText('')
+      setSelectedAccounts([])
+      setMediaFiles([]) // Limpiar archivos multimedia
+    } catch (error) {
+      console.error('Error al publicar:', error)
+      alert('Error al publicar el post: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  const schedulePost = async () => {
+    if (!postText.trim()) {
+      alert('Por favor escribe el contenido del post')
+      return
+    }
+
+    if (selectedAccounts.length === 0) {
+      alert('Por favor selecciona al menos una red social')
+      return
+    }
+
+    if (!publishDate || !publishTime) {
+      alert('Por favor selecciona fecha y hora de publicación')
+      return
+    }
+
+    const scheduledDateTime = new Date(`${publishDate}T${publishTime}`)
+    if (scheduledDateTime <= new Date()) {
+      alert('La fecha y hora debe ser en el futuro')
+      return
+    }
+
+    try {
+      setPublishing(true)
+      
+      // Preparar datos del post para guardar
+      const mediaData = mediaFiles.map(file => ({
+        id: file.id,
+        fileName: file.fileName,
+        url: file.url,
+        type: file.type
+      }))
+
+      const newPostData = {
+        content: postText,
+        date: publishDate,
+        time: publishTime,
+        platforms: [...selectedAccounts],
+        type: postType,
+        media: mediaData // Incluir multimedia
+      }
+
+      // Guardar en la base de datos/archivo
+      const savedPost = await saveScheduledPost(newPostData)
+      console.log('✅ Post guardado:', savedPost)
+      
+      // También programar en las APIs externas si es necesario
+      for (const platform of selectedAccounts) {
+        console.log(`Programando para ${platform}: ${postText}`)
+        
+        const response = await fetch('/api/publish-via-n8n', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            platform: platform,
+            content: postText,
+            publishNow: false,  // Corregido: era immediate: false
+            scheduledFor: scheduledDateTime.toISOString(),  // Corregido: era scheduledDateTime
+            platforms: [platform],  // Añadido: la API necesita este campo
+            tenantId: 'demo-tenant',  // Añadido: tenant por defecto
+            type: postType,
+            media: mediaData
+          }),
+        })
+
+        const result = await response.json()
+        console.log(`Resultado programado de ${platform}:`, result)
+      }
+
+      alert('Post programado exitosamente!')
+      setPostText('')
+      setSelectedAccounts([])
+      setPublishDate('')
+      setPublishTime('')
+      setMediaFiles([])
+      setShowScheduleForm(false)
+    } catch (error) {
+      console.error('Error al programar:', error)
+      alert('Error al programar el post')
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  return (
+    <DashboardLayout>
+      {loading ? (
+        <div className="p-6">
+          <div className="flex justify-center items-center h-64">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Cargando publicaciones...</p>
+            </div>
+          </div>
+        </div>
+      ) : (
+      <div className="p-6">
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-3xl font-bold text-gray-900">Programación de Publicaciones</h1>
+          <div className="flex gap-3 items-center">
+            <div className="flex items-center gap-2">
+              <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                <input
+                  type="checkbox"
+                  checked={testMode}
+                  onChange={(e) => setTestMode(e.target.checked)}
+                  className="h-4 w-4 text-blue-600 rounded"
+                />
+                Modo de Prueba
+              </label>
+            </div>
+            <button
+              onClick={() => setShowFacebookConfig(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              ⚙️ Configurar Facebook
+            </button>
+          </div>
+        </div>
+
+        {/* Navigation Tabs */}
+        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+          <button
+            onClick={() => setActiveView('create')}
+            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+              activeView === 'create'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            ✍️ Crear Publicación
+          </button>
+          <button
+            onClick={() => setActiveView('scheduled')}
+            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+              activeView === 'scheduled'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            📋 Contenido Programado
+          </button>
+          <button
+            onClick={() => setActiveView('calendar')}
+            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
+              activeView === 'calendar'
+                ? 'bg-white text-blue-600 shadow-sm'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
+          >
+            📅 Vista Calendario
+          </button>
+        </div>
+
+        {testMode ? (
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-yellow-600 text-lg">🧪</span>
+              <h3 className="font-semibold text-yellow-800">Modo de Prueba Activado</h3>
+            </div>
+            <p className="text-yellow-700 text-sm">
+              Las publicaciones serán simuladas (no se publicarán realmente). <button 
+                onClick={() => setTestMode(false)} 
+                className="underline hover:no-underline"
+              >
+                Cambiar a Modo Real
+              </button>
+            </p>
+          </div>
+        ) : (
+          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-green-600 text-lg">🚀</span>
+              <h3 className="font-semibold text-green-800">Modo Real Activado</h3>
+            </div>
+            <p className="text-green-700 text-sm">
+              Las publicaciones se enviarán directamente a Facebook (Página: IDinmo). <button 
+                onClick={() => setTestMode(true)} 
+                className="underline hover:no-underline"
+              >
+                Cambiar a Modo Prueba
+              </button>
+            </p>
+          </div>
+        )}
+
+        {/* Create Publication View */}
+        {activeView === 'create' && (
+          <div className="bg-white rounded-lg shadow-md p-6">
+            {/* Post Type Selection */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-900 mb-3">Tipo de contenido</label>
+              <div className="flex gap-4">
+                <button
+                  onClick={() => setPostType('post')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    postType === 'post'
+                      ? 'bg-blue-100 text-blue-800 border-2 border-blue-300'
+                      : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
+                  }`}
+                >
+                  📝 Post
+                </button>
+                <button
+                  onClick={() => setPostType('story')}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    postType === 'story'
+                      ? 'bg-purple-100 text-purple-800 border-2 border-purple-300'
+                      : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
+                  }`}
+                >
+                  📸 Story
+                </button>
+              </div>
+            </div>
+
+            {/* Content Input - Improved visibility */}
+            <div className="mb-6">
+              <label htmlFor="postContent" className="block text-sm font-medium text-gray-900 mb-2">
+                Contenido del {postType === 'post' ? 'post' : 'story'}
+              </label>
+              <textarea
+                id="postContent"
+                value={postText}
+                onChange={(e) => setPostText(e.target.value)}
+                placeholder="¿Qué quieres publicar hoy?"
+                className="w-full h-32 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white text-gray-900 placeholder-gray-500 shadow-sm"
+                style={{ fontSize: '16px' }}
+              />
+              <div className="mt-2 text-sm text-gray-600">
+                {postText.length}/280 caracteres
+              </div>
+            </div>
+
+            {/* Media Upload */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-900 mb-3">
+                Adjuntar archivos multimedia
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                {uploading ? (
+                  <div>
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+                    <span className="text-sm text-gray-600">Subiendo archivos...</span>
+                  </div>
+                ) : (
+                  <>
+                    <input
+                      type="file"
+                      accept="image/*,video/*"
+                      multiple
+                      onChange={handleMediaUpload}
+                      className="hidden"
+                      id="mediaUpload"
+                      disabled={uploading}
+                    />
+                    <label htmlFor="mediaUpload" className="cursor-pointer">
+                      <div className="text-gray-600">
+                        <span className="text-2xl mb-2 block">📎</span>
+                        <span className="text-sm font-medium">Click para subir fotos o videos</span>
+                        <p className="text-xs text-gray-500 mt-1">PNG, JPG, MP4, MOV hasta 10MB</p>
+                      </div>
+                    </label>
+                  </>
+                )}
+              </div>
+
+              {/* Media Preview */}
+              {mediaFiles.length > 0 && (
+                <div className="mt-4 grid grid-cols-3 gap-4">
+                  {mediaFiles.map((media) => (
+                    <div key={media.id} className="relative group">
+                      {media.type === 'image' ? (
+                        <img
+                          src={media.preview}
+                          alt="Preview"
+                          className="w-full h-24 object-cover rounded-lg"
+                        />
+                      ) : (
+                        <video
+                          src={media.preview}
+                          className="w-full h-24 object-cover rounded-lg"
+                        />
+                      )}
+                      <button
+                        onClick={() => removeMediaFile(media.id)}
+                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 text-xs hover:bg-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Social Networks Selection */}
+            <div className="mb-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-3">Seleccionar redes sociales</h3>
+              <div className="grid grid-cols-2 gap-4">
+                {mockAccounts.map((account) => (
+                  <div
+                    key={account.platform}
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
+                      selectedAccounts.includes(account.platform)
+                        ? 'border-blue-500 bg-blue-50 shadow-md'
+                        : account.connected
+                        ? 'border-gray-300 hover:border-gray-400 hover:shadow-sm'
+                        : 'border-gray-200 bg-gray-50 cursor-not-allowed'
+                    }`}
+                    onClick={() => account.connected && handleAccountToggle(account.platform)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{getPlatformIcon(account.platform)}</span>
+                        <div>
+                          <div className="font-medium text-gray-900">{account.name}</div>
+                          <div className={`text-sm ${account.connected ? 'text-green-600' : 'text-red-600'}`}>
+                            {account.connected ? 'Conectado' : 'Desconectado'}
+                          </div>
+                        </div>
+                      </div>
+                      {account.connected && (
+                        <input
+                          type="checkbox"
+                          checked={selectedAccounts.includes(account.platform)}
+                          onChange={() => {}}
+                          className="h-5 w-5 text-blue-600 rounded"
+                        />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-4 mb-6">
+              <button
+                onClick={publishNow}
+                disabled={publishing}
+                className={`px-6 py-3 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg ${
+                  testMode 
+                    ? 'bg-yellow-600 hover:bg-yellow-700' 
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
+              >
+                {publishing 
+                  ? 'Publicando...' 
+                  : testMode 
+                    ? '🧪 Simular Publicación' 
+                    : 'Publicar AHORA'
+                }
+              </button>
+              
+              <button
+                onClick={() => setShowScheduleForm(!showScheduleForm)}
+                disabled={publishing}
+                className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 shadow-md hover:shadow-lg"
+              >
+                📅 Programar Post
+              </button>
+            </div>
+
+            {/* Schedule Form - Improved visibility */}
+            {showScheduleForm && (
+              <div className="border-t-2 border-gray-200 pt-6">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Programar publicación</h3>
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div>
+                    <label htmlFor="publishDate" className="block text-sm font-medium text-gray-900 mb-2">
+                      Fecha
+                    </label>
+                    <input
+                      type="date"
+                      id="publishDate"
+                      value={publishDate}
+                      onChange={(e) => setPublishDate(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 shadow-sm"
+                      style={{ fontSize: '16px' }}
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="publishTime" className="block text-sm font-medium text-gray-900 mb-2">
+                      Hora
+                    </label>
+                    <input
+                      type="time"
+                      id="publishTime"
+                      value={publishTime}
+                      onChange={(e) => setPublishTime(e.target.value)}
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 shadow-sm"
+                      style={{ fontSize: '16px' }}
+                    />
+                  </div>
+                </div>
+                <button
+                  onClick={schedulePost}
+                  disabled={publishing}
+                  className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 shadow-md hover:shadow-lg"
+                >
+                  {publishing ? 'Programando...' : '✅ Confirmar Programación'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Scheduled Content Table View */}
+        {activeView === 'scheduled' && (
+          <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-gray-900">Contenido Programado</h2>
+                
+                {/* Filters */}
+                <div className="flex gap-4 items-center">
+                  <select
+                    value={platformFilter}
+                    onChange={(e) => setPlatformFilter(e.target.value)}
+                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">Todas las plataformas</option>
+                    <option value="facebook">📘 Facebook</option>
+                    <option value="instagram">📷 Instagram</option>
+                    <option value="twitter">🐦 Twitter</option>
+                    <option value="linkedin">💼 LinkedIn</option>
+                  </select>
+                  
+                  <select
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">Todos los estados</option>
+                    <option value="pending">Pendiente</option>
+                    <option value="published">Publicado</option>
+                    <option value="failed">Falló</option>
+                  </select>
+                  
+                  <select
+                    value={typeFilter}
+                    onChange={(e) => setTypeFilter(e.target.value)}
+                    className="px-3 py-1 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="all">Todos los tipos</option>
+                    <option value="post">📝 Post</option>
+                    <option value="story">📸 Story</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            
+            {getFilteredPosts().length === 0 ? (
+              <div className="p-12 text-center">
+                <span className="text-6xl mb-4 block">📭</span>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No hay contenido que coincida con los filtros</h3>
+                <p className="text-gray-500">Ajusta los filtros o crea nueva publicación.</p>
+                <button
+                  onClick={() => setActiveView('create')}
+                  className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Crear Publicación
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Fecha y Hora
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Contenido
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Tipo
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Plataformas
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Estado
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Acciones
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {getFilteredPosts().map((post) => (
+                      <tr key={post.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {formatDate(post.date)}
+                          </div>
+                          <div className="text-sm text-gray-500">{post.time}</div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="text-sm text-gray-900 max-w-xs truncate" title={post.content}>
+                            {post.content}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            post.type === 'post' 
+                              ? 'bg-blue-100 text-blue-800' 
+                              : 'bg-purple-100 text-purple-800'
+                          }`}>
+                            {post.type === 'post' ? '📝 Post' : '📸 Story'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex gap-1">
+                            {post.platforms.map((platform) => (
+                              <span key={platform} className="text-lg" title={platform}>
+                                {getPlatformIcon(platform)}
+                              </span>
+                            ))}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {getStatusBadge(post.status)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button 
+                            onClick={() => openEditModal(post)}
+                            className="text-blue-600 hover:text-blue-900 mr-3 font-medium"
+                          >
+                            ✏️ Editar
+                          </button>
+                          <button 
+                            onClick={() => openDeleteModal(post)}
+                            className="text-red-600 hover:text-red-900 font-medium"
+                          >
+                            🗑️ Eliminar
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Calendar View */}
+        {activeView === 'calendar' && (
+          <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">Vista Calendario</h2>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => navigateMonth('prev')}
+                  className="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+                >
+                  ← Anterior
+                </button>
+                <span className="px-4 py-1 font-medium text-gray-900 min-w-[120px] text-center">
+                  {currentMonth.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+                </span>
+                <button 
+                  onClick={() => navigateMonth('next')}
+                  className="px-3 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200 transition-colors"
+                >
+                  Siguiente →
+                </button>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-7 gap-1 mb-4">
+              {['Dom', 'Lun', 'Mar', 'Mie', 'Jue', 'Vie', 'Sab'].map((day) => (
+                <div key={day} className="p-3 text-center text-sm font-medium text-gray-500 bg-gray-50 rounded">
+                  {day}
+                </div>
+              ))}
+            </div>
+            
+            <div className="grid grid-cols-7 gap-1">
+              {getDaysInMonth().map((day, index) => {
+                const isToday = day.toDateString() === new Date().toDateString()
+                const isCurrentMonth = day.getMonth() === currentMonth.getMonth()
+                const dayPosts = getPostsForDate(day)
+                
+                return (
+                  <div
+                    key={index}
+                    className={`min-h-[100px] p-2 border border-gray-200 rounded ${
+                      !isCurrentMonth
+                        ? 'bg-gray-50 text-gray-400' 
+                        : isToday 
+                          ? 'bg-blue-50 border-blue-300' 
+                          : 'bg-white hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className={`text-sm font-medium mb-1 ${isToday ? 'text-blue-600' : 'text-gray-900'}`}>
+                      {day.getDate()}
+                    </div>
+                    {dayPosts.length > 0 && isCurrentMonth && (
+                      <div className="space-y-1">
+                        {dayPosts.slice(0, 2).map((post) => (
+                          <div
+                            key={post.id}
+                            onClick={() => openCalendarModal(post)}
+                            className={`text-xs px-2 py-1 rounded cursor-pointer hover:opacity-80 transition-opacity truncate ${
+                              post.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                              post.status === 'published' ? 'bg-green-100 text-green-800' :
+                              'bg-red-100 text-red-800'
+                            }`}
+                            title={post.content}
+                          >
+                            {post.time} - {post.type === 'post' ? '📝' : '📸'} {post.content.slice(0, 15)}...
+                          </div>
+                        ))}
+                        {dayPosts.length > 2 && (
+                          <div className="text-xs text-gray-500 px-2">
+                            +{dayPosts.length - 2} más
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+            
+            <div className="mt-6 flex justify-between items-center text-sm text-gray-600">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-yellow-100 border border-yellow-200 rounded"></div>
+                  <span>Pendiente</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-green-100 border border-green-200 rounded"></div>
+                  <span>Publicado</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-3 h-3 bg-red-100 border border-red-200 rounded"></div>
+                  <span>Falló</span>
+                </div>
+              </div>
+              <div>
+                Total: {scheduledPosts.length} publicaciones programadas
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+      )}
+
+      {/* Edit Modal */}
+      {showEditModal && selectedPost && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-gray-900">Editar Publicación</h3>
+                <button
+                  onClick={closeModals}
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {/* Post Type Selection */}
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-3">Tipo de contenido</label>
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setPostType('post')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      postType === 'post'
+                        ? 'bg-blue-100 text-blue-800 border-2 border-blue-300'
+                        : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
+                    }`}
+                  >
+                    📝 Post
+                  </button>
+                  <button
+                    onClick={() => setPostType('story')}
+                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                      postType === 'story'
+                        ? 'bg-purple-100 text-purple-800 border-2 border-purple-300'
+                        : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
+                    }`}
+                  >
+                    📸 Story
+                  </button>
+                </div>
+              </div>
+
+              {/* Content Input */}
+              <div>
+                <label htmlFor="editPostContent" className="block text-sm font-medium text-gray-900 mb-2">
+                  Contenido del {postType === 'post' ? 'post' : 'story'}
+                </label>
+                <textarea
+                  id="editPostContent"
+                  value={postText}
+                  onChange={(e) => setPostText(e.target.value)}
+                  placeholder="¿Qué quieres publicar hoy?"
+                  className="w-full h-32 px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none bg-white text-gray-900 placeholder-gray-500 shadow-sm"
+                  style={{ fontSize: '16px' }}
+                />
+              </div>
+
+              {/* Social Networks Selection */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3">Seleccionar redes sociales</h4>
+                <div className="grid grid-cols-2 gap-3">
+                  {mockAccounts.map((account) => (
+                    <div
+                      key={account.platform}
+                      className={`border-2 rounded-lg p-3 cursor-pointer transition-all ${
+                        selectedAccounts.includes(account.platform)
+                          ? 'border-blue-500 bg-blue-50 shadow-md'
+                          : account.connected
+                          ? 'border-gray-300 hover:border-gray-400 hover:shadow-sm'
+                          : 'border-gray-200 bg-gray-50 cursor-not-allowed'
+                      }`}
+                      onClick={() => account.connected && handleAccountToggle(account.platform)}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{getPlatformIcon(account.platform)}</span>
+                          <div>
+                            <div className="font-medium text-gray-900 text-sm">{account.name}</div>
+                            <div className={`text-xs ${account.connected ? 'text-green-600' : 'text-red-600'}`}>
+                              {account.connected ? 'Conectado' : 'Desconectado'}
+                            </div>
+                          </div>
+                        </div>
+                        {account.connected && (
+                          <input
+                            type="checkbox"
+                            checked={selectedAccounts.includes(account.platform)}
+                            onChange={() => {}}
+                            className="h-4 w-4 text-blue-600 rounded"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Date and Time */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="editPublishDate" className="block text-sm font-medium text-gray-900 mb-2">
+                    Fecha
+                  </label>
+                  <input
+                    type="date"
+                    id="editPublishDate"
+                    value={publishDate}
+                    onChange={(e) => setPublishDate(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 shadow-sm"
+                    style={{ fontSize: '16px' }}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="editPublishTime" className="block text-sm font-medium text-gray-900 mb-2">
+                    Hora
+                  </label>
+                  <input
+                    type="time"
+                    id="editPublishTime"
+                    value={publishTime}
+                    onChange={(e) => setPublishTime(e.target.value)}
+                    className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-gray-900 shadow-sm"
+                    style={{ fontSize: '16px' }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={closeModals}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={saveEditedPost}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Guardar Cambios
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && selectedPost && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-md w-full">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Confirmar Eliminación</h3>
+            </div>
+            
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <span className="text-red-500 text-2xl">⚠️</span>
+                <div>
+                  <p className="text-gray-900 font-medium">¿Estás seguro de que quieres eliminar esta publicación?</p>
+                  <p className="text-gray-600 text-sm mt-1">Esta acción no se puede deshacer.</p>
+                </div>
+              </div>
+              
+              <div className="bg-gray-50 rounded-lg p-4">
+                <div className="text-sm text-gray-700 font-medium mb-1">
+                  {selectedPost.type === 'post' ? '📝 Post' : '📸 Story'} - {formatDate(selectedPost.date)} a las {selectedPost.time}
+                </div>
+                <div className="text-sm text-gray-600 truncate">
+                  {selectedPost.content}
+                </div>
+                <div className="flex gap-1 mt-2">
+                  {selectedPost.platforms.map((platform) => (
+                    <span key={platform} className="text-sm" title={platform}>
+                      {getPlatformIcon(platform)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+              <button
+                onClick={closeModals}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={deletePost}
+                className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Calendar Detail Modal */}
+      {showCalendarModal && selectedPost && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg max-w-lg w-full">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-gray-900">Detalles de la Publicación</h3>
+                <button
+                  onClick={closeModals}
+                  className="text-gray-400 hover:text-gray-600 text-2xl"
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <div className="space-y-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      selectedPost.type === 'post' 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : 'bg-purple-100 text-purple-800'
+                    }`}>
+                      {selectedPost.type === 'post' ? '📝 Post' : '📸 Story'}
+                    </span>
+                    {getStatusBadge(selectedPost.status)}
+                  </div>
+                  <h4 className="font-medium text-gray-900">Contenido:</h4>
+                  <p className="text-gray-700 bg-gray-50 p-3 rounded-lg mt-1">{selectedPost.content}</p>
+                </div>
+                
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Programado para:</h4>
+                  <div className="text-gray-700">
+                    📅 {formatDate(selectedPost.date)} a las {selectedPost.time}
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-gray-900 mb-2">Plataformas:</h4>
+                  <div className="flex gap-2">
+                    {selectedPost.platforms.map((platform) => (
+                      <span
+                        key={platform}
+                        className="inline-flex items-center px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm"
+                      >
+                        {getPlatformIcon(platform)} {platform}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-between">
+              <button
+                onClick={closeModals}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cerrar
+              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setShowCalendarModal(false)
+                    openEditModal(selectedPost)
+                  }}
+                  className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  ✏️ Editar
+                </button>
+                <button
+                  onClick={() => {
+                    setShowCalendarModal(false)
+                    openDeleteModal(selectedPost)
+                  }}
+                  className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  🗑️ Eliminar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showFacebookConfig && (
+        <FacebookConfig
+          onClose={() => setShowFacebookConfig(false)}
+          onSave={(config) => {
+            console.log('Facebook config saved:', config)
+            setShowFacebookConfig(false)
+          }}
+        />
+      )}
+    </DashboardLayout>
+  )
+}

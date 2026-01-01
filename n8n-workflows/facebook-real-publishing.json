@@ -1,0 +1,128 @@
+{
+  "name": "Facebook Real Publishing",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "facebook-publish-real",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook-node",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Log incoming data\nconst data = $input.all();\nconst publishData = data[0].json;\n\nconsole.log('📥 Facebook publish request:', publishData);\n\n// Extract content and prepare for Facebook\nconst message = publishData.content?.text || publishData.message || 'Test post from Dashboard';\nconst tenantId = publishData.tenantId || 'demo';\n\nreturn {\n  message: message,\n  tenantId: tenantId,\n  originalData: publishData\n};"
+      },
+      "id": "process-node",
+      "name": "Process Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "resource": "post",
+        "operation": "create",
+        "pageId": "me",
+        "message": "={{ $json.message }}"
+      },
+      "id": "facebook-node",
+      "name": "Facebook Post",
+      "type": "n8n-nodes-base.facebook",
+      "typeVersion": 1,
+      "position": [680, 300],
+      "credentials": {
+        "facebookGraphApi": {
+          "id": "fb-cred-id",
+          "name": "FB TOKEN"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"success\": true, \"message\": \"Published successfully to Facebook\", \"facebookResponse\": $json } }}"
+      },
+      "id": "success-response",
+      "name": "Success Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ { \"error\": \"Publication failed\", \"details\": $json.error?.message || 'Unknown error' } }}",
+        "options": {
+          "responseCode": 500
+        }
+      },
+      "id": "error-response",
+      "name": "Error Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 400]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Data": {
+      "main": [
+        [
+          {
+            "node": "Facebook Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Facebook Post": {
+      "main": [
+        [
+          {
+            "node": "Success Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ],
+      "error": [
+        [
+          {
+            "node": "Error Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "1",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dashboard-marketing"
+  },
+  "id": "facebook-real-publish",
+  "tags": []
+}
