@@ -74,7 +74,7 @@ export async function GET(
         authUrl = `https://www.facebook.com/v19.0/dialog/oauth?` +
           `client_id=${facebookId}&` +
           `redirect_uri=${encodeURIComponent(baseUrl + '/api/oauth/facebook/callback')}&` +
-          `scope=public_profile&` +
+          `scope=pages_manage_posts,pages_show_list,public_profile&` +
           `state=${state}&` +
           `response_type=code`
         break
