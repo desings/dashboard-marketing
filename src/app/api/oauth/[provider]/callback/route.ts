@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { headers } from 'next/headers'
+import { supabase, isSupabaseConfigured } from '@/lib/supabase'
 
 export async function GET(
   request: NextRequest,
@@ -55,17 +56,57 @@ export async function GET(
     }
 
     // Obtener configuración OAuth
-    const { data: config, error: configError } = await supabase
-      .from('oauth_configurations')
-      .select('*')
-      .eq('provider', provider)
-      .eq('is_active', true)
-      .single()
+    let config: any
 
-    if (configError || !config) {
-      return NextResponse.redirect(
-        `/dashboard/settings?oauth_error=config_not_found&provider=${provider}`
-      )
+    if (isSupabaseConfigured()) {
+      const { data: supabaseConfig, error: configError } = await supabase
+        .from('oauth_configurations')
+        .select('*')
+        .eq('provider', provider)
+        .eq('is_active', true)
+        .single()
+
+      if (configError || !supabaseConfig) {
+        return NextResponse.redirect(
+          `/dashboard/settings?oauth_error=config_not_found&provider=${provider}`
+        )
+      }
+      config = supabaseConfig
+    } else {
+      // Usar variables de entorno cuando Supabase no está configurado
+      const headersList = await headers()
+      const host = headersList.get('host')
+      const protocol = host?.includes('localhost') ? 'http' : 'https'
+      const baseUrl = host ? `${protocol}://${host}` : 'https://dashboard-marketing-a62m.vercel.app'
+
+      switch (provider) {
+        case 'facebook':
+          config = {
+            client_id: process.env.FACEBOOK_CLIENT_ID || process.env.FACEBOOK_APP_ID,
+            client_secret: process.env.FACEBOOK_CLIENT_SECRET || process.env.FACEBOOK_APP_SECRET,
+            redirect_uri: `${baseUrl}/api/oauth/facebook/callback`,
+            scopes: ['public_profile']
+          }
+          break
+        case 'google':
+          config = {
+            client_id: process.env.GOOGLE_CLIENT_ID,
+            client_secret: process.env.GOOGLE_CLIENT_SECRET,
+            redirect_uri: `${baseUrl}/api/oauth/google/callback`,
+            scopes: ['https://www.googleapis.com/auth/youtube.upload']
+          }
+          break
+        default:
+          return NextResponse.redirect(
+            `/dashboard/settings?oauth_error=provider_not_configured&provider=${provider}`
+          )
+      }
+
+      if (!config.client_id || !config.client_secret) {
+        return NextResponse.redirect(
+          `/dashboard/settings?oauth_error=missing_credentials&provider=${provider}`
+        )
+      }
     }
 
     // Intercambiar código por token según el proveedor
@@ -105,32 +146,37 @@ export async function GET(
       )
     }
 
-    // Guardar o actualizar cuenta social en Supabase
-    const accountData = {
-      user_id: userId,
-      provider,
-      provider_account_id: profileData.id,
-      provider_account_name: profileData.name,
-      access_token: tokenData.access_token,
-      refresh_token: tokenData.refresh_token,
-      long_lived_token: tokenData.long_lived_token,
-      expires_at: tokenData.expires_at,
-      scopes: tokenData.scopes || config.scopes,
-      account_type: profileData.account_type,
-      status: 'active' as const
-    }
+    // Guardar o actualizar cuenta social
+    if (isSupabaseConfigured()) {
+      const accountData = {
+        user_id: userId,
+        provider,
+        provider_account_id: profileData.id,
+        provider_account_name: profileData.name,
+        access_token: tokenData.access_token,
+        refresh_token: tokenData.refresh_token,
+        long_lived_token: tokenData.long_lived_token,
+        expires_at: tokenData.expires_at,
+        scopes: tokenData.scopes || config.scopes,
+        account_type: profileData.account_type,
+        status: 'active' as const
+      }
 
-    const { error: upsertError } = await supabase
-      .from('social_accounts')
-      .upsert(accountData, {
-        onConflict: 'user_id,provider,provider_account_id'
-      })
+      const { error: upsertError } = await supabase
+        .from('social_accounts')
+        .upsert(accountData, {
+          onConflict: 'user_id,provider,provider_account_id'
+        })
 
-    if (upsertError) {
-      console.error('Error guardando cuenta social:', upsertError)
-      return NextResponse.redirect(
-        `/dashboard/settings?oauth_error=save_failed&provider=${provider}`
-      )
+      if (upsertError) {
+        console.error('Error guardando cuenta social:', upsertError)
+        return NextResponse.redirect(
+          `/dashboard/settings?oauth_error=save_failed&provider=${provider}`
+        )
+      }
+    } else {
+      // En modo demo sin Supabase, solo simular éxito
+      console.log('Demo mode: OAuth successful for', provider, profileData.name)
     }
 
     // Redirigir con éxito
