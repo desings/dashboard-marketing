@@ -13,23 +13,10 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Si Supabase no está configurado, devolver datos de ejemplo
+    // Si Supabase no está configurado, devolver array vacío para permitir conexiones
     if (!isSupabaseConfigured()) {
       return NextResponse.json({
-        accounts: [
-          {
-            id: 'demo-1',
-            provider: 'facebook',
-            provider_account_name: 'Mi Página Demo',
-            account_type: 'page',
-            status: 'expired',
-            scopes: ['pages_manage_posts'],
-            expires_at: new Date(Date.now() - 86400000).toISOString(), // Ayer
-            last_used_at: new Date(Date.now() - 3600000).toISOString(), // Hace 1 hora
-            created_at: new Date(Date.now() - 86400000 * 7).toISOString(), // Hace 1 semana
-            error_message: 'Supabase no configurado - datos de demostración'
-          }
-        ]
+        accounts: []
       })
     }
 
