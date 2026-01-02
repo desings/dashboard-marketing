@@ -750,6 +750,15 @@ export default function ProgramacionPage() {
       return
     }
 
+    // Validación especial para stories
+    if (postType === 'story') {
+      if (mediaFiles.length === 0) {
+        alert('❌ Las stories requieren media\n\nPor favor agrega una imagen o video para publicar como story.')
+        return
+      }
+      console.log('📸 Publicando story con media:', mediaFiles.length, 'archivos')
+    }
+
     try {
       setPublishing(true)
       
@@ -878,6 +887,15 @@ export default function ProgramacionPage() {
     if (selectedAccounts.length === 0) {
       alert('Por favor selecciona al menos una red social')
       return
+    }
+
+    // Validación especial para stories
+    if (postType === 'story') {
+      if (mediaFiles.length === 0) {
+        alert('❌ Las stories requieren media\n\nPor favor agrega una imagen o video para programar como story.')
+        return
+      }
+      console.log('📸 Programando story con media:', mediaFiles.length, 'archivos')
     }
 
     if (!publishDate || !publishTime) {
@@ -1086,6 +1104,20 @@ export default function ProgramacionPage() {
               <label htmlFor="postContent" className="block text-sm font-medium text-gray-900 mb-2">
                 Contenido del {postType === 'post' ? 'post' : 'story'}
               </label>
+              
+              {/* Aviso para stories */}
+              {postType === 'story' && (
+                <div className="mb-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+                  <div className="flex items-center">
+                    <span className="text-purple-600 mr-2">📸</span>
+                    <div>
+                      <p className="text-sm font-medium text-purple-800">Stories requieren media</p>
+                      <p className="text-xs text-purple-600">Las stories necesitan una imagen o video para publicarse.</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <textarea
                 id="postContent"
                 value={postText}
