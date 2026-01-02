@@ -78,49 +78,124 @@ export async function POST(request: NextRequest) {
           hasUrl: !!firstMedia.url
         })
         
-        const uploadUrl = pageId 
-          ? `https://graph.facebook.com/v19.0/${pageId}/${isVideo ? 'videos' : 'photos'}`
-          : `https://graph.facebook.com/v19.0/me/${isVideo ? 'videos' : 'photos'}`
+        if (isVideo) {
+          // Para videos, usar el endpoint específico de Facebook con diferentes parámetros
+          const uploadUrl = pageId 
+            ? `https://graph.facebook.com/v19.0/${pageId}/videos`
+            : `https://graph.facebook.com/v19.0/me/videos`
 
-        console.log(`📤 Publishing ${isVideo ? 'video' : 'image'} from Cloudinary URL...`)
-        console.log(`🔗 Facebook API URL: ${uploadUrl}`)
-        
-        const bodyParams = {
-          url: mediaUrl,
-          message: isVideo ? undefined : content,
-          description: isVideo ? content : undefined,
-          access_token: pageToken
-        }
-        
-        console.log('📋 Parámetros envío:', JSON.stringify(bodyParams, null, 2))
+          console.log(`📤 Publishing video from Cloudinary URL...`)
+          console.log(`🔗 Facebook API URL: ${uploadUrl}`)
+          
+          // Para videos de URL remota, Facebook requiere este formato específico
+          const bodyParams = {
+            file_url: mediaUrl,  // Cambiar de 'url' a 'file_url' para videos
+            description: content,
+            access_token: pageToken,
+            published: 'true'  // Publicar inmediatamente
+          }
+          
+          console.log('📋 Parámetros envío video:', JSON.stringify(bodyParams, null, 2))
 
-        const publishResponse = await fetch(uploadUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams(bodyParams).toString()
-        })
+          const publishResponse = await fetch(uploadUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(bodyParams).toString()
+          })
 
-        const publishData = await publishResponse.json()
-        
-        console.log('📤 Facebook Response Status:', publishResponse.status)
-        console.log('📤 Facebook Response Data:', JSON.stringify(publishData, null, 2))
+          const publishData = await publishResponse.json()
+          
+          console.log('📤 Facebook Video Response Status:', publishResponse.status)
+          console.log('📤 Facebook Video Response Data:', JSON.stringify(publishData, null, 2))
 
-        if (!publishResponse.ok || publishData.error) {
-          console.error('❌ Error publishing Cloudinary media:', publishData)
+          if (!publishResponse.ok || publishData.error) {
+            console.error('❌ Error publishing video:', publishData)
+            
+            // Fallback: intentar con parámetros alternativos
+            console.log('🔄 Intentando con parámetros alternativos...')
+            
+            const fallbackParams = {
+              url: mediaUrl,  // Volver al parámetro original
+              description: content,
+              access_token: pageToken
+            }
+            
+            const fallbackResponse = await fetch(uploadUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams(fallbackParams).toString()
+            })
+
+            const fallbackData = await fallbackResponse.json()
+            
+            if (!fallbackResponse.ok || fallbackData.error) {
+              return NextResponse.json({
+                success: false,
+                error: 'Error publicando video en Facebook',
+                details: { original: publishData, fallback: fallbackData },
+                statusCode: publishResponse.status,
+                help: 'El video puede ser muy grande o Facebook no puede acceder a la URL'
+              }, { status: 400 })
+            }
+            
+            return NextResponse.json({
+              success: true,
+              message: 'Video publicado exitosamente (con parámetros alternativos)',
+              postId: fallbackData.id,
+              postUrl: `https://facebook.com/${fallbackData.id}`
+            })
+          }
+
           return NextResponse.json({
-            success: false,
-            error: 'Error publicando media en Facebook',
-            details: publishData,
-            statusCode: publishResponse.status
-          }, { status: 400 })
-        }
+            success: true,
+            message: 'Video desde Cloudinary publicado exitosamente',
+            postId: publishData.id,
+            postUrl: `https://facebook.com/${publishData.id}`
+          })
+          
+        } else {
+          // Para imágenes, mantener el comportamiento original
+          const uploadUrl = pageId 
+            ? `https://graph.facebook.com/v19.0/${pageId}/photos`
+            : `https://graph.facebook.com/v19.0/me/photos`
 
-        return NextResponse.json({
-          success: true,
-          message: `${isVideo ? 'Video' : 'Imagen'} desde Cloudinary publicado exitosamente`,
-          postId: publishData.id,
-          postUrl: `https://facebook.com/${publishData.id}`
-        })
+          const bodyParams = {
+            url: mediaUrl,
+            message: content,
+            access_token: pageToken
+          }
+          
+          console.log('📋 Parámetros envío imagen:', JSON.stringify(bodyParams, null, 2))
+
+          const publishResponse = await fetch(uploadUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams(bodyParams).toString()
+          })
+
+          const publishData = await publishResponse.json()
+          
+          console.log('📤 Facebook Image Response Status:', publishResponse.status)
+          console.log('📤 Facebook Image Response Data:', JSON.stringify(publishData, null, 2))
+
+          if (!publishResponse.ok || publishData.error) {
+            console.error('❌ Error publishing image:', publishData)
+            return NextResponse.json({
+              success: false,
+              error: 'Error publicando imagen en Facebook',
+              details: publishData,
+              statusCode: publishResponse.status
+            }, { status: 400 })
+          }
+
+          return NextResponse.json({
+            success: true,
+            message: 'Imagen desde Cloudinary publicada exitosamente',
+            postId: publishData.id,
+            postUrl: `https://facebook.com/${publishData.id}`
+          })
+        }
+      }
       }
       
       if (isBase64) {
