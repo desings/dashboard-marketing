@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { promises as fs } from 'fs'
 import path from 'path'
 
+// Configuración para Next.js 16.1.0
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+  },
+}
+
 const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
 const ALLOWED_TYPES = [
   'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
@@ -11,6 +20,16 @@ const ALLOWED_TYPES = [
 export async function POST(request: NextRequest) {
   try {
     console.log('📤 [UPLOAD] Starting file upload process...')
+    
+    // Verificar Content-Length del request
+    const contentLength = request.headers.get('content-length')
+    console.log('📏 [UPLOAD] Request content-length:', contentLength)
+    
+    if (contentLength && parseInt(contentLength) > MAX_FILE_SIZE) {
+      return NextResponse.json({ 
+        error: `Request too large. Maximum size: 50MB. Current: ${Math.round(parseInt(contentLength) / 1024 / 1024)}MB` 
+      }, { status: 413 })
+    }
     
     const formData = await request.formData()
     const files = formData.getAll('files') as File[]
@@ -103,8 +122,28 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('❌ [UPLOAD] Error uploading files:', error)
+    
+    // Errores específicos
+    if (error instanceof Error) {
+      if (error.message.includes('request entity too large')) {
+        return NextResponse.json({ 
+          error: 'Archivo demasiado grande. Máximo: 50MB' 
+        }, { status: 413 })
+      }
+      
+      if (error.message.includes('Invalid form data')) {
+        return NextResponse.json({ 
+          error: 'Datos de formulario inválidos. Verifica el archivo.' 
+        }, { status: 400 })
+      }
+      
+      return NextResponse.json({ 
+        error: `Error de upload: ${error.message}` 
+      }, { status: 500 })
+    }
+    
     return NextResponse.json(
-      { error: 'Error uploading files' },
+      { error: 'Error interno del servidor durante upload' },
       { status: 500 }
     )
   }
