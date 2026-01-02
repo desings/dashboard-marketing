@@ -193,7 +193,18 @@ export default function ConnectedAccounts({ userId }: ConnectedAccountsProps) {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
+    if (!dateString || dateString === '' || dateString === 'null') {
+      return 'No expira'
+    }
+    
+    const date = new Date(dateString)
+    
+    // Si la fecha es inválida o es la época Unix (1 enero 1970)
+    if (isNaN(date.getTime()) || date.getTime() < 1000000000000) {
+      return 'No expira'
+    }
+    
+    return date.toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -203,10 +214,57 @@ export default function ConnectedAccounts({ userId }: ConnectedAccountsProps) {
   }
 
   const isExpiring = (expiresAt: string) => {
+    if (!expiresAt || expiresAt === '' || expiresAt === 'null') {
+      return false // No expira, no mostrar alerta
+    }
+    
     const expirationDate = new Date(expiresAt)
+    
+    // Si la fecha es inválida o es muy antigua (época Unix)
+    if (isNaN(expirationDate.getTime()) || expirationDate.getTime() < 1000000000000) {
+      return false // No mostrar alerta para tokens que no expiran
+    }
+    
     const now = new Date()
     const hoursUntilExpiration = (expirationDate.getTime() - now.getTime()) / (1000 * 60 * 60)
-    return hoursUntilExpiration < 24
+    return hoursUntilExpiration < 24 && hoursUntilExpiration > 0
+  }
+
+  const getTokenInfo = (account: SocialAccount) => {
+    // Para Facebook, mostrar información específica sobre el tipo de token
+    if (account.provider === 'facebook') {
+      const tokenType = (account as any).tokenType || 'unknown'
+      const expiresInDays = (account as any).expires_in_days
+      const isLongLived = tokenType === 'long-lived'
+      
+      if (!account.expires_at || account.expires_at === 'null' || new Date(account.expires_at).getTime() < 1000000000000) {
+        return {
+          text: 'Token permanente',
+          color: 'text-green-600',
+          description: 'Token de página que no expira'
+        }
+      }
+      
+      if (isLongLived && expiresInDays) {
+        return {
+          text: `Token de larga duración (${expiresInDays} días)`,
+          color: 'text-blue-600',
+          description: 'Token de usuario de 60 días'
+        }
+      }
+      
+      return {
+        text: tokenType === 'short-lived' ? 'Token de corta duración' : 'Token estándar',
+        color: tokenType === 'short-lived' ? 'text-yellow-600' : 'text-gray-600',
+        description: ''
+      }
+    }
+    
+    return {
+      text: formatDate(account.expires_at),
+      color: 'text-gray-600',
+      description: ''
+    }
   }
 
   if (loading) {
@@ -276,15 +334,6 @@ export default function ConnectedAccounts({ userId }: ConnectedAccountsProps) {
                     {/* Botones de acción */}
                     {account.status === 'active' ? (
                       <>
-                        {isExpiring(account.expires_at) && (
-                          <button
-                            onClick={() => refreshToken(account.id)}
-                            disabled={refreshing === account.id}
-                            className="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 disabled:opacity-50"
-                          >
-                            {refreshing === account.id ? 'Renovando...' : 'Renovar'}
-                          </button>
-                        )}
                         <button
                           onClick={() => disconnectAccount(account.id, account.provider_account_name || account.provider)}
                           className="px-3 py-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100"
@@ -313,14 +362,41 @@ export default function ConnectedAccounts({ userId }: ConnectedAccountsProps) {
                   </div>
                 )}
 
-                {/* Información de expiración */}
+                {/* Información de expiración y tipo de token */}
                 {account.status === 'active' && (
-                  <div className="mt-3 text-xs text-gray-500">
-                    <span>Expira: {formatDate(account.expires_at)}</span>
-                    {isExpiring(account.expires_at) && (
-                      <span className="ml-2 text-yellow-600 font-medium">
-                        (¡Expira pronto!)
-                      </span>
+                  <div className="mt-3 text-xs">
+                    {(() => {
+                      const tokenInfo = getTokenInfo(account)
+                      return (
+                        <div>
+                          <span className={tokenInfo.color}>
+                            Expira: {tokenInfo.text}
+                          </span>
+                          {tokenInfo.description && (
+                            <span className="ml-2 text-gray-500">
+                              ({tokenInfo.description})
+                            </span>
+                          )}
+                          {isExpiring(account.expires_at) && (
+                            <span className="ml-2 text-yellow-600 font-medium">
+                              (¡Expira pronto!)
+                            </span>
+                          )}
+                        </div>
+                      )
+                    })()}
+                    
+                    {/* Mostrar botón de renovar solo si realmente expira pronto */}
+                    {isExpiring(account.expires_at) && !getTokenInfo(account).text.includes('permanente') && (
+                      <div className="mt-2">
+                        <button
+                          onClick={() => refreshToken(account.id)}
+                          disabled={refreshing === account.id}
+                          className="px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-md hover:bg-blue-100 disabled:opacity-50"
+                        >
+                          {refreshing === account.id ? 'Renovando...' : 'Renovar Token'}
+                        </button>
+                      </div>
                     )}
                   </div>
                 )}
