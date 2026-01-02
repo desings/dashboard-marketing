@@ -94,24 +94,44 @@ export default function ProgramacionPage() {
       console.log('📋 Verificando posts programados:', {
         total: localPosts.length,
         pendientes: localPosts.filter((p: any) => p.status === 'pending').length,
-        hora_actual: now.toLocaleString('es-ES', { timeZone: 'Europe/Madrid' })
+        hora_actual: now.toLocaleString()
+      })
+      
+      // Log de todos los posts para debugging
+      localPosts.forEach((post: any, index: number) => {
+        console.log(`📝 Post ${index + 1}:`, {
+          id: post.id.substring(0, 10) + '...',
+          status: post.status,
+          fecha_programada: `${post.date} ${post.time}`,
+          tiene_media: post.media && post.media.length > 0,
+          media_count: post.media ? post.media.length : 0
+        })
       })
       
       for (const post of localPosts) {
         if (post.status === 'pending') {
           const scheduledTime = new Date(`${post.date}T${post.time}`)
+          const timeDiff = scheduledTime.getTime() - now.getTime()
           
           console.log('⏰ Verificando post:', {
-            id: post.id,
-            programado_para: scheduledTime.toLocaleString('es-ES', { timeZone: 'Europe/Madrid' }),
-            hora_actual: now.toLocaleString('es-ES', { timeZone: 'Europe/Madrid' }),
-            debe_ejecutarse: scheduledTime <= now
+            id: post.id.substring(0, 10) + '...',
+            programado_para: scheduledTime.toLocaleString(),
+            hora_actual: now.toLocaleString(),
+            diferencia_ms: timeDiff,
+            diferencia_minutos: Math.round(timeDiff / 60000),
+            debe_ejecutarse: scheduledTime <= now,
+            tiene_media: post.media && post.media.length > 0
           })
           
           // Si la hora programada ya pasó, ejecutar el post
           if (scheduledTime <= now) {
             console.log('🕒 Ejecutando post programado:', post.id)
             await executeScheduledPost(post)
+          } else {
+            console.log('⏳ Post aún no está listo para ejecutar:', {
+              id: post.id.substring(0, 10) + '...',
+              faltan_minutos: Math.round(timeDiff / 60000)
+            })
           }
         }
       }
@@ -150,6 +170,16 @@ export default function ProgramacionPage() {
 
       // Preparar medios si los hay
       const postMedia = post.media || []
+      
+      // Log detallado de media
+      if (postMedia.length > 0) {
+        console.log('📸 Media detectado:', {
+          count: postMedia.length,
+          tipos: postMedia.map((m: any) => m.type),
+          es_cloudinary: postMedia.map((m: any) => m.isCloudinary || !!m.cloudinaryUrl),
+          urls: postMedia.map((m: any) => (m.cloudinaryUrl || m.url || '').substring(0, 50) + '...')
+        })
+      }
       
       const requestData = {
         content: post.content,
