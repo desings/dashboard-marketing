@@ -1,13 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Configuración para Next.js 16.1.0
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: '15mb', // Aumentado para videos pequeños
-    },
-  },
-}
+// Note: config export is deprecated in Next.js 16.1.0
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5MB para imágenes
 const MAX_VIDEO_SIZE = 10 * 1024 * 1024 // 10MB para videos (aumentado)

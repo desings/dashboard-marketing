@@ -410,7 +410,7 @@ export default function ProgramacionPage() {
         }
       }
 
-      const uploadedFiles = []
+      const uploadedFiles: MediaFile[] = []
 
       for (const file of files) {
         console.log(`📤 Subiendo "${file.name}" directamente a Cloudinary...`)
