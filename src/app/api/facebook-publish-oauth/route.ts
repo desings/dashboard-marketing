@@ -196,7 +196,6 @@ export async function POST(request: NextRequest) {
           })
         }
       }
-      }
       
       if (isBase64) {
         console.log('📤 Base64 media detected - uploading directly to Facebook...')
