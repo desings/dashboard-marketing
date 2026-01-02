@@ -49,9 +49,16 @@ export async function POST(request: NextRequest) {
     // Asegurar que existe el directorio
     try {
       await fs.mkdir(uploadsDir, { recursive: true })
-      console.log('✅ [UPLOAD] Directory ensured')
-    } catch (error) {
-      console.log('ℹ️  [UPLOAD] Directory already exists')
+      console.log('✅ [UPLOAD] Directory ensured:', uploadsDir)
+      
+      // Verificar permisos de escritura
+      await fs.access(uploadsDir, fs.constants.W_OK)
+      console.log('✅ [UPLOAD] Directory is writable')
+    } catch (dirError) {
+      console.error('❌ [UPLOAD] Directory error:', dirError)
+      return NextResponse.json({ 
+        error: `Error accessing upload directory: ${dirError instanceof Error ? dirError.message : 'Unknown error'}` 
+      }, { status: 500 })
     }
 
     for (const file of files) {
@@ -82,33 +89,83 @@ export async function POST(request: NextRequest) {
         }, { status: 400 })
       }
       
-      // Generar nombre único
+      // Generar nombre único y seguro
       const timestamp = Date.now()
-      const fileName = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
+      const fileExtension = path.extname(file.name).toLowerCase()
+      const baseName = path.basename(file.name, fileExtension)
+      
+      // Limpiar nombre: solo letras, números, guiones y puntos
+      const cleanBaseName = baseName
+        .normalize('NFD') // Normalizar caracteres con acentos
+        .replace(/[\u0300-\u036f]/g, '') // Remover diacríticos (acentos)
+        .replace(/[^a-zA-Z0-9\-_]/g, '_') // Reemplazar caracteres especiales
+        .replace(/_{2,}/g, '_') // Reemplazar múltiples guiones bajos con uno solo
+        .replace(/^_+|_+$/g, '') // Remover guiones bajos al inicio y final
+        
+      // Agregar un número aleatorio para evitar conflictos
+      const randomSuffix = Math.random().toString(36).substr(2, 6)
+      const fileName = `${timestamp}-${cleanBaseName}-${randomSuffix}${fileExtension}`
       const filePath = path.join(uploadsDir, fileName)
       
-      console.log('💾 [UPLOAD] Saving file:', fileName)
+      // Verificar que el archivo no existe (doble seguridad)
+      let finalFilePath = filePath
+      let finalFileName = fileName
+      let counter = 1
+      
+      while (await fs.access(finalFilePath).then(() => true).catch(() => false)) {
+        finalFileName = `${timestamp}-${cleanBaseName}-${randomSuffix}-${counter}${fileExtension}`
+        finalFilePath = path.join(uploadsDir, finalFileName)
+        counter++
+      }
+      
+      console.log('💾 [UPLOAD] File naming:', {
+        originalName: file.name,
+        cleanBaseName,
+        fileName: finalFileName,
+        filePath: finalFilePath
+      })
       
       try {
+        // Verificar que el directorio sea accesible
+        await fs.access(uploadsDir, fs.constants.W_OK)
+        
         // Escribir archivo
         const bytes = await file.arrayBuffer()
         const buffer = Buffer.from(bytes)
-        await fs.writeFile(filePath, buffer)
         
-        console.log('✅ [UPLOAD] File saved successfully:', fileName)
+        console.log('📝 [UPLOAD] Writing file:', {
+          fileName: finalFileName,
+          bufferSize: buffer.length,
+          targetPath: finalFilePath
+        })
+        
+        await fs.writeFile(finalFilePath, buffer)
+        
+        // Verificar que el archivo se escribió correctamente
+        const stats = await fs.stat(finalFilePath)
+        console.log('✅ [UPLOAD] File written successfully:', {
+          fileName: finalFileName,
+          fileSize: stats.size,
+          isFile: stats.isFile()
+        })
         
         uploadedFiles.push({
           id: `media_${timestamp}_${Math.random().toString(36).substr(2, 9)}`,
-          fileName,
+          fileName: finalFileName,
           originalName: file.name,
-          url: `/uploads/media/${fileName}`,
+          url: `/uploads/media/${finalFileName}`,
           type: file.type.startsWith('video/') ? 'video' : 'image',
           size: file.size
         })
       } catch (writeError) {
-        console.error('❌ [UPLOAD] Error writing file:', writeError)
+        console.error('❌ [UPLOAD] Error writing file:', {
+          fileName: file.name,
+          cleanFileName: finalFileName,
+          error: writeError,
+          errorMessage: writeError instanceof Error ? writeError.message : 'Unknown error'
+        })
         return NextResponse.json({ 
-          error: `Error saving file ${file.name}` 
+          error: `Error guardando archivo "${file.name}": ${writeError instanceof Error ? writeError.message : 'Error desconocido'}` 
         }, { status: 500 })
       }
     }
