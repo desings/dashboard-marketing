@@ -392,17 +392,17 @@ export default function ProgramacionPage() {
       
       console.log('📤 Iniciando upload de archivos:', files.length)
       
-      // Validar archivos antes de enviar
-      const maxSize = 50 * 1024 * 1024 // 50MB
-      const allowedTypes = ['image/', 'video/']
+      // Validar archivos antes de enviar (límites más estrictos para Vercel)
+      const maxSize = 5 * 1024 * 1024 // 5MB para Vercel
+      const allowedTypes = ['image/'] // Solo imágenes en Vercel
       
       for (const file of files) {
         if (file.size > maxSize) {
-          alert(`El archivo ${file.name} es demasiado grande. Máximo: 50MB`)
+          alert(`⚠️ El archivo ${file.name} es demasiado grande.\n\nMáximo permitido en Vercel: 5MB\nTamaño actual: ${Math.round(file.size / 1024 / 1024)}MB\n\n💡 Recomendación: Comprime la imagen o usa una herramienta online para reducir el tamaño.`)
           return
         }
         if (!allowedTypes.some(type => file.type.startsWith(type))) {
-          alert(`El archivo ${file.name} no es una imagen o video válido`)
+          alert(`⚠️ El archivo ${file.name} no es válido.\n\nTipos permitidos en Vercel: Imágenes (JPG, PNG, GIF, WebP)\nVideos no están soportados debido a limitaciones de Vercel.\n\n💡 Alternativa: Sube videos a YouTube/Vimeo y usa el enlace.`)
           return
         }
       }
@@ -415,7 +415,7 @@ export default function ProgramacionPage() {
       })
 
       // Subir archivos al servidor
-      console.log('🚀 Enviando archivos al servidor...')
+      console.log('🚀 Enviando archivos al servidor (Vercel)...')
       const response = await fetch('/api/upload-media', {
         method: 'POST',
         body: formData
@@ -429,23 +429,32 @@ export default function ProgramacionPage() {
         // Agregar archivos subidos a mediaFiles
         const uploadedFiles: MediaFile[] = data.files.map((file: any) => ({
           id: file.id,
-          file: null, // Ya está en el servidor
+          file: null, // Ya convertido a base64
           fileName: file.fileName,
-          url: file.url,
+          url: file.url, // Base64 data URL
           preview: file.url,
           type: file.type
         }))
         
         setMediaFiles(prev => [...prev, ...uploadedFiles])
-        console.log('✅ Archivos subidos correctamente:', uploadedFiles)
-        alert(`✅ ${uploadedFiles.length} archivo(s) subido(s) correctamente`)
+        console.log('✅ Archivos procesados correctamente:', uploadedFiles)
+        alert(`✅ ${uploadedFiles.length} archivo(s) procesado(s) correctamente\n\n📝 Nota: Las imágenes se almacenan como base64 para compatibilidad con Vercel.`)
       } else {
         console.error('❌ Error en el servidor:', data.error)
-        alert('Error al subir archivos: ' + data.error)
+        
+        // Mensajes de error más específicos para Vercel
+        let errorMessage = data.error
+        if (data.error.includes('read-only file system')) {
+          errorMessage = '⚠️ Error de sistema de archivos de Vercel.\n\nVercel no permite guardar archivos. Hemos cambiado a almacenamiento base64.\n\nPor favor, intenta de nuevo con archivos menores a 5MB.'
+        } else if (data.error.includes('too large')) {
+          errorMessage = '⚠️ Archivo demasiado grande para Vercel.\n\nMáximo: 5MB\n\n💡 Comprime tu imagen antes de subir.'
+        }
+        
+        alert('Error al subir archivos:\n\n' + errorMessage)
       }
     } catch (error) {
       console.error('❌ Error uploading media:', error)
-      alert('Error al subir archivos: ' + (error instanceof Error ? error.message : 'Error desconocido'))
+      alert('Error al subir archivos:\n\n' + (error instanceof Error ? error.message : 'Error desconocido') + '\n\n💡 Verifica tu conexión e intenta con archivos más pequeños.')
     } finally {
       setUploading(false)
       // Limpiar el input para permitir volver a subir el mismo archivo

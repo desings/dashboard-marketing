@@ -26,6 +26,50 @@ export async function POST(request: NextRequest) {
     if (media && media.length > 0) {
       console.log('🖼️ Publishing with media...')
       
+      // Verificar si son URLs base64 (Vercel)
+      const firstMedia = media[0]
+      const isBase64 = firstMedia.url && firstMedia.url.startsWith('data:')
+      
+      if (isBase64) {
+        console.log('⚠️ Base64 media detected - Facebook no acepta base64 directamente')
+        console.log('📝 Publishing text-only post instead...')
+        
+        // Facebook no acepta base64, publicar solo texto con nota
+        const textWithNote = `${content}\n\n📸 [Imagen adjunta - No visible debido a limitaciones de Vercel]`
+        
+        const publishUrl = pageId 
+          ? `https://graph.facebook.com/v19.0/${pageId}/feed`
+          : `https://graph.facebook.com/v19.0/me/feed`
+
+        const publishResponse = await fetch(publishUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            message: textWithNote,
+            access_token: pageToken
+          })
+        })
+
+        const publishData = await publishResponse.json()
+
+        if (!publishResponse.ok || publishData.error) {
+          console.error('❌ Error publishing text with image note:', publishData)
+          return NextResponse.json({
+            success: false,
+            error: 'Error publicando en Facebook',
+            details: publishData
+          }, { status: 400 })
+        }
+
+        return NextResponse.json({
+          success: true,
+          message: 'Texto publicado (imagen no soportada en Vercel)',
+          postId: publishData.id,
+          postUrl: `https://facebook.com/${publishData.id}`,
+          note: 'Las imágenes base64 no son soportadas por Facebook API. Solo se publicó el texto.'
+        })
+      }
+      
       // Para posts con media, usar el endpoint de photos
       // Facebook permite subir hasta 10 imágenes en una sola publicación
       if (media.length === 1) {
