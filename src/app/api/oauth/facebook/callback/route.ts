@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
       }, { status: 400 })
     }
 
-    // Intercambiar código por token
+    // Intercambiar código por token de corta duración
     const tokenResponse = await fetch(
       `https://graph.facebook.com/v19.0/oauth/access_token?` +
       `client_id=${process.env.FACEBOOK_APP_ID}&` +
@@ -56,9 +56,35 @@ export async function GET(request: NextRequest) {
       }, { status: 400 })
     }
 
+    // Intercambiar por token de larga duración (60 días)
+    console.log('🔄 Intercambiando por token de larga duración...')
+    const longTokenResponse = await fetch(
+      `https://graph.facebook.com/v19.0/oauth/access_token?` +
+      `grant_type=fb_exchange_token&` +
+      `client_id=${process.env.FACEBOOK_APP_ID}&` +
+      `client_secret=${process.env.FACEBOOK_APP_SECRET}&` +
+      `fb_exchange_token=${tokenData.access_token}`
+    )
+
+    const longTokenData = await longTokenResponse.json()
+
+    if (!longTokenResponse.ok || longTokenData.error) {
+      console.warn('No se pudo obtener token de larga duración, usando token original:', longTokenData)
+      // Continuar con token original si falla
+    }
+
+    const finalUserToken = longTokenData.access_token || tokenData.access_token
+    const expiresIn = longTokenData.expires_in || tokenData.expires_in
+
+    console.log('✅ Token obtenido:', {
+      hasToken: !!finalUserToken,
+      expiresIn: expiresIn ? `${expiresIn} segundos` : 'No especificado',
+      isLongLived: !!longTokenData.access_token
+    })
+
     // Obtener perfil del usuario
     const profileResponse = await fetch(
-      `https://graph.facebook.com/v19.0/me?fields=id,name&access_token=${tokenData.access_token}`
+      `https://graph.facebook.com/v19.0/me?fields=id,name&access_token=${finalUserToken}`
     )
 
     const profileData = await profileResponse.json()
@@ -72,7 +98,7 @@ export async function GET(request: NextRequest) {
 
     // Obtener páginas que el usuario administra
     const pagesResponse = await fetch(
-      `https://graph.facebook.com/v19.0/me/accounts?access_token=${tokenData.access_token}`
+      `https://graph.facebook.com/v19.0/me/accounts?access_token=${finalUserToken}`
     )
 
     const pagesData = await pagesResponse.json()
@@ -97,10 +123,13 @@ export async function GET(request: NextRequest) {
       account_type: pageInfo ? 'page' : 'user',
       status: 'active',
       scopes: ['pages_manage_posts', 'pages_show_list', 'public_profile'],
-      expires_at: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000).toISOString(), // 60 días
+      expires_at: expiresIn ? new Date(Date.now() + expiresIn * 1000).toISOString() : null, // Token de página no expira
       created_at: new Date().toISOString(),
       pageId: pageInfo?.pageId,
-      pageToken: pageInfo?.pageToken
+      pageToken: pageInfo?.pageToken,
+      userToken: finalUserToken,
+      tokenType: longTokenData.access_token ? 'long-lived' : 'short-lived',
+      expiresIn: expiresIn
     }
 
     // Guardar también en el servidor para el scheduler
