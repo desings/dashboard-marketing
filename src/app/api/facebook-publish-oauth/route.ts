@@ -7,6 +7,13 @@ export async function POST(request: NextRequest) {
     
     const { content, pageToken, pageId, media } = requestData
     
+    console.log('🔍 Token recibido:', {
+      hasToken: !!pageToken,
+      tokenLength: pageToken ? pageToken.length : 0,
+      tokenStart: pageToken ? pageToken.substring(0, 30) + '...' : 'N/A',
+      tokenType: typeof pageToken
+    })
+    
     if (!content || !content.trim()) {
       console.log('❌ Error: Contenido requerido')
       return NextResponse.json({ error: 'Contenido requerido' }, { status: 400 })
@@ -26,6 +33,26 @@ export async function POST(request: NextRequest) {
       hasMedia: media && media.length > 0,
       mediaCount: media ? media.length : 0
     })
+
+    // Verificar si el token es válido antes de usar
+    console.log('🔍 Verificando token de Facebook...')
+    const tokenCheckResponse = await fetch(`https://graph.facebook.com/v19.0/me?access_token=${pageToken}`)
+    const tokenCheckData = await tokenCheckResponse.json()
+    
+    console.log('🔍 Token check response:', {
+      status: tokenCheckResponse.status,
+      data: tokenCheckData
+    })
+    
+    if (!tokenCheckResponse.ok || tokenCheckData.error) {
+      console.error('❌ Token inválido:', tokenCheckData)
+      return NextResponse.json({
+        success: false,
+        error: 'Token de Facebook inválido o expirado',
+        details: tokenCheckData,
+        help: 'Reconecta tu cuenta de Facebook en Settings'
+      }, { status: 401 })
+    }
 
     // Si hay media, usar endpoint de photos/videos
     if (media && media.length > 0) {

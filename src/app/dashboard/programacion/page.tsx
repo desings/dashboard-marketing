@@ -711,7 +711,9 @@ export default function ProgramacionPage() {
             tiene_cuenta: !!fbAccount,
             tiene_token: !!fbAccount?.pageToken,
             page_id: fbAccount?.pageId,
-            token_preview: fbAccount?.pageToken ? fbAccount.pageToken.substring(0, 20) + '...' : 'N/A'
+            token_preview: fbAccount?.pageToken ? fbAccount.pageToken.substring(0, 20) + '...' : 'N/A',
+            token_length: fbAccount?.pageToken ? fbAccount.pageToken.length : 0,
+            token_full: fbAccount?.pageToken // TEMPORAL para debug
           })
           
           if (!fbAccount?.pageToken) {
