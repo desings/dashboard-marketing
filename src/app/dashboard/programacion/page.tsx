@@ -1112,7 +1112,7 @@ export default function ProgramacionPage() {
                     <span className="text-purple-600 mr-2">📸</span>
                     <div>
                       <p className="text-sm font-medium text-purple-800">Stories requieren media</p>
-                      <p className="text-xs text-purple-600">Las stories necesitan una imagen o video para publicarse.</p>
+                      <p className="text-xs text-purple-600">Las stories necesitan una imagen o video. Facebook puede limitar la API de stories según tu página.</p>
                     </div>
                   </div>
                 </div>
