@@ -31,43 +31,124 @@ export async function POST(request: NextRequest) {
       const isBase64 = firstMedia.url && firstMedia.url.startsWith('data:')
       
       if (isBase64) {
-        console.log('⚠️ Base64 media detected - Facebook no acepta base64 directamente')
-        console.log('📝 Publishing text-only post instead...')
+        console.log('📤 Base64 media detected - uploading directly to Facebook...')
         
-        // Facebook no acepta base64, publicar solo texto con nota
-        const textWithNote = `${content}\n\n📸 [Imagen adjunta - No visible debido a limitaciones de Vercel]`
-        
-        const publishUrl = pageId 
-          ? `https://graph.facebook.com/v19.0/${pageId}/feed`
-          : `https://graph.facebook.com/v19.0/me/feed`
-
-        const publishResponse = await fetch(publishUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({
-            message: textWithNote,
-            access_token: pageToken
+        // Convertir base64 a Buffer para Facebook
+        try {
+          const base64Data = firstMedia.url.split(',')[1] // Remover "data:image/jpeg;base64,"
+          const imageBuffer = Buffer.from(base64Data, 'base64')
+          
+          console.log('🔄 Converted base64 to buffer:', {
+            originalBase64Length: base64Data.length,
+            bufferSize: imageBuffer.length,
+            mediaType: firstMedia.url.split(';')[0].split(':')[1] // Extraer tipo MIME
           })
-        })
 
-        const publishData = await publishResponse.json()
+          // Subir imagen directamente a Facebook
+          const uploadUrl = pageId 
+            ? `https://graph.facebook.com/v19.0/${pageId}/photos`
+            : `https://graph.facebook.com/v19.0/me/photos`
 
-        if (!publishResponse.ok || publishData.error) {
-          console.error('❌ Error publishing text with image note:', publishData)
+          // Crear FormData para Facebook
+          const formData = new FormData()
+          
+          // Crear un Blob desde el buffer
+          const imageBlob = new Blob([imageBuffer], { 
+            type: firstMedia.url.split(';')[0].split(':')[1] 
+          })
+          
+          formData.append('source', imageBlob)
+          formData.append('message', content)
+          formData.append('access_token', pageToken)
+
+          console.log('📤 Uploading image directly to Facebook...')
+
+          const uploadResponse = await fetch(uploadUrl, {
+            method: 'POST',
+            body: formData
+          })
+
+          const uploadData = await uploadResponse.json()
+
+          if (!uploadResponse.ok || uploadData.error) {
+            console.error('❌ Error uploading image to Facebook:', uploadData)
+            
+            // Fallback: publicar solo texto
+            console.log('🔄 Fallback: Publishing text-only...')
+            const textOnlyUrl = pageId 
+              ? `https://graph.facebook.com/v19.0/${pageId}/feed`
+              : `https://graph.facebook.com/v19.0/me/feed`
+
+            const textResponse = await fetch(textOnlyUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+              body: new URLSearchParams({
+                message: content,
+                access_token: pageToken
+              })
+            })
+
+            const textData = await textResponse.json()
+
+            if (!textResponse.ok || textData.error) {
+              return NextResponse.json({
+                success: false,
+                error: 'Error publicando en Facebook (imagen y texto fallaron)',
+                details: { uploadData, textData }
+              }, { status: 400 })
+            }
+
+            return NextResponse.json({
+              success: true,
+              message: 'Texto publicado (imagen falló)',
+              postId: textData.id,
+              postUrl: `https://facebook.com/${textData.id}`,
+              warning: 'La imagen no pudo subirse a Facebook: ' + (uploadData.error?.message || 'Error desconocido')
+            })
+          }
+
           return NextResponse.json({
-            success: false,
-            error: 'Error publicando en Facebook',
-            details: publishData
-          }, { status: 400 })
-        }
+            success: true,
+            message: 'Imagen y texto publicados exitosamente en Facebook',
+            postId: uploadData.id,
+            postUrl: `https://facebook.com/${uploadData.id}`
+          })
 
-        return NextResponse.json({
-          success: true,
-          message: 'Texto publicado (imagen no soportada en Vercel)',
-          postId: publishData.id,
-          postUrl: `https://facebook.com/${publishData.id}`,
-          note: 'Las imágenes base64 no son soportadas por Facebook API. Solo se publicó el texto.'
-        })
+        } catch (conversionError) {
+          console.error('❌ Error converting base64 for Facebook:', conversionError)
+          
+          // Fallback: publicar solo texto
+          const publishUrl = pageId 
+            ? `https://graph.facebook.com/v19.0/${pageId}/feed`
+            : `https://graph.facebook.com/v19.0/me/feed`
+
+          const publishResponse = await fetch(publishUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+              message: content,
+              access_token: pageToken
+            })
+          })
+
+          const publishData = await publishResponse.json()
+
+          if (!publishResponse.ok || publishData.error) {
+            return NextResponse.json({
+              success: false,
+              error: 'Error publicando en Facebook',
+              details: publishData
+            }, { status: 400 })
+          }
+
+          return NextResponse.json({
+            success: true,
+            message: 'Texto publicado (error procesando imagen)',
+            postId: publishData.id,
+            postUrl: `https://facebook.com/${publishData.id}`,
+            warning: 'Error procesando imagen: ' + (conversionError instanceof Error ? conversionError.message : 'Error desconocido')
+          })
+        }
       }
       
       // Para posts con media, usar el endpoint de photos

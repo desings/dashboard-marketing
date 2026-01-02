@@ -438,7 +438,7 @@ export default function ProgramacionPage() {
         
         setMediaFiles(prev => [...prev, ...uploadedFiles])
         console.log('✅ Archivos procesados correctamente:', uploadedFiles)
-        alert(`✅ ${uploadedFiles.length} archivo(s) procesado(s) correctamente\n\n📝 Nota: Las imágenes se almacenan como base64 para compatibilidad con Vercel.`)
+        alert(`✅ ${uploadedFiles.length} archivo(s) procesado(s) correctamente\n\n� Las imágenes se subirán directamente a Facebook al publicar.`)
       } else {
         console.error('❌ Error en el servidor:', data.error)
         
@@ -690,6 +690,13 @@ export default function ProgramacionPage() {
             alert(`❌ Error en Facebook: ${result.error}`)
             setPublishing(false)
             return
+          }
+
+          // Mostrar mensaje específico según el resultado
+          if (result.warning) {
+            alert(`⚠️ Publicado con advertencia:\n${result.message}\n\nAdvertencia: ${result.warning}`)
+          } else {
+            alert(`✅ ¡Publicación exitosa en Facebook!\n\n${result.message}\n\nID del post: ${result.postId}`)
           }
         } else {
           // Para otras plataformas, usar endpoint directo
