@@ -557,12 +557,47 @@ export default function ProgramacionPage() {
 
   const getPlatformIcon = (platform: string) => {
     const icons = {
-      facebook: '📘',
-      instagram: '📷',
-      twitter: '🐦',
-      linkedin: '💼'
+      facebook: (
+        <img 
+          src="/logos/facebook.svg" 
+          alt="Facebook" 
+          className="w-6 h-6 inline-block"
+          title="Facebook"
+        />
+      ),
+      instagram: (
+        <div 
+          className="w-6 h-6 rounded-lg bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 flex items-center justify-center"
+          title="Instagram"
+        >
+          <span className="text-white text-xs font-bold">IG</span>
+        </div>
+      ),
+      twitter: (
+        <img 
+          src="/logos/twitter.svg" 
+          alt="Twitter/X" 
+          className="w-6 h-6 inline-block"
+          title="Twitter"
+        />
+      ),
+      linkedin: (
+        <img 
+          src="/logos/linkedin.svg" 
+          alt="LinkedIn" 
+          className="w-6 h-6 inline-block"
+          title="LinkedIn"
+        />
+      )
     }
-    return icons[platform as keyof typeof icons] || '📱'
+    return icons[platform as keyof typeof icons] || (
+      <div 
+        className="w-6 h-6 rounded bg-gray-400 flex items-center justify-center"
+        title={platform}
+      >
+        <span className="text-white text-xs">📱</span>
+      </div>
+    )
   }
 
   const getStatusBadge = (status: string) => {

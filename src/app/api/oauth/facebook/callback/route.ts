@@ -69,17 +69,23 @@ export async function GET(request: NextRequest) {
     const longTokenData = await longTokenResponse.json()
 
     if (!longTokenResponse.ok || longTokenData.error) {
-      console.warn('No se pudo obtener token de larga duración, usando token original:', longTokenData)
-      // Continuar con token original si falla
+      console.warn('⚠️ No se pudo obtener token de larga duración, usando token original:', longTokenData)
+      // Continuar con token original si falla, pero loggearlo
+    } else {
+      console.log('✅ Token de larga duración obtenido exitosamente:', {
+        expires_in: longTokenData.expires_in ? `${longTokenData.expires_in} segundos` : 'No especificado',
+        expires_days: longTokenData.expires_in ? Math.round(longTokenData.expires_in / (24 * 60 * 60)) : 'N/A'
+      })
     }
 
-    const finalUserToken = longTokenData.access_token || tokenData.access_token
-    const expiresIn = longTokenData.expires_in || tokenData.expires_in
+    const finalUserToken = (longTokenData.access_token && !longTokenData.error) ? longTokenData.access_token : tokenData.access_token
+    const expiresIn = (longTokenData.expires_in && !longTokenData.error) ? longTokenData.expires_in : tokenData.expires_in
 
-    console.log('✅ Token obtenido:', {
+    console.log('🔑 Token final seleccionado:', {
       hasToken: !!finalUserToken,
       expiresIn: expiresIn ? `${expiresIn} segundos` : 'No especificado',
-      isLongLived: !!longTokenData.access_token
+      expiresInDays: expiresIn ? Math.round(expiresIn / (24 * 60 * 60)) : 'N/A',
+      isLongLived: !!(longTokenData.access_token && !longTokenData.error)
     })
 
     // Obtener perfil del usuario
@@ -116,6 +122,9 @@ export async function GET(request: NextRequest) {
     } : null
 
     // Guardar cuenta conectada para mostrar en la UI
+    const expirationDate = expiresIn ? new Date(Date.now() + expiresIn * 1000) : null
+    const isLongLivedToken = !!(longTokenData.access_token && !longTokenData.error)
+    
     const connectedAccount = {
       id: `facebook-${profileData.id}`,
       provider: 'facebook',
@@ -123,13 +132,15 @@ export async function GET(request: NextRequest) {
       account_type: pageInfo ? 'page' : 'user',
       status: 'active',
       scopes: ['pages_manage_posts', 'pages_show_list', 'public_profile'],
-      expires_at: expiresIn ? new Date(Date.now() + expiresIn * 1000).toISOString() : null, // Token de página no expira
+      expires_at: expirationDate ? expirationDate.toISOString() : null,
+      expires_in_days: expiresIn ? Math.round(expiresIn / (24 * 60 * 60)) : null,
       created_at: new Date().toISOString(),
       pageId: pageInfo?.pageId,
       pageToken: pageInfo?.pageToken,
       userToken: finalUserToken,
-      tokenType: longTokenData.access_token ? 'long-lived' : 'short-lived',
-      expiresIn: expiresIn
+      tokenType: isLongLivedToken ? 'long-lived' : 'short-lived',
+      expiresIn: expiresIn,
+      tokenCreatedAt: new Date().toISOString()
     }
 
     // Guardar también en el servidor para el scheduler
