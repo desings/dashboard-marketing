@@ -142,6 +142,9 @@ export default function ProgramacionPage() {
 
       console.log('📤 Enviando a Facebook...')
 
+      // Preparar medios si los hay
+      const postMedia = post.media || []
+
       // Ejecutar publicación en Facebook
       const response = await fetch('/api/facebook-publish-oauth', {
         method: 'POST',
@@ -149,7 +152,8 @@ export default function ProgramacionPage() {
         body: JSON.stringify({
           content: post.content,
           pageToken: fbAccount.pageToken,
-          pageId: fbAccount.pageId
+          pageId: fbAccount.pageId,
+          media: postMedia
         })
       })
 
@@ -386,19 +390,40 @@ export default function ProgramacionPage() {
     try {
       setUploading(true)
       
+      console.log('📤 Iniciando upload de archivos:', files.length)
+      
+      // Validar archivos antes de enviar
+      const maxSize = 50 * 1024 * 1024 // 50MB
+      const allowedTypes = ['image/', 'video/']
+      
+      for (const file of files) {
+        if (file.size > maxSize) {
+          alert(`El archivo ${file.name} es demasiado grande. Máximo: 50MB`)
+          return
+        }
+        if (!allowedTypes.some(type => file.type.startsWith(type))) {
+          alert(`El archivo ${file.name} no es una imagen o video válido`)
+          return
+        }
+      }
+      
       // Crear FormData para enviar archivos
       const formData = new FormData()
       Array.from(files).forEach(file => {
         formData.append('files', file)
+        console.log('📎 Agregando archivo:', file.name, file.type, file.size)
       })
 
       // Subir archivos al servidor
+      console.log('🚀 Enviando archivos al servidor...')
       const response = await fetch('/api/upload-media', {
         method: 'POST',
         body: formData
       })
 
+      console.log('📡 Respuesta del servidor:', response.status)
       const data = await response.json()
+      console.log('📋 Datos recibidos:', data)
       
       if (data.success) {
         // Agregar archivos subidos a mediaFiles
@@ -413,15 +438,20 @@ export default function ProgramacionPage() {
         
         setMediaFiles(prev => [...prev, ...uploadedFiles])
         console.log('✅ Archivos subidos correctamente:', uploadedFiles)
+        alert(`✅ ${uploadedFiles.length} archivo(s) subido(s) correctamente`)
       } else {
-        console.error('Error uploading files:', data.error)
+        console.error('❌ Error en el servidor:', data.error)
         alert('Error al subir archivos: ' + data.error)
       }
     } catch (error) {
-      console.error('Error uploading media:', error)
-      alert('Error al subir archivos')
+      console.error('❌ Error uploading media:', error)
+      alert('Error al subir archivos: ' + (error instanceof Error ? error.message : 'Error desconocido'))
     } finally {
       setUploading(false)
+      // Limpiar el input para permitir volver a subir el mismo archivo
+      if (event.target) {
+        event.target.value = ''
+      }
     }
   }
 

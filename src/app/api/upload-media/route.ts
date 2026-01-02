@@ -2,49 +2,99 @@ import { NextRequest, NextResponse } from 'next/server'
 import { promises as fs } from 'fs'
 import path from 'path'
 
+const MAX_FILE_SIZE = 50 * 1024 * 1024 // 50MB
+const ALLOWED_TYPES = [
+  'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+  'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo'
+]
+
 export async function POST(request: NextRequest) {
   try {
+    console.log('📤 [UPLOAD] Starting file upload process...')
+    
     const formData = await request.formData()
     const files = formData.getAll('files') as File[]
     
+    console.log('📋 [UPLOAD] Received files:', files.length)
+    
     if (!files || files.length === 0) {
+      console.log('❌ [UPLOAD] No files provided')
       return NextResponse.json({ error: 'No files provided' }, { status: 400 })
     }
 
     const uploadedFiles = []
     const uploadsDir = path.join(process.cwd(), 'public', 'uploads', 'media')
 
+    console.log('📁 [UPLOAD] Upload directory:', uploadsDir)
+
     // Asegurar que existe el directorio
     try {
       await fs.mkdir(uploadsDir, { recursive: true })
+      console.log('✅ [UPLOAD] Directory ensured')
     } catch (error) {
-      // Directorio ya existe
+      console.log('ℹ️  [UPLOAD] Directory already exists')
     }
 
     for (const file of files) {
-      if (file.size === 0) continue
+      console.log('🔍 [UPLOAD] Processing file:', {
+        name: file.name,
+        size: file.size,
+        type: file.type
+      })
+
+      if (file.size === 0) {
+        console.log('⚠️  [UPLOAD] Skipping empty file:', file.name)
+        continue
+      }
+      
+      // Validar tamaño
+      if (file.size > MAX_FILE_SIZE) {
+        console.log('❌ [UPLOAD] File too large:', file.name, file.size)
+        return NextResponse.json({ 
+          error: `File ${file.name} is too large. Maximum size: 50MB` 
+        }, { status: 400 })
+      }
+
+      // Validar tipo
+      if (!ALLOWED_TYPES.includes(file.type)) {
+        console.log('❌ [UPLOAD] Invalid file type:', file.name, file.type)
+        return NextResponse.json({ 
+          error: `File ${file.name} has invalid type: ${file.type}` 
+        }, { status: 400 })
+      }
       
       // Generar nombre único
       const timestamp = Date.now()
       const fileName = `${timestamp}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`
       const filePath = path.join(uploadsDir, fileName)
       
-      // Escribir archivo
-      const bytes = await file.arrayBuffer()
-      const buffer = Buffer.from(bytes)
-      await fs.writeFile(filePath, buffer)
+      console.log('💾 [UPLOAD] Saving file:', fileName)
       
-      uploadedFiles.push({
-        id: `media_${timestamp}_${Math.random().toString(36).substr(2, 9)}`,
-        fileName,
-        originalName: file.name,
-        url: `/uploads/media/${fileName}`,
-        type: file.type.startsWith('video/') ? 'video' : 'image',
-        size: file.size
-      })
+      try {
+        // Escribir archivo
+        const bytes = await file.arrayBuffer()
+        const buffer = Buffer.from(bytes)
+        await fs.writeFile(filePath, buffer)
+        
+        console.log('✅ [UPLOAD] File saved successfully:', fileName)
+        
+        uploadedFiles.push({
+          id: `media_${timestamp}_${Math.random().toString(36).substr(2, 9)}`,
+          fileName,
+          originalName: file.name,
+          url: `/uploads/media/${fileName}`,
+          type: file.type.startsWith('video/') ? 'video' : 'image',
+          size: file.size
+        })
+      } catch (writeError) {
+        console.error('❌ [UPLOAD] Error writing file:', writeError)
+        return NextResponse.json({ 
+          error: `Error saving file ${file.name}` 
+        }, { status: 500 })
+      }
     }
 
-    console.log('📁 [UPLOAD] Files uploaded:', uploadedFiles.map(f => f.fileName))
+    console.log('🎉 [UPLOAD] All files processed successfully:', uploadedFiles.length)
 
     return NextResponse.json({
       success: true,
