@@ -390,78 +390,101 @@ export default function ProgramacionPage() {
     try {
       setUploading(true)
       
-      console.log('📤 Iniciando upload de archivos:', files.length)
+      console.log('☁️ Iniciando upload directo a Cloudinary:', files.length)
       
-      // Cloudinary no tiene límites estrictos como Vercel base64
-      // Solo validar tipos de archivo
-      const allowedTypes = ['image/', 'video/'] // Imágenes y videos
+      // Solo advertencia para archivos muy grandes (>100MB)
+      const allowedTypes = ['image/', 'video/']
       
       for (const file of files) {
         const sizeInMB = Math.round(file.size / 1024 / 1024)
         
-        // Advertencia para archivos muy grandes (>100MB)
-        if (file.size > 100 * 1024 * 1024) {
-          const confirmUpload = confirm(`⚠️ El archivo "${file.name}" es muy grande (${sizeInMB}MB).\n\n¿Estás seguro de que quieres subirlo?\n\nPuede tardar varios minutos y consumir datos.`)
+        // Advertencia para archivos muy grandes (>200MB)
+        if (file.size > 200 * 1024 * 1024) {
+          const confirmUpload = confirm(`⚠️ El archivo "${file.name}" es muy grande (${sizeInMB}MB).\n\n¿Estás seguro de que quieres subirlo?\n\nPuede tardar varios minutos.`)
           if (!confirmUpload) return
         }
         
         if (!allowedTypes.some(type => file.type.startsWith(type))) {
-          alert(`⚠️ El archivo "${file.name}" no es válido.\n\nTipos permitidos:\n• Imágenes: JPG, PNG, GIF, WebP, etc.\n• Videos: MP4, MOV, AVI, etc.\n\n💡 Cloudinary optimizará automáticamente tu archivo.`)
+          alert(`⚠️ El archivo "${file.name}" no es válido.\n\nTipos permitidos:\n• Imágenes: JPG, PNG, GIF, WebP, etc.\n• Videos: MP4, MOV, AVI, etc.`)
+          return
+        }
+      }
+
+      const uploadedFiles = []
+
+      for (const file of files) {
+        console.log(`📤 Subiendo "${file.name}" directamente a Cloudinary...`)
+        
+        try {
+          // Obtener firma para upload seguro
+          const signatureResponse = await fetch('/api/cloudinary-signature', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              timestamp: Math.round(new Date().getTime() / 1000),
+              folder: 'dashboard-marketing'
+            })
+          })
+
+          if (!signatureResponse.ok) {
+            throw new Error('Error obteniendo firma de Cloudinary')
+          }
+
+          const signatureData = await signatureResponse.json()
+
+          // Upload directo a Cloudinary
+          const formData = new FormData()
+          formData.append('file', file)
+          formData.append('signature', signatureData.signature)
+          formData.append('timestamp', signatureData.timestamp.toString())
+          formData.append('api_key', signatureData.api_key)
+          formData.append('folder', signatureData.folder)
+
+          console.log('🚀 Enviando a Cloudinary (upload directo)...')
+
+          const uploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${signatureData.cloud_name}/upload`, {
+            method: 'POST',
+            body: formData
+          })
+
+          if (!uploadResponse.ok) {
+            throw new Error(`Error en Cloudinary: ${uploadResponse.status}`)
+          }
+
+          const result = await uploadResponse.json()
+
+          console.log('✅ Upload exitoso:', result.secure_url)
+
+          uploadedFiles.push({
+            id: `cloudinary_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            fileName: file.name,
+            originalName: file.name,
+            url: result.secure_url,
+            preview: result.secure_url,
+            type: file.type.startsWith('video/') ? 'video' : 'image',
+            size: file.size,
+            cloudinaryId: result.public_id,
+            cloudinaryUrl: result.secure_url,
+            isCloudinary: true
+          })
+
+        } catch (fileError) {
+          console.error(`❌ Error subiendo ${file.name}:`, fileError)
+          alert(`Error subiendo "${file.name}":\n\n${fileError instanceof Error ? fileError.message : 'Error desconocido'}`)
+          setUploading(false)
           return
         }
       }
       
-      // Crear FormData para enviar archivos
-      const formData = new FormData()
-      Array.from(files).forEach(file => {
-        formData.append('files', file)
-        console.log('📎 Agregando archivo:', file.name, file.type, file.size)
-      })
-
-      // Subir archivos al servidor
-      console.log('☁️ Enviando archivos a Cloudinary...')
-      const response = await fetch('/api/upload-cloudinary', {
-        method: 'POST',
-        body: formData
-      })
-
-      console.log('📡 Respuesta del servidor:', response.status)
-      const data = await response.json()
-      console.log('📋 Datos recibidos:', data)
+      setMediaFiles(prev => [...prev, ...uploadedFiles])
+      console.log('✅ Todos los archivos subidos a Cloudinary:', uploadedFiles)
+      alert(`✅ ${uploadedFiles.length} archivo(s) subido(s) a Cloudinary exitosamente\n\n🚀 Upload directo - Sin límites del servidor`)
       
-      if (data.success) {
-        // Agregar archivos subidos a mediaFiles
-        const uploadedFiles: MediaFile[] = data.files.map((file: any) => ({
-          id: file.id,
-          file: null, // Ya convertido a base64
-          fileName: file.fileName,
-          url: file.url, // Base64 data URL
-          preview: file.url,
-          type: file.type
-        }))
-        
-        setMediaFiles(prev => [...prev, ...uploadedFiles])
-        console.log('✅ Archivos subidos a Cloudinary:', uploadedFiles)
-        alert("✅ Archivos subidos a Cloudinary - Sin límites de tamaño, optimización automática")
-      } else {
-        console.error('❌ Error en Cloudinary:', data.error)
-        
-        // Mensajes de error específicos para Cloudinary
-        let errorMessage = data.error
-        if (data.error.includes('not configured')) {
-          errorMessage = '⚠️ Cloudinary no está configurado.\n\nContacta al administrador para configurar las credenciales.'
-        } else if (data.error.includes('quota')) {
-          errorMessage = '⚠️ Límite de Cloudinary alcanzado.\n\nVerifica tu plan de Cloudinary.'
-        }
-        
-        alert('Error al subir archivos a Cloudinary:\n\n' + errorMessage)
-      }
     } catch (error) {
-      console.error('❌ Error uploading to Cloudinary:', error)
-      alert('Error al subir archivos a Cloudinary:\n\n' + (error instanceof Error ? error.message : 'Error desconocido') + '\n\n💡 Verifica tu conexión a internet.')
+      console.error('❌ Error en upload directo:', error)
+      alert('Error general en upload:\n\n' + (error instanceof Error ? error.message : 'Error desconocido'))
     } finally {
       setUploading(false)
-      // Limpiar el input para permitir volver a subir el mismo archivo
       if (event.target) {
         event.target.value = ''
       }
