@@ -689,9 +689,11 @@ export default function ProgramacionPage() {
       
       // Preparar URLs de multimedia
       const mediaUrls = mediaFiles.map(file => ({
-        url: file.url,
+        url: file.cloudinaryUrl || file.url,
         type: file.type,
-        fileName: file.fileName
+        fileName: file.fileName,
+        isCloudinary: file.isCloudinary || !!file.cloudinaryUrl,
+        cloudinaryUrl: file.cloudinaryUrl
       }))
       
       // Obtener cuentas conectadas desde localStorage
@@ -827,8 +829,10 @@ export default function ProgramacionPage() {
       const mediaData = mediaFiles.map(file => ({
         id: file.id,
         fileName: file.fileName,
-        url: file.url,
-        type: file.type
+        url: file.cloudinaryUrl || file.url,
+        type: file.type,
+        isCloudinary: file.isCloudinary || !!file.cloudinaryUrl,
+        cloudinaryUrl: file.cloudinaryUrl
       }))
 
       const newPostData = {
