@@ -26,11 +26,16 @@ interface ScheduledPost {
 
 interface MediaFile {
   id: string
-  file: File
+  file?: File
   preview: string
   type: 'image' | 'video'
   fileName?: string
+  originalName?: string
   url?: string
+  size?: number
+  cloudinaryId?: string
+  cloudinaryUrl?: string
+  isCloudinary?: boolean
 }
 
 export default function ProgramacionPage() {
