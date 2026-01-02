@@ -185,7 +185,8 @@ export default function ProgramacionPage() {
         content: post.content,
         pageToken: fbAccount.pageToken,
         pageId: fbAccount.pageId,
-        media: postMedia
+        media: postMedia,
+        type: post.type || 'post' // Agregar tipo de publicación, default a 'post'
       }
       
       console.log('📊 Datos de request a Facebook:', {
@@ -791,7 +792,8 @@ export default function ProgramacionPage() {
             content: postText,
             pageToken: fbAccount.pageToken,
             pageId: fbAccount.pageId,
-            media: mediaUrls
+            media: mediaUrls,
+            type: postType // Agregar tipo de publicación
           }
           
           console.log('📊 Datos de request inmediato a Facebook:', {
