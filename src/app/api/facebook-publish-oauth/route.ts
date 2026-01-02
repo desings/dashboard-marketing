@@ -26,9 +26,53 @@ export async function POST(request: NextRequest) {
     if (media && media.length > 0) {
       console.log('🖼️ Publishing with media...')
       
-      // Verificar si son URLs base64 (Vercel)
+      // Verificar si son URLs de Cloudinary (más eficiente)
       const firstMedia = media[0]
+      const isCloudinary = firstMedia.isCloudinary || firstMedia.cloudinaryUrl
       const isBase64 = firstMedia.url && firstMedia.url.startsWith('data:')
+      
+      if (isCloudinary) {
+        console.log('☁️ Cloudinary media detected - using direct URLs...')
+        
+        // Usar URL directa de Cloudinary (mucho más eficiente)
+        const mediaUrl = firstMedia.cloudinaryUrl || firstMedia.url
+        const isVideo = firstMedia.type === 'video' || firstMedia.isVideo
+        
+        const uploadUrl = pageId 
+          ? `https://graph.facebook.com/v19.0/${pageId}/${isVideo ? 'videos' : 'photos'}`
+          : `https://graph.facebook.com/v19.0/me/${isVideo ? 'videos' : 'photos'}`
+
+        console.log(`📤 Publishing ${isVideo ? 'video' : 'image'} from Cloudinary URL...`)
+
+        const publishResponse = await fetch(uploadUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            url: mediaUrl,
+            message: isVideo ? undefined : content,
+            description: isVideo ? content : undefined,
+            access_token: pageToken
+          }).toString()
+        })
+
+        const publishData = await publishResponse.json()
+
+        if (!publishResponse.ok || publishData.error) {
+          console.error('❌ Error publishing Cloudinary media:', publishData)
+          return NextResponse.json({
+            success: false,
+            error: 'Error publicando desde Cloudinary en Facebook',
+            details: publishData
+          }, { status: 400 })
+        }
+
+        return NextResponse.json({
+          success: true,
+          message: `${isVideo ? 'Video' : 'Imagen'} desde Cloudinary publicado exitosamente`,
+          postId: publishData.id,
+          postUrl: `https://facebook.com/${publishData.id}`
+        })
+      }
       
       if (isBase64) {
         console.log('📤 Base64 media detected - uploading directly to Facebook...')

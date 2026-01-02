@@ -392,30 +392,21 @@ export default function ProgramacionPage() {
       
       console.log('📤 Iniciando upload de archivos:', files.length)
       
-      // Validar archivos antes de enviar (límites más estrictos para Vercel)
-      const maxImageSize = 5 * 1024 * 1024 // 5MB para imágenes
-      const maxVideoSize = 10 * 1024 * 1024 // 10MB para videos
+      // Cloudinary no tiene límites estrictos como Vercel base64
+      // Solo validar tipos de archivo
       const allowedTypes = ['image/', 'video/'] // Imágenes y videos
       
       for (const file of files) {
-        const isVideo = file.type.startsWith('video/')
-        const isImage = file.type.startsWith('image/')
-        const maxSize = isVideo ? maxVideoSize : maxImageSize
+        const sizeInMB = Math.round(file.size / 1024 / 1024)
         
-        if (file.size > maxSize) {
-          const sizeInMB = Math.round(file.size / 1024 / 1024)
-          const maxSizeText = isVideo ? '10MB para videos' : '5MB para imágenes'
-          
-          if (isVideo && file.size > maxVideoSize) {
-            alert(`⚠️ El video "${file.name}" es demasiado grande.\n\nTamaño actual: ${sizeInMB}MB\nMáximo permitido: 10MB\n\n💡 Alternativas para videos grandes:\n• Sube a YouTube y comparte el enlace\n• Usa Vimeo o Google Drive\n• Comprime el video\n• Divide en clips más cortos`)
-          } else {
-            alert(`⚠️ El archivo "${file.name}" es demasiado grande.\n\nTamaño actual: ${sizeInMB}MB\nMáximo permitido: ${maxSizeText}`)
-          }
-          return
+        // Advertencia para archivos muy grandes (>100MB)
+        if (file.size > 100 * 1024 * 1024) {
+          const confirmUpload = confirm(`⚠️ El archivo "${file.name}" es muy grande (${sizeInMB}MB).\n\n¿Estás seguro de que quieres subirlo?\n\nPuede tardar varios minutos y consumir datos.`)
+          if (!confirmUpload) return
         }
         
         if (!allowedTypes.some(type => file.type.startsWith(type))) {
-          alert(`⚠️ El archivo "${file.name}" no es válido.\n\nTipos permitidos:\n• Imágenes: JPG, PNG, GIF, WebP\n• Videos: MP4, MOV, AVI\n\n💡 Para otros formatos, convierte primero el archivo.`)
+          alert(`⚠️ El archivo "${file.name}" no es válido.\n\nTipos permitidos:\n• Imágenes: JPG, PNG, GIF, WebP, etc.\n• Videos: MP4, MOV, AVI, etc.\n\n💡 Cloudinary optimizará automáticamente tu archivo.`)
           return
         }
       }
@@ -428,8 +419,8 @@ export default function ProgramacionPage() {
       })
 
       // Subir archivos al servidor
-      console.log('🚀 Enviando archivos al servidor (Vercel)...')
-      const response = await fetch('/api/upload-media', {
+      console.log('☁️ Enviando archivos a Cloudinary...')
+      const response = await fetch('/api/upload-cloudinary', {
         method: 'POST',
         body: formData
       })
@@ -450,24 +441,24 @@ export default function ProgramacionPage() {
         }))
         
         setMediaFiles(prev => [...prev, ...uploadedFiles])
-        console.log('✅ Archivos procesados correctamente:', uploadedFiles)
-        alert("✅ Archivos procesados - Imágenes y videos se subirán directamente a Facebook (Videos máx. 10MB)")
+        console.log('✅ Archivos subidos a Cloudinary:', uploadedFiles)
+        alert("✅ Archivos subidos a Cloudinary - Sin límites de tamaño, optimización automática")
       } else {
-        console.error('❌ Error en el servidor:', data.error)
+        console.error('❌ Error en Cloudinary:', data.error)
         
-        // Mensajes de error más específicos para Vercel
+        // Mensajes de error específicos para Cloudinary
         let errorMessage = data.error
-        if (data.error.includes('read-only file system')) {
-          errorMessage = '⚠️ Error de sistema de archivos de Vercel.\n\nVercel no permite guardar archivos. Hemos cambiado a almacenamiento base64.\n\nPor favor, intenta de nuevo con archivos menores a 5MB.'
-        } else if (data.error.includes('too large')) {
-          errorMessage = '⚠️ Archivo demasiado grande para Vercel.\n\nMáximo: 5MB\n\n💡 Comprime tu imagen antes de subir.'
+        if (data.error.includes('not configured')) {
+          errorMessage = '⚠️ Cloudinary no está configurado.\n\nContacta al administrador para configurar las credenciales.'
+        } else if (data.error.includes('quota')) {
+          errorMessage = '⚠️ Límite de Cloudinary alcanzado.\n\nVerifica tu plan de Cloudinary.'
         }
         
-        alert('Error al subir archivos:\n\n' + errorMessage)
+        alert('Error al subir archivos a Cloudinary:\n\n' + errorMessage)
       }
     } catch (error) {
-      console.error('❌ Error uploading media:', error)
-      alert('Error al subir archivos:\n\n' + (error instanceof Error ? error.message : 'Error desconocido') + '\n\n💡 Verifica tu conexión e intenta con archivos más pequeños.')
+      console.error('❌ Error uploading to Cloudinary:', error)
+      alert('Error al subir archivos a Cloudinary:\n\n' + (error instanceof Error ? error.message : 'Error desconocido') + '\n\n💡 Verifica tu conexión a internet.')
     } finally {
       setUploading(false)
       // Limpiar el input para permitir volver a subir el mismo archivo
