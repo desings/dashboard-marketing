@@ -136,7 +136,8 @@ export default function ProgramacionPage() {
       console.log('🔑 Verificando cuenta de Facebook:', {
         tiene_cuenta: !!fbAccount,
         tiene_token: !!fbAccount?.pageToken,
-        page_id: fbAccount?.pageId
+        page_id: fbAccount?.pageId,
+        token_preview: fbAccount?.pageToken ? fbAccount.pageToken.substring(0, 20) + '...' : 'N/A'
       })
 
       if (!fbAccount?.pageToken) {
@@ -149,17 +150,26 @@ export default function ProgramacionPage() {
 
       // Preparar medios si los hay
       const postMedia = post.media || []
+      
+      const requestData = {
+        content: post.content,
+        pageToken: fbAccount.pageToken,
+        pageId: fbAccount.pageId,
+        media: postMedia
+      }
+      
+      console.log('📊 Datos de request a Facebook:', {
+        content_length: post.content?.length || 0,
+        pageId: fbAccount.pageId,
+        token_preview: fbAccount.pageToken.substring(0, 20) + '...',
+        media_count: postMedia.length
+      })
 
       // Ejecutar publicación en Facebook
       const response = await fetch('/api/facebook-publish-oauth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content: post.content,
-          pageToken: fbAccount.pageToken,
-          pageId: fbAccount.pageId,
-          media: postMedia
-        })
+        body: JSON.stringify(requestData)
       })
 
       const result = await response.json()
@@ -695,23 +705,39 @@ export default function ProgramacionPage() {
           // Usar OAuth para Facebook
           const fbAccount = connectedAccounts.find((acc: any) => acc.provider === 'facebook')
           
+          console.log('🔑 Facebook account para publicación inmediata:', {
+            tiene_cuenta: !!fbAccount,
+            tiene_token: !!fbAccount?.pageToken,
+            page_id: fbAccount?.pageId,
+            token_preview: fbAccount?.pageToken ? fbAccount.pageToken.substring(0, 20) + '...' : 'N/A'
+          })
+          
           if (!fbAccount?.pageToken) {
             alert(`❌ Facebook no está conectado.\n\nVe a Settings → Cuentas Conectadas → Conectar Facebook`)
             setPublishing(false)
             return
           }
           
+          const requestData = {
+            content: postText,
+            pageToken: fbAccount.pageToken,
+            pageId: fbAccount.pageId,
+            media: mediaUrls
+          }
+          
+          console.log('📊 Datos de request inmediato a Facebook:', {
+            content_length: postText?.length || 0,
+            pageId: fbAccount.pageId,
+            token_preview: fbAccount.pageToken.substring(0, 20) + '...',
+            media_count: mediaUrls.length
+          })
+          
           const response = await fetch('/api/facebook-publish-oauth', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-              content: postText,
-              pageToken: fbAccount.pageToken,
-              pageId: fbAccount.pageId,
-              media: mediaUrls
-            }),
+            body: JSON.stringify(requestData)
           })
           
           const result = await response.json()
