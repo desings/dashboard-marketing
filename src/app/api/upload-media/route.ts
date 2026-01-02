@@ -4,15 +4,16 @@ import { NextRequest, NextResponse } from 'next/server'
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '10mb', // Reducido para base64
+      sizeLimit: '15mb', // Aumentado para videos pequeños
     },
   },
 }
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB (más pequeño para base64)
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024 // 5MB para imágenes
+const MAX_VIDEO_SIZE = 10 * 1024 * 1024 // 10MB para videos (aumentado)
 const ALLOWED_TYPES = [
-  'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'
-  // Removemos videos por ahora debido al tamaño
+  'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+  'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo' // Reactivamos videos
 ]
 
 export async function POST(request: NextRequest) {
@@ -23,9 +24,9 @@ export async function POST(request: NextRequest) {
     const contentLength = request.headers.get('content-length')
     console.log('📏 [UPLOAD] Request content-length:', contentLength)
     
-    if (contentLength && parseInt(contentLength) > MAX_FILE_SIZE) {
+    if (contentLength && parseInt(contentLength) > MAX_VIDEO_SIZE) {
       return NextResponse.json({ 
-        error: `Archivo demasiado grande. Máximo: 5MB para Vercel. Actual: ${Math.round(parseInt(contentLength) / 1024 / 1024)}MB` 
+        error: `Archivo demasiado grande. Máximo: 10MB para videos, 5MB para imágenes. Actual: ${Math.round(parseInt(contentLength) / 1024 / 1024)}MB` 
       }, { status: 413 })
     }
     
@@ -53,11 +54,16 @@ export async function POST(request: NextRequest) {
         continue
       }
       
-      // Validar tamaño
-      if (file.size > MAX_FILE_SIZE) {
+      // Determinar si es imagen o video
+      const isVideo = file.type.startsWith('video/')
+      const isImage = file.type.startsWith('image/')
+      const maxSize = isVideo ? MAX_VIDEO_SIZE : MAX_IMAGE_SIZE
+      
+      // Validar tamaño según tipo
+      if (file.size > maxSize) {
         console.log('❌ [UPLOAD] File too large:', file.name, file.size)
         return NextResponse.json({ 
-          error: `El archivo "${file.name}" es demasiado grande. Máximo: 5MB para Vercel` 
+          error: `El archivo "${file.name}" es demasiado grande. Máximo: ${isVideo ? '10MB para videos' : '5MB para imágenes'}\n\n💡 Para videos grandes (>10MB):\n- Usa YouTube o Vimeo\n- Comprime el video\n- Divide en clips más cortos` 
         }, { status: 400 })
       }
 
@@ -65,7 +71,7 @@ export async function POST(request: NextRequest) {
       if (!ALLOWED_TYPES.includes(file.type)) {
         console.log('❌ [UPLOAD] Invalid file type:', file.name, file.type)
         return NextResponse.json({ 
-          error: `El archivo "${file.name}" debe ser una imagen (JPG, PNG, GIF, WebP). Videos no soportados en Vercel` 
+          error: `El archivo "${file.name}" tiene un tipo no válido: ${file.type}\n\nTipos permitidos:\n- Imágenes: JPG, PNG, GIF, WebP\n- Videos: MP4, MOV, AVI` 
         }, { status: 400 })
       }
       
@@ -90,9 +96,10 @@ export async function POST(request: NextRequest) {
           fileName: file.name,
           originalName: file.name,
           url: dataUrl, // Base64 data URL
-          type: 'image',
+          type: isVideo ? 'video' : 'image',
           size: file.size,
-          isBase64: true
+          isBase64: true,
+          isVideo: isVideo
         })
         
       } catch (convertError) {

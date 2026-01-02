@@ -36,32 +36,35 @@ export async function POST(request: NextRequest) {
         // Convertir base64 a Buffer para Facebook
         try {
           const base64Data = firstMedia.url.split(',')[1] // Remover "data:image/jpeg;base64,"
-          const imageBuffer = Buffer.from(base64Data, 'base64')
+          const mediaBuffer = Buffer.from(base64Data, 'base64')
+          const mimeType = firstMedia.url.split(';')[0].split(':')[1] // Extraer tipo MIME
+          const isVideo = mimeType.startsWith('video/') || firstMedia.isVideo || firstMedia.type === 'video'
           
           console.log('🔄 Converted base64 to buffer:', {
             originalBase64Length: base64Data.length,
-            bufferSize: imageBuffer.length,
-            mediaType: firstMedia.url.split(';')[0].split(':')[1] // Extraer tipo MIME
+            bufferSize: mediaBuffer.length,
+            mediaType: mimeType,
+            isVideo: isVideo
           })
 
-          // Subir imagen directamente a Facebook
+          // Subir imagen/video directamente a Facebook
           const uploadUrl = pageId 
-            ? `https://graph.facebook.com/v19.0/${pageId}/photos`
-            : `https://graph.facebook.com/v19.0/me/photos`
+            ? `https://graph.facebook.com/v19.0/${pageId}/${isVideo ? 'videos' : 'photos'}`
+            : `https://graph.facebook.com/v19.0/me/${isVideo ? 'videos' : 'photos'}`
 
           // Crear FormData para Facebook
           const formData = new FormData()
           
           // Crear un Blob desde el buffer
-          const imageBlob = new Blob([imageBuffer], { 
-            type: firstMedia.url.split(';')[0].split(':')[1] 
+          const mediaBlob = new Blob([mediaBuffer], { 
+            type: mimeType 
           })
           
-          formData.append('source', imageBlob)
-          formData.append('message', content)
+          formData.append('source', mediaBlob)
+          formData.append(isVideo ? 'description' : 'message', content)
           formData.append('access_token', pageToken)
 
-          console.log('📤 Uploading image directly to Facebook...')
+          console.log(`📤 Uploading ${isVideo ? 'video' : 'image'} directly to Facebook...`)
 
           const uploadResponse = await fetch(uploadUrl, {
             method: 'POST',
@@ -109,7 +112,7 @@ export async function POST(request: NextRequest) {
 
           return NextResponse.json({
             success: true,
-            message: 'Imagen y texto publicados exitosamente en Facebook',
+            message: `${isVideo ? 'Video' : 'Imagen'} y texto publicados exitosamente en Facebook`,
             postId: uploadData.id,
             postUrl: `https://facebook.com/${uploadData.id}`
           })
@@ -154,9 +157,9 @@ export async function POST(request: NextRequest) {
       // Para posts con media, usar el endpoint de photos
       // Facebook permite subir hasta 10 imágenes en una sola publicación
       if (media.length === 1) {
-        // Una sola imagen/video
+        // Determinar si es imagen o video
         const mediaFile = media[0]
-        const isVideo = mediaFile.type === 'video'
+        const isVideo = mediaFile.type === 'video' || mediaFile.isVideo
         
         const mediaUrl = pageId 
           ? `https://graph.facebook.com/v19.0/${pageId}/${isVideo ? 'videos' : 'photos'}`

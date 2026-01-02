@@ -393,16 +393,29 @@ export default function ProgramacionPage() {
       console.log('📤 Iniciando upload de archivos:', files.length)
       
       // Validar archivos antes de enviar (límites más estrictos para Vercel)
-      const maxSize = 5 * 1024 * 1024 // 5MB para Vercel
-      const allowedTypes = ['image/'] // Solo imágenes en Vercel
+      const maxImageSize = 5 * 1024 * 1024 // 5MB para imágenes
+      const maxVideoSize = 10 * 1024 * 1024 // 10MB para videos
+      const allowedTypes = ['image/', 'video/'] // Imágenes y videos
       
       for (const file of files) {
+        const isVideo = file.type.startsWith('video/')
+        const isImage = file.type.startsWith('image/')
+        const maxSize = isVideo ? maxVideoSize : maxImageSize
+        
         if (file.size > maxSize) {
-          alert(`⚠️ El archivo ${file.name} es demasiado grande.\n\nMáximo permitido en Vercel: 5MB\nTamaño actual: ${Math.round(file.size / 1024 / 1024)}MB\n\n💡 Recomendación: Comprime la imagen o usa una herramienta online para reducir el tamaño.`)
+          const sizeInMB = Math.round(file.size / 1024 / 1024)
+          const maxSizeText = isVideo ? '10MB para videos' : '5MB para imágenes'
+          
+          if (isVideo && file.size > maxVideoSize) {
+            alert(`⚠️ El video "${file.name}" es demasiado grande.\n\nTamaño actual: ${sizeInMB}MB\nMáximo permitido: 10MB\n\n💡 Alternativas para videos grandes:\n• Sube a YouTube y comparte el enlace\n• Usa Vimeo o Google Drive\n• Comprime el video\n• Divide en clips más cortos`)
+          } else {
+            alert(`⚠️ El archivo "${file.name}" es demasiado grande.\n\nTamaño actual: ${sizeInMB}MB\nMáximo permitido: ${maxSizeText}`)
+          }
           return
         }
+        
         if (!allowedTypes.some(type => file.type.startsWith(type))) {
-          alert(`⚠️ El archivo ${file.name} no es válido.\n\nTipos permitidos en Vercel: Imágenes (JPG, PNG, GIF, WebP)\nVideos no están soportados debido a limitaciones de Vercel.\n\n💡 Alternativa: Sube videos a YouTube/Vimeo y usa el enlace.`)
+          alert(`⚠️ El archivo "${file.name}" no es válido.\n\nTipos permitidos:\n• Imágenes: JPG, PNG, GIF, WebP\n• Videos: MP4, MOV, AVI\n\n💡 Para otros formatos, convierte primero el archivo.`)
           return
         }
       }
@@ -438,7 +451,7 @@ export default function ProgramacionPage() {
         
         setMediaFiles(prev => [...prev, ...uploadedFiles])
         console.log('✅ Archivos procesados correctamente:', uploadedFiles)
-        alert(`✅ ${uploadedFiles.length} archivo(s) procesado(s) correctamente\n\n� Las imágenes se subirán directamente a Facebook al publicar.`)
+        alert("✅ Archivos procesados - Imágenes y videos se subirán directamente a Facebook (Videos máx. 10MB)")
       } else {
         console.error('❌ Error en el servidor:', data.error)
         
