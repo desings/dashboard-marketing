@@ -391,12 +391,11 @@ export default function ProgramacionPage() {
 
   const deleteScheduledPost = async (postId: string) => {
     try {
-      const response = await fetch('/api/programming-posts', {
+      const response = await fetch(`/api/programming-posts?id=${postId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ id: postId })
+        }
       })
 
       const data = await response.json()
@@ -719,14 +718,24 @@ export default function ProgramacionPage() {
   const deletePost = async () => {
     if (!selectedPost) return
     
+    // Confirmar eliminación con el usuario
+    const postStatus = selectedPost.status === 'pending' ? 'pendiente' : 
+                       selectedPost.status === 'published' ? 'publicada' : 'fallida'
+    
+    const confirmMessage = `¿Estás seguro de que quieres eliminar esta publicación ${postStatus}?\n\nContenido: "${selectedPost.content.slice(0, 50)}..."\n\nEsta acción no se puede deshacer.`
+    
+    if (!confirm(confirmMessage)) {
+      return
+    }
+    
     try {
       await deleteScheduledPost(selectedPost.id)
       
       closeModals()
-      alert('Publicación eliminada exitosamente!')
+      alert(`✅ Publicación ${postStatus} eliminada exitosamente!`)
     } catch (error) {
       console.error('Error deleting post:', error)
-      alert('Error al eliminar la publicación')
+      alert('❌ Error al eliminar la publicación: ' + (error instanceof Error ? error.message : 'Error desconocido'))
     }
   }
 
@@ -1641,7 +1650,8 @@ export default function ProgramacionPage() {
                 onClick={deletePost}
                 className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
-                Eliminar
+                🗑️ Eliminar {selectedPost?.status === 'pending' ? 'Pendiente' : 
+                           selectedPost?.status === 'published' ? 'Publicada' : 'Publicación'}
               </button>
             </div>
           </div>
@@ -1724,7 +1734,8 @@ export default function ProgramacionPage() {
                   }}
                   className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
                 >
-                  🗑️ Eliminar
+                  🗑️ Eliminar {selectedPost?.status === 'pending' ? 'Pendiente' : 
+                           selectedPost?.status === 'published' ? 'Publicada' : 'Publicación'}
                 </button>
               </div>
             </div>
