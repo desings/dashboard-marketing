@@ -46,7 +46,7 @@ export default function ProgramacionPage() {
   const [showScheduleForm, setShowScheduleForm] = useState(false)
   const [showFacebookConfig, setShowFacebookConfig] = useState(false)
   const [publishing, setPublishing] = useState(false)
-  const [activeView, setActiveView] = useState<'create' | 'scheduled' | 'calendar'>('create')
+  const [activeView, setActiveView] = useState<'scheduled' | 'calendar'>('scheduled')
   const [postType, setPostType] = useState<'post'>('post')
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([])
   const [loading, setLoading] = useState(true)
@@ -56,6 +56,7 @@ export default function ProgramacionPage() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [showCalendarModal, setShowCalendarModal] = useState(false)
+  const [showCreateModal, setShowCreateModal] = useState(false)
   const [selectedPost, setSelectedPost] = useState<ScheduledPost | null>(null)
   
   // Filter states
@@ -672,6 +673,7 @@ export default function ProgramacionPage() {
     setShowEditModal(false)
     setShowDeleteModal(false)
     setShowCalendarModal(false)
+    setShowCreateModal(false)
     setSelectedPost(null)
     setPostText('')
     setSelectedAccounts([])
@@ -952,64 +954,59 @@ export default function ProgramacionPage() {
       <div className="p-6">
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Programación de Publicaciones</h1>
-          <div className="flex gap-3 items-center">
-            <button
-              onClick={() => setActiveView('create')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
-            >
-              <span>➕</span>
-              Nueva Publicación
-            </button>
-          </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg mb-6">
+        <div className="flex justify-between items-center mb-6">
+          <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+            <button
+              onClick={() => setActiveView('scheduled')}
+              className={`py-2 px-4 rounded-md font-medium transition-colors ${
+                activeView === 'scheduled'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              📋 Posts Programados ({scheduledPosts.filter(p => p.status === 'pending').length})
+            </button>
+            <button
+              onClick={() => setActiveView('calendar')}
+              className={`py-2 px-4 rounded-md font-medium transition-colors ${
+                activeView === 'calendar'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-800'
+              }`}
+            >
+              📅 Calendario
+            </button>
+          </div>
+          
           <button
-            onClick={() => setActiveView('create')}
-            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
-              activeView === 'create'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
+            onClick={() => setShowCreateModal(true)}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 shadow-lg"
           >
-            ✍️ Crear Publicación
-          </button>
-          <button
-            onClick={() => setActiveView('scheduled')}
-            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
-              activeView === 'scheduled'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            📋 Contenido Programado
-          </button>
-          <button
-            onClick={() => setActiveView('calendar')}
-            className={`flex-1 py-2 px-4 rounded-md font-medium transition-colors ${
-              activeView === 'calendar'
-                ? 'bg-white text-blue-600 shadow-sm'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
-            📅 Vista Calendario
-          </button>
-          <button
-            onClick={async () => {
-              console.log('🚀 Ejecutando manualmente posts pendientes...')
-              await checkAndExecuteDuePosts()
-              loadScheduledPosts() // Recargar para mostrar cambios
-            }}
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm font-medium"
-          >
-            ⚡ Ejecutar Pendientes
+            <span>➕</span>
+            Crear Post
           </button>
         </div>
 
-        {/* Create Publication View */}
-        {activeView === 'create' && (
-          <div className="bg-white rounded-lg shadow-md p-6">
+        {/* Create Publication Modal */}
+        {showCreateModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold text-gray-900">Crear Nueva Publicación</h3>
+                  <button
+                    onClick={() => setShowCreateModal(false)}
+                    className="text-gray-400 hover:text-gray-600 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+              </div>
+              
+              <div className="p-6">
 
             {/* Content Input - Improved visibility */}
             <div className="mb-6">
@@ -1032,14 +1029,14 @@ export default function ProgramacionPage() {
 
             {/* Media Upload */}
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-900 mb-3">
-                Adjuntar archivos multimedia
-              </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+              <div className="flex items-center gap-3 mb-3">
+                <label className="text-sm font-medium text-gray-900">
+                  Multimedia
+                </label>
                 {uploading ? (
-                  <div>
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
-                    <span className="text-sm text-gray-600">Subiendo archivos...</span>
+                  <div className="flex items-center gap-2">
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                    <span className="text-xs text-gray-600">Subiendo...</span>
                   </div>
                 ) : (
                   <>
@@ -1053,11 +1050,13 @@ export default function ProgramacionPage() {
                       disabled={uploading}
                     />
                     <label htmlFor="mediaUpload" className="cursor-pointer">
-                      <div className="text-gray-600">
-                        <span className="text-2xl mb-2 block">📎</span>
-                        <span className="text-sm font-medium">Click para subir fotos o videos</span>
-                        <p className="text-xs text-gray-500 mt-1">PNG, JPG, MP4, MOV hasta 10MB</p>
-                      </div>
+                      <button
+                        type="button"
+                        className="inline-flex items-center px-3 py-1.5 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                      >
+                        <span className="text-lg mr-1">📎</span>
+                        Agregar
+                      </button>
                     </label>
                   </>
                 )}
@@ -1094,40 +1093,34 @@ export default function ProgramacionPage() {
 
             {/* Social Networks Selection */}
             <div className="mb-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-3">Seleccionar redes sociales</h3>
-              <div className="grid grid-cols-2 gap-4">
+              <label className="block text-sm font-medium text-gray-900 mb-3">
+                Redes Sociales
+              </label>
+              <div className="flex flex-wrap gap-2">
                 {mockAccounts.map((account) => (
-                  <div
+                  <button
                     key={account.platform}
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-all ${
-                      selectedAccounts.includes(account.platform)
-                        ? 'border-blue-500 bg-blue-50 shadow-md'
-                        : account.connected
-                        ? 'border-gray-300 hover:border-gray-400 hover:shadow-sm'
-                        : 'border-gray-200 bg-gray-50 cursor-not-allowed'
-                    }`}
+                    type="button"
                     onClick={() => account.connected && handleAccountToggle(account.platform)}
+                    disabled={!account.connected}
+                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-all ${
+                      selectedAccounts.includes(account.platform)
+                        ? 'bg-blue-100 text-blue-800 border-2 border-blue-300'
+                        : account.connected
+                        ? 'bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200'
+                        : 'bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed'
+                    }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{getPlatformIcon(account.platform)}</span>
-                        <div>
-                          <div className="font-medium text-gray-900">{account.name}</div>
-                          <div className={`text-sm ${account.connected ? 'text-green-600' : 'text-red-600'}`}>
-                            {account.connected ? 'Conectado' : 'Desconectado'}
-                          </div>
-                        </div>
-                      </div>
-                      {account.connected && (
-                        <input
-                          type="checkbox"
-                          checked={selectedAccounts.includes(account.platform)}
-                          onChange={() => {}}
-                          className="h-5 w-5 text-blue-600 rounded"
-                        />
-                      )}
-                    </div>
-                  </div>
+                    <span className="text-sm">{getPlatformIcon(account.platform)}</span>
+                    <span>{account.name}</span>
+                    {account.connected ? (
+                      selectedAccounts.includes(account.platform) ? (
+                        <span className="text-blue-600">✓</span>
+                      ) : null
+                    ) : (
+                      <span className="text-red-400 text-xs">○</span>
+                    )}
+                  </button>
                 ))}
               </div>
             </div>
@@ -1195,6 +1188,8 @@ export default function ProgramacionPage() {
                 </button>
               </div>
             )}
+              </div>
+            </div>
           </div>
         )}
 
@@ -1248,7 +1243,7 @@ export default function ProgramacionPage() {
                 <h3 className="text-lg font-medium text-gray-900 mb-2">No hay contenido que coincida con los filtros</h3>
                 <p className="text-gray-500">Ajusta los filtros o crea nueva publicación.</p>
                 <button
-                  onClick={() => setActiveView('create')}
+                  onClick={() => setShowCreateModal(true)}
                   className="mt-4 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Crear Publicación
