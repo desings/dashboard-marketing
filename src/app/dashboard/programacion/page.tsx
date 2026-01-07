@@ -737,17 +737,57 @@ export default function ProgramacionPage() {
     const postStatus = selectedPost.status === 'pending' ? 'pendiente' : 
                        selectedPost.status === 'published' ? 'publicada' : 'fallida'
     
-    const confirmMessage = `¿Estás seguro de que quieres eliminar esta publicación ${postStatus}?\n\nContenido: "${selectedPost.content.slice(0, 50)}..."\n\nEsta acción no se puede deshacer.`
+    const confirmMessage = selectedPost.status === 'published' 
+      ? `¿Estás seguro de que quieres eliminar esta publicación ${postStatus}?\n\nContenido: "${selectedPost.content.slice(0, 50)}..."\n\n⚠️ IMPORTANTE: Esto también eliminará el post de Facebook.\n\nEsta acción no se puede deshacer.`
+      : `¿Estás seguro de que quieres eliminar esta publicación ${postStatus}?\n\nContenido: "${selectedPost.content.slice(0, 50)}..."\n\nEsta acción no se puede deshacer.`
     
     if (!confirm(confirmMessage)) {
       return
     }
     
     try {
+      // Si el post está publicado en Facebook, intentar eliminarlo de Facebook primero
+      if (selectedPost.status === 'published' && selectedPost.facebookPostId) {
+        console.log('🗑️ Eliminando post de Facebook:', selectedPost.facebookPostId)
+        
+        try {
+          const facebookResponse = await fetch(`/api/facebook-delete-post?postId=${selectedPost.facebookPostId}`, {
+            method: 'DELETE'
+          })
+          
+          const facebookResult = await facebookResponse.json()
+          
+          if (!facebookResult.success && !facebookResult.alreadyDeleted) {
+            const continueAnyway = confirm(
+              `⚠️ No se pudo eliminar de Facebook: ${facebookResult.error}\n\n¿Quieres continuar y eliminar solo del dashboard?`
+            )
+            if (!continueAnyway) {
+              return
+            }
+          } else {
+            console.log('✅ Post eliminado de Facebook exitosamente')
+          }
+        } catch (facebookError) {
+          console.error('Error eliminando de Facebook:', facebookError)
+          const continueAnyway = confirm(
+            `⚠️ Error al conectar con Facebook para eliminar el post.\n\n¿Quieres continuar y eliminar solo del dashboard?`
+          )
+          if (!continueAnyway) {
+            return
+          }
+        }
+      }
+      
+      // Eliminar del dashboard local
       await deleteScheduledPost(selectedPost.id)
       
       closeModals()
-      alert(`✅ Publicación ${postStatus} eliminada exitosamente!`)
+      
+      if (selectedPost.status === 'published' && selectedPost.facebookPostId) {
+        alert(`✅ Publicación ${postStatus} eliminada exitosamente del dashboard y Facebook!`)
+      } else {
+        alert(`✅ Publicación ${postStatus} eliminada exitosamente!`)
+      }
     } catch (error) {
       console.error('Error deleting post:', error)
       alert('❌ Error al eliminar la publicación: ' + (error instanceof Error ? error.message : 'Error desconocido'))
