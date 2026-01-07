@@ -48,7 +48,7 @@ export default function ProgramacionPage() {
   const [publishing, setPublishing] = useState(false)
   const [testMode, setTestMode] = useState(false)
   const [activeView, setActiveView] = useState<'create' | 'scheduled' | 'calendar'>('create')
-  const [postType, setPostType] = useState<'post' | 'story'>('post')
+  const [postType, setPostType] = useState<'post'>('post')
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
@@ -750,15 +750,6 @@ export default function ProgramacionPage() {
       return
     }
 
-    // Validación especial para stories
-    if (postType === 'story') {
-      if (mediaFiles.length === 0) {
-        alert('❌ Las stories requieren media\n\nPor favor agrega una imagen o video para publicar como story.')
-        return
-      }
-      console.log('📸 Publicando story con media:', mediaFiles.length, 'archivos')
-    }
-
     try {
       setPublishing(true)
       
@@ -887,15 +878,6 @@ export default function ProgramacionPage() {
     if (selectedAccounts.length === 0) {
       alert('Por favor selecciona al menos una red social')
       return
-    }
-
-    // Validación especial para stories
-    if (postType === 'story') {
-      if (mediaFiles.length === 0) {
-        alert('❌ Las stories requieren media\n\nPor favor agrega una imagen o video para programar como story.')
-        return
-      }
-      console.log('📸 Programando story con media:', mediaFiles.length, 'archivos')
     }
 
     if (!publishDate || !publishTime) {
@@ -1085,16 +1067,6 @@ export default function ProgramacionPage() {
                   }`}
                 >
                   📝 Post
-                </button>
-                <button
-                  onClick={() => setPostType('story')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    postType === 'story'
-                      ? 'bg-purple-100 text-purple-800 border-2 border-purple-300'
-                      : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
-                  }`}
-                >
-                  📸 Story
                 </button>
               </div>
             </div>
@@ -1344,7 +1316,6 @@ export default function ProgramacionPage() {
                   >
                     <option value="all">Todos los tipos</option>
                     <option value="post">📝 Post</option>
-                    <option value="story">📸 Story</option>
                   </select>
                 </div>
               </div>
@@ -1716,7 +1687,7 @@ export default function ProgramacionPage() {
               
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="text-sm text-gray-700 font-medium mb-1">
-                  {selectedPost.type === 'post' ? '📝 Post' : '📸 Story'} - {formatDate(selectedPost.date)} a las {selectedPost.time}
+                  📝 Post - {formatDate(selectedPost.date)} a las {selectedPost.time}
                 </div>
                 <div className="text-sm text-gray-600 truncate">
                   {selectedPost.content}

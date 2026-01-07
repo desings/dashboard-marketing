@@ -15,9 +15,8 @@ export async function POST(request: NextRequest) {
     })
     
     console.log('📋 Tipo de publicación:', {
-      tipo: type,
-      esStory: type === 'story',
-      esPost: type === 'post'
+      tipo: type || 'post',
+      esPost: true
     })
     
     if (!content || !content.trim()) {
@@ -58,90 +57,6 @@ export async function POST(request: NextRequest) {
         details: tokenCheckData,
         help: 'Reconecta tu cuenta de Facebook en Settings'
       }, { status: 401 })
-    }
-
-    // Manejo especial para stories
-    if (type === 'story') {
-      console.log('📸 Publicando como story...')
-      
-      // Stories requieren media obligatorio
-      if (!media || media.length === 0) {
-        return NextResponse.json({
-          success: false,
-          error: 'Las stories requieren media (imagen o video)',
-          help: 'Agrega una imagen o video para publicar como story'
-        }, { status: 400 })
-      }
-
-      const firstMedia = media[0]
-      const isCloudinary = firstMedia.isCloudinary || firstMedia.cloudinaryUrl
-      const mediaUrl = firstMedia.cloudinaryUrl || firstMedia.url
-      const isVideo = firstMedia.type === 'video' || firstMedia.isVideo
-
-      console.log(`📤 Attempting to publish ${isVideo ? 'video' : 'image'} story...`)
-      console.log('📋 Media URL:', mediaUrl)
-
-      // Para stories, Facebook requiere un enfoque diferente
-      // Intentar primero como post con la tag de story, si eso no funciona
-      // entonces usar el endpoint normal con parámetros específicos
-      
-      try {
-        // Método 1: Intentar endpoint estándar con marcador de story
-        const storyUrl = pageId 
-          ? `https://graph.facebook.com/v19.0/${pageId}/photos`
-          : `https://graph.facebook.com/v19.0/me/photos`
-
-        const storyParams = {
-          url: mediaUrl,
-          message: `📸 STORY: ${content}`, // Marcar claramente como story
-          access_token: pageToken,
-          published: 'true'
-        }
-        
-        console.log('📋 Intentando publicar como foto con marcador de story...')
-        console.log('🔗 URL:', storyUrl)
-        console.log('📋 Parámetros:', JSON.stringify(storyParams, null, 2))
-
-        const storyResponse = await fetch(storyUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams(storyParams).toString()
-        })
-
-        const storyData = await storyResponse.json()
-        
-        console.log('📤 Facebook Story Response Status:', storyResponse.status)
-        console.log('📤 Facebook Story Response Data:', JSON.stringify(storyData, null, 2))
-
-        if (storyResponse.ok && !storyData.error) {
-          return NextResponse.json({
-            success: true,
-            message: `Story ${isVideo ? 'con video' : 'con imagen'} publicada exitosamente`,
-            postId: storyData.id,
-            postUrl: `https://facebook.com/${storyData.id}`,
-            type: 'story',
-            note: 'Publicado como post marcado como story (Facebook no permite stories via API para todas las páginas)'
-          })
-        }
-        
-        // Si falló, mostrar el error específico
-        console.error('❌ Error publishing story:', storyData)
-        return NextResponse.json({
-          success: false,
-          error: 'Error publicando story en Facebook',
-          details: storyData,
-          statusCode: storyResponse.status,
-          help: 'Las stories pueden requerir permisos especiales de Facebook. Se publicará como post normal.'
-        }, { status: 400 })
-
-      } catch (error) {
-        console.error('❌ Error en story request:', error)
-        return NextResponse.json({
-          success: false,
-          error: 'Error de conexión al intentar publicar story',
-          details: error instanceof Error ? error.message : 'Unknown error'
-        }, { status: 500 })
-      }
     }
 
     // Si hay media, usar endpoint de photos/videos (para posts normales)
