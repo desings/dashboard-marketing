@@ -391,6 +391,20 @@ export default function ProgramacionPage() {
 
   const deleteScheduledPost = async (postId: string) => {
     try {
+      // Primero intentar eliminar desde localStorage
+      const localPosts = JSON.parse(localStorage.getItem('scheduled_posts') || '[]')
+      const postExistsInLocal = localPosts.find((p: any) => p.id === postId)
+      
+      if (postExistsInLocal) {
+        // Post existe en localStorage - eliminarlo de ahí
+        const filteredLocalPosts = localPosts.filter((p: any) => p.id !== postId)
+        localStorage.setItem('scheduled_posts', JSON.stringify(filteredLocalPosts))
+        console.log('✅ Post eliminado desde localStorage:', postId)
+        await loadScheduledPosts()
+        return true
+      }
+      
+      // Si no está en localStorage, intentar eliminar desde la API
       const response = await fetch(`/api/programming-posts?id=${postId}`, {
         method: 'DELETE',
         headers: {
@@ -401,6 +415,7 @@ export default function ProgramacionPage() {
       const data = await response.json()
       
       if (data.success) {
+        console.log('✅ Post eliminado desde API:', postId)
         await loadScheduledPosts()
         return true
       } else {
