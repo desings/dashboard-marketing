@@ -861,6 +861,7 @@ export default function ProgramacionPage() {
       setPostText('')
       setSelectedAccounts([])
       setMediaFiles([]) // Limpiar archivos multimedia
+      setShowCreateModal(false) // Cerrar el modal
     } catch (error) {
       console.error('Error al publicar:', error)
       alert('Error al publicar el post: ' + (error instanceof Error ? error.message : 'Error desconocido'))
@@ -928,6 +929,7 @@ export default function ProgramacionPage() {
       setPublishTime('')
       setMediaFiles([])
       setShowScheduleForm(false)
+      setShowCreateModal(false) // Cerrar el modal
       
       // Recargar la lista de posts programados
       await loadScheduledPosts()
