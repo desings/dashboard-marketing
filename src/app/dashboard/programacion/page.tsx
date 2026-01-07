@@ -1010,41 +1010,12 @@ export default function ProgramacionPage() {
         {/* Create Publication View */}
         {activeView === 'create' && (
           <div className="bg-white rounded-lg shadow-md p-6">
-            {/* Post Type Selection */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-900 mb-3">Tipo de contenido</label>
-              <div className="flex gap-4">
-                <button
-                  onClick={() => setPostType('post')}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                    postType === 'post'
-                      ? 'bg-blue-100 text-blue-800 border-2 border-blue-300'
-                      : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
-                  }`}
-                >
-                  📝 Post
-                </button>
-              </div>
-            </div>
 
             {/* Content Input - Improved visibility */}
             <div className="mb-6">
               <label htmlFor="postContent" className="block text-sm font-medium text-gray-900 mb-2">
-                Contenido del {postType === 'post' ? 'post' : 'story'}
+                Contenido del post
               </label>
-              
-              {/* Aviso para stories */}
-              {postType === 'story' && (
-                <div className="mb-3 p-3 bg-purple-50 border border-purple-200 rounded-lg">
-                  <div className="flex items-center">
-                    <span className="text-purple-600 mr-2">📸</span>
-                    <div>
-                      <p className="text-sm font-medium text-purple-800">Stories requieren media</p>
-                      <p className="text-xs text-purple-600">Las stories necesitan una imagen o video. Facebook puede limitar la API de stories según tu página.</p>
-                    </div>
-                  </div>
-                </div>
-              )}
               
               <textarea
                 id="postContent"
@@ -1708,12 +1679,8 @@ export default function ProgramacionPage() {
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center gap-2 mb-2">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      selectedPost.type === 'post' 
-                        ? 'bg-blue-100 text-blue-800' 
-                        : 'bg-purple-100 text-purple-800'
-                    }`}>
-                      {selectedPost.type === 'post' ? '📝 Post' : '📸 Story'}
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800`}>
+                      📝 Post
                     </span>
                     {getStatusBadge(selectedPost.status)}
                   </div>
