@@ -1137,17 +1137,11 @@ export default function ProgramacionPage() {
               <button
                 onClick={publishNow}
                 disabled={publishing}
-                className={`px-6 py-3 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg ${
-                  testMode 
-                    ? 'bg-yellow-600 hover:bg-yellow-700' 
-                    : 'bg-blue-600 hover:bg-blue-700'
-                }`}
+                className={`px-6 py-3 text-white rounded-lg transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg bg-blue-600 hover:bg-blue-700`}
               >
                 {publishing 
                   ? 'Publicando...' 
-                  : testMode 
-                    ? '🧪 Simular Publicación' 
-                    : 'Publicar AHORA'
+                  : 'Publicar AHORA'
                 }
               </button>
               
