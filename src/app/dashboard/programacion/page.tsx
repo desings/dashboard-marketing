@@ -16,7 +16,7 @@ interface ScheduledPost {
   date: string
   time: string
   platforms: string[]
-  type: 'post' | 'story'
+  type: 'post'
   media?: any[]
   status: 'pending' | 'published' | 'failed'
   facebookPostId?: string
@@ -46,7 +46,6 @@ export default function ProgramacionPage() {
   const [showScheduleForm, setShowScheduleForm] = useState(false)
   const [showFacebookConfig, setShowFacebookConfig] = useState(false)
   const [publishing, setPublishing] = useState(false)
-  const [testMode, setTestMode] = useState(false)
   const [activeView, setActiveView] = useState<'create' | 'scheduled' | 'calendar'>('create')
   const [postType, setPostType] = useState<'post'>('post')
   const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([])
@@ -829,7 +828,7 @@ export default function ProgramacionPage() {
           }
         } else {
           // Para otras plataformas, usar endpoint directo
-          const endpoint = testMode ? '/api/publish-test' : '/api/publish-real'
+          const endpoint = '/api/publish-real'
           
           const response = await fetch(endpoint, {
             method: 'POST',
@@ -856,8 +855,7 @@ export default function ProgramacionPage() {
         }
       }
 
-      const modeText = testMode ? ' (MODO DE PRUEBA)' : ''
-      alert(`✅ Post publicado exitosamente${modeText}!`)
+      alert(`✅ Post publicado exitosamente!`)
       setPostText('')
       setSelectedAccounts([])
       setMediaFiles([]) // Limpiar archivos multimedia
@@ -1018,38 +1016,6 @@ export default function ProgramacionPage() {
             ⚡ Ejecutar Pendientes
           </button>
         </div>
-
-        {testMode ? (
-          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-yellow-600 text-lg">🧪</span>
-              <h3 className="font-semibold text-yellow-800">Modo de Prueba Activado</h3>
-            </div>
-            <p className="text-yellow-700 text-sm">
-              Las publicaciones serán simuladas (no se publicarán realmente). <button 
-                onClick={() => setTestMode(false)} 
-                className="underline hover:no-underline"
-              >
-                Cambiar a Modo Real
-              </button>
-            </p>
-          </div>
-        ) : (
-          <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-green-600 text-lg">🚀</span>
-              <h3 className="font-semibold text-green-800">Modo Real Activado</h3>
-            </div>
-            <p className="text-green-700 text-sm">
-              Las publicaciones se enviarán directamente a Facebook (Página: IDinmo). <button 
-                onClick={() => setTestMode(true)} 
-                className="underline hover:no-underline"
-              >
-                Cambiar a Modo Prueba
-              </button>
-            </p>
-          </div>
-        )}
 
         {/* Create Publication View */}
         {activeView === 'create' && (
@@ -1345,6 +1311,9 @@ export default function ProgramacionPage() {
                         Contenido
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Media
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                         Tipo
                       </th>
                       <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -1372,13 +1341,49 @@ export default function ProgramacionPage() {
                             {post.content}
                           </div>
                         </td>
+                        <td className="px-6 py-4">
+                          {post.media && post.media.length > 0 ? (
+                            <div className="flex gap-2">
+                              {post.media.slice(0, 3).map((media: any, index: number) => {
+                                const mediaUrl = media.cloudinaryUrl || media.url;
+                                const isVideo = media.type === 'video' || media.isVideo || mediaUrl?.includes('.mp4') || mediaUrl?.includes('.mov');
+                                
+                                return (
+                                  <div key={index} className="relative">
+                                    {isVideo ? (
+                                      <div className="w-12 h-12 bg-gray-100 rounded border flex items-center justify-center">
+                                        <span className="text-xs text-gray-500">🎥</span>
+                                      </div>
+                                    ) : (
+                                      <img
+                                        src={mediaUrl}
+                                        alt="Vista previa"
+                                        className="w-12 h-12 object-cover rounded border"
+                                        onError={(e) => {
+                                          e.currentTarget.style.display = 'none';
+                                        }}
+                                      />
+                                    )}
+                                  </div>
+                                );
+                              })}
+                              {post.media.length > 3 && (
+                                <div className="w-12 h-12 bg-gray-100 rounded border flex items-center justify-center">
+                                  <span className="text-xs text-gray-500">+{post.media.length - 3}</span>
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-gray-400">Sin multimedia</span>
+                          )}
+                        </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             post.type === 'post' 
                               ? 'bg-blue-100 text-blue-800' 
                               : 'bg-purple-100 text-purple-800'
                           }`}>
-                            {post.type === 'post' ? '📝 Post' : '📸 Story'}
+                            📝 Post
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -1537,37 +1542,10 @@ export default function ProgramacionPage() {
             </div>
             
             <div className="p-6 space-y-6">
-              {/* Post Type Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-3">Tipo de contenido</label>
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => setPostType('post')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      postType === 'post'
-                        ? 'bg-blue-100 text-blue-800 border-2 border-blue-300'
-                        : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
-                    }`}
-                  >
-                    📝 Post
-                  </button>
-                  <button
-                    onClick={() => setPostType('story')}
-                    className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-                      postType === 'story'
-                        ? 'bg-purple-100 text-purple-800 border-2 border-purple-300'
-                        : 'bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200'
-                    }`}
-                  >
-                    📸 Story
-                  </button>
-                </div>
-              </div>
-
               {/* Content Input */}
               <div>
                 <label htmlFor="editPostContent" className="block text-sm font-medium text-gray-900 mb-2">
-                  Contenido del {postType === 'post' ? 'post' : 'story'}
+                  Contenido del post
                 </label>
                 <textarea
                   id="editPostContent"
