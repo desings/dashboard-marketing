@@ -92,8 +92,8 @@ export class InfoJobsScraper {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
       })
 
-      // Construir URL de búsqueda
-      const searchUrl = `https://www.infojobs.net/ofertas-trabajo?q=${encodeURIComponent(keywords)}&page=${page}`
+      // Construir URL de búsqueda usando estructura real de InfoJobs
+      const searchUrl = `https://www.infojobs.net/ofertas-trabajo?keyword=${encodeURIComponent(keywords)}&segmentId=&page=${page}&sortBy=RELEVANCE&onlyForeignCountry=false&countryIds=17&sinceDate=ANY`
       console.log(`🌐 Navegando a: ${searchUrl}`)
       
       await browserPage.goto(searchUrl, { 

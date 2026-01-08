@@ -28,11 +28,14 @@ const frequencyOptions = [
 ]
 
 export default function JobSearchForm({ initialData, onSubmit, onCancel }: JobSearchFormProps) {
+  // Temporal: usar un userId fijo hasta implementar autenticación
+  const userId = 'user-1'
+  
   const [formData, setFormData] = useState<JobSearchFormData>({
     keywords: initialData?.keywords || '',
     portals: initialData?.portals || ['infojobs'],
     frequencyMinutes: initialData?.frequencyMinutes || 240,
-    userId: 'demo-user'
+    userId
   })
 
   const [errors, setErrors] = useState<Record<string, string>>({})

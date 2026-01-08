@@ -24,6 +24,9 @@ interface JobSearchStats {
 }
 
 export default function JobSearchListPage() {
+  // Temporal: usar un userId fijo hasta implementar autenticación
+  const userId = 'user-1'
+  
   const [jobSearches, setJobSearches] = useState<JobSearch[]>([])
   const [stats, setStats] = useState<JobSearchStats | null>(null)
   const [loading, setLoading] = useState(true)
@@ -39,8 +42,8 @@ export default function JobSearchListPage() {
     setLoading(true)
     try {
       const [searchesResponse, statsResponse] = await Promise.all([
-        fetch('/api/job-searches?userId=demo-user'),
-        fetch('/api/job-searches/stats?userId=demo-user')
+        fetch(`/api/job-searches?userId=${userId}`),
+        fetch(`/api/job-searches/stats?userId=${userId}`)
       ])
 
       const searchesData = await searchesResponse.json()

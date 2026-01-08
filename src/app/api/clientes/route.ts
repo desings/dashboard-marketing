@@ -20,66 +20,59 @@ function getUserId(req: Request) {
   }
 }
 
-// GET - Obtener todos los clientes con sus cuentas sociales
 export async function GET(req: Request) {
   try {
     const userId = getUserId(req);
     console.log("UserId en clientes:", userId);
 
-    // En modo demo, retornar datos fijos
-    const clients = [
-      {
+    // Obtener clientes desde base de datos real
+    const clients = await prisma.userTenant.findMany({
+      where: { userId },
+      include: {
         tenant: {
-          id: "1",
-          name: "Cliente Demo",
-          logoUrl: null,
-          createdAt: new Date().toISOString()
-        },
-        socialAccounts: [
-          {
-            id: "1",
-            platform: "facebook",
-            username: "demo_facebook",
-            isActive: true,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: "2", 
-            platform: "linkedin",
-            username: "demo_linkedin",
-            isActive: true,
-            createdAt: new Date().toISOString()
+          include: {
+            socialAccounts: true
           }
-        ]
+        }
       }
-    ];
+    });
 
-    return NextResponse.json({ clients });
+    const formattedClients = clients.map(relation => ({
+      tenant: relation.tenant,
+      socialAccounts: relation.tenant.socialAccounts
+    }));
+
+    return NextResponse.json({ clients: formattedClients });
   } catch (error) {
     console.error("Error fetching clients:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }
 
-// POST - Crear nuevo cliente
 export async function POST(req: Request) {
   try {
     const userId = getUserId(req);
     const body = await req.json();
     console.log("POST clientes - userId:", userId, "body:", body);
 
-    // En modo demo, simular creación exitosa
-    const newClient = {
-      tenant: {
-        id: Date.now().toString(),
-        name: body.name || "Nuevo Cliente",
-        logoUrl: null,
-        createdAt: new Date().toISOString()
-      },
-      socialAccounts: []
-    };
+    // Crear cliente en base de datos real
+    const newTenant = await prisma.tenant.create({
+      data: {
+        name: body.name,
+        logoUrl: body.logoUrl || null
+      }
+    });
 
-    return NextResponse.json({ client: newClient });
+    // Crear relación usuario-tenant
+    await prisma.userTenant.create({
+      data: {
+        userId,
+        tenantId: newTenant.id,
+        role: 'owner'
+      }
+    });
+
+    return NextResponse.json({ client: { tenant: newTenant, socialAccounts: [] } });
   } catch (error) {
     console.error("Error creating client:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });

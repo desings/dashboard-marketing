@@ -46,6 +46,9 @@ const statusLabels = {
 }
 
 export default function JobOffersListPage() {
+  // Temporal: usar un userId fijo hasta implementar autenticación
+  const userId = 'user-1'
+  
   const [offers, setOffers] = useState<JobOffer[]>([])
   const [jobSearches, setJobSearches] = useState<JobSearch[]>([])
   const [filters, setFilters] = useState({
@@ -73,7 +76,7 @@ export default function JobOffersListPage() {
 
   const loadJobSearches = async () => {
     try {
-      const response = await fetch('/api/job-searches?userId=demo-user')
+      const response = await fetch(`/api/job-searches?userId=${userId}`)
       const data = await response.json()
       if (data.success) {
         setJobSearches(data.data || [])
@@ -87,7 +90,7 @@ export default function JobOffersListPage() {
     setLoading(true)
     try {
       const params = new URLSearchParams({
-        userId: 'demo-user',
+        userId,
         page: pagination.page.toString(),
         limit: pagination.limit.toString(),
         ...(filters.status !== 'all' && { status: filters.status }),
