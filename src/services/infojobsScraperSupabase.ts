@@ -81,52 +81,114 @@ export class InfoJobsScraperSupabase {
     let browser: Browser | null = null
     
     try {
-      // Lanzar navegador con configuración optimizada
+      // Lanzar navegador con configuración optimizada para InfoJobs
       browser = await puppeteer.launch({
         headless: true,
         args: [
           '--no-sandbox',
           '--disable-setuid-sandbox',
           '--disable-dev-shm-usage',
-          '--disable-web-security',
-          '--disable-features=VizDisplayCompositor'
-        ]
+          '--disable-blink-features=AutomationControlled',
+          '--disable-extensions',
+          '--no-first-run',
+          '--disable-default-apps',
+          '--disable-features=TranslateUI'
+        ],
+        defaultViewport: null
       })
 
       const page: Page = await browser.newPage()
       
-      // Configurar user agent y viewport
-      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+      // Configurar para evitar detección de bot
+      await page.evaluateOnNewDocument(() => {
+        Object.defineProperty(navigator, 'webdriver', { get: () => undefined })
+        Object.defineProperty(navigator, 'plugins', { get: () => [1, 2, 3, 4, 5] })
+        Object.defineProperty(navigator, 'languages', { get: () => ['es-ES', 'es'] })
+        ;(window as any).chrome = { runtime: {} }
+      })
+
+      await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
       await page.setViewport({ width: 1920, height: 1080 })
+
+      // Configurar headers adicionales
+      await page.setExtraHTTPHeaders({
+        'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8'
+      })
 
       console.log(`📱 Navegando a InfoJobs...`)
       
-      // Navegar con timeout extendido
+      // Navegar con timeout extendido y estrategia de carga completa
       await page.goto(url, { 
-        waitUntil: 'networkidle2', 
-        timeout: 30000 
+        waitUntil: 'domcontentloaded',
+        timeout: 45000 
       })
 
       console.log(`⏳ Esperando a que carguen las ofertas...`)
 
-      // Esperar a que aparezcan las ofertas (múltiples selectores)
-      try {
-        await page.waitForSelector('[data-testid="offer-item"], .offer-item, .js-offer-item, [data-cy="OfferItem"], .list-offers article', {
-          timeout: 15000
-        })
-        console.log(`✅ Ofertas cargadas correctamente`)
-      } catch (waitError) {
-        console.log(`⚠️ Timeout esperando ofertas, continuando con el HTML disponible...`)
-      }
+      // Esperar múltiples indicadores de que la página está cargada
+      await Promise.race([
+        page.waitForSelector('article', { timeout: 20000 }),
+        page.waitForSelector('[data-testid]', { timeout: 20000 }),
+        page.waitForSelector('.list-group', { timeout: 20000 }),
+        new Promise(resolve => setTimeout(resolve, 10000)) // timeout fallback
+      ]).catch(() => console.log('⚠️ Timeout esperando selectores, continuando...'))
 
-      // Esperar un poco más para asegurar que todo el contenido dinámico se ha cargado
-      await new Promise(resolve => setTimeout(resolve, 3000))
+      // Esperar que se complete la carga de JavaScript
+      await new Promise(resolve => setTimeout(resolve, 5000))
+
+      // Scroll down para activar lazy loading si existe
+      await page.evaluate(() => {
+        window.scrollTo(0, document.body.scrollHeight / 2)
+      })
+      await new Promise(resolve => setTimeout(resolve, 2000))
 
       // Obtener el HTML renderizado
       const html = await page.content()
       console.log(`📄 HTML obtenido, tamaño: ${html.length} caracteres`)
 
-      return this.parseJobOffers(html)
+      // DEBUG: Guardar fragmentos del HTML para análisis
+      console.log('🔍 DEBUG: Buscando indicadores de ofertas en HTML...')
+      
+      const bodyText = await page.evaluate(() => document.body.innerText)
+      console.log(`📝 Texto del body (primeros 500 chars): ${bodyText.substring(0, 500)}`)
+      
+      // Verificar si hay elementos que indiquen ofertas
+      const hasOfferElements = await page.evaluate(() => {
+        const selectors = [
+          'article',
+          '[data-testid*="offer"]',
+          '[class*="offer"]',
+          '[class*="job"]',
+          'a[href*="detail"]'
+        ]
+        
+        const results: { [key: string]: number } = {}
+        selectors.forEach(selector => {
+          const elements = document.querySelectorAll(selector)
+          results[selector] = elements.length
+        })
+        
+        return results
+      })
+      
+      console.log('🔍 DEBUG: Elementos encontrados por selector:', hasOfferElements)
+      
+      // Verificar si hay texto relacionado con ofertas
+      const offerKeywords = await page.evaluate(() => {
+        const text = document.body.innerText.toLowerCase()
+        return {
+          'ofertas': text.includes('ofertas'),
+          'empleo': text.includes('empleo'),
+          'trabajo': text.includes('trabajo'),
+          'desarrollador': text.includes('desarrollador'),
+          'react': text.includes('react')
+        }
+      })
+      
+      console.log('🔍 DEBUG: Palabras clave encontradas:', offerKeywords)
+
+      return this.parseJobOffersWithDebug(html)
 
     } catch (error) {
       console.error('❌ Error usando Puppeteer:', error)
@@ -138,160 +200,141 @@ export class InfoJobsScraperSupabase {
     }
   }
 
-  private parseJobOffers(html: string): ScrapedJobOffer[] {
+  private parseJobOffersWithDebug(html: string): ScrapedJobOffer[] {
     const $ = cheerio.load(html)
     const offers: ScrapedJobOffer[] = []
 
-    console.log('🔍 Parseando ofertas de trabajo...')
+    console.log('🔍 Parseando ofertas de trabajo con DEBUG...')
 
-    // Selectores actualizados para InfoJobs 2024/2025
-    const jobSelectors = [
-      '[data-testid="offer-item"]',
-      '[data-cy="OfferItem"]', 
-      '.list-offers article',
-      '.offer-item', 
-      '.js-offer-item',
-      'article[data-adid]',
-      '.list-group-item'
+    // Selectores más amplios para encontrar la estructura actual de InfoJobs
+    const allSelectors = [
+      // Selectores específicos InfoJobs actuales
+      'article[data-id]',
+      'article[class*="offer"]',
+      'article[class*="job"]',
+      'div[data-testid*="offer"]',
+      'li[class*="offer"]',
+      
+      // Selectores genéricos
+      'article',
+      '.list-group-item',
+      '[data-testid]',
+      'li',
+      
+      // Selectores de enlaces
+      'a[href*="infojobs.net"]',
+      'a[href*="/detail/"]',
+      'a[href*="/empleo/"]'
     ]
 
-    let jobElements: any = null
+    // Probar cada selector y ver qué encuentra
+    let bestSelector = null
+    let maxElements = 0
 
-    // Probar diferentes selectores
-    for (const selector of jobSelectors) {
+    for (const selector of allSelectors) {
       const elements = $(selector)
-      if (elements.length > 0) {
-        jobElements = elements
-        console.log(`✅ Usando selector: ${selector} (${elements.length} elementos)`)
-        break
+      console.log(`🔍 Selector "${selector}": ${elements.length} elementos`)
+      
+      if (elements.length > maxElements) {
+        maxElements = elements.length
+        bestSelector = selector
       }
     }
 
-    if (!jobElements || jobElements.length === 0) {
-      console.log('⚠️ No se encontraron ofertas con selectores conocidos, intentando estructura alternativa...')
+    console.log(`✅ Mejor selector encontrado: "${bestSelector}" con ${maxElements} elementos`)
+
+    if (bestSelector && maxElements > 0) {
+      const elements = $(bestSelector)
       
-      // Fallback mejorado: buscar múltiples patrones de enlaces
-      const linkPatterns = [
-        'a[href*="/ofertas-trabajo/"]',
-        'a[href*="/ofertas-de-empleo/detail/"]', 
-        'a[href*="/empleo/"]',
-        'a[href*="infojobs.net"][href*="detail"]'
-      ]
-
-      for (const pattern of linkPatterns) {
-        const links = $(pattern)
-        if (links.length > 0) {
-          console.log(`🔗 Encontrados ${links.length} enlaces con patrón: ${pattern}`)
-          
-          links.each((_, element: any) => {
-            const $link = $(element)
-            const $container = $link.closest('div, li, article, section')
-            
-            const title = $link.text()?.trim() || 
-                         $link.find('h1, h2, h3, h4, .title, [data-testid="title"]').text()?.trim() ||
-                         $container.find('h1, h2, h3, h4').first().text()?.trim() ||
-                         'Título no disponible'
-            
-            const href = $link.attr('href')
-            if (!href) return
-            
-            const fullUrl = href.startsWith('http') ? href : `https://www.infojobs.net${href}`
-            
-            // Extraer ID de diferentes formatos de URL de InfoJobs
-            const idMatches = [
-              href.match(/\/detail\/(\w+)/),
-              href.match(/\/(\w+)\.html/),
-              href.match(/oferta-(\w+)/),
-              href.match(/\/([a-zA-Z0-9]{8,})/),
-            ]
-            
-            const externalId = idMatches.find(match => match)?.[1] || null
-
-            const company = $container.find('[data-testid="company"], .company, .employer').text()?.trim() || 
-                           $container.find('span, p').filter((_, el) => {
-                             const text = $(el).text()
-                             return text.includes('S.L.') || text.includes('S.A.') || text.includes('Ltd')
-                           }).first().text()?.trim() ||
-                           null
-                           
-            const location = $container.find('[data-testid="location"], .location, .city').text()?.trim() ||
-                            $container.find('span, p').filter((_, el) => {
-                              const text = $(el).text()
-                              return text.includes('Madrid') || text.includes('Barcelona') || text.includes('Valencia') || text.includes('Sevilla') || text.includes(',')
-                            }).first().text()?.trim() ||
-                            null
-                            
-            const salary = $container.find('[data-testid="salary"], .salary, .wage').text()?.trim() ||
-                          $container.find('span, p').filter((_, el) => {
-                            const text = $(el).text()
-                            return text.includes('€') || text.includes('euros') || Boolean(text.match(/\d+\.?\d*/))
-                          }).first().text()?.trim() ||
-                          null
-
-            if (title && title !== 'Título no disponible' && title.length > 5) {
-              offers.push({
-                title,
-                company,
-                location,
-                salary,
-                description: null,
-                url: fullUrl,
-                external_id: externalId
-              })
-            }
-          })
-          
-          if (offers.length > 0) break // Si encontramos ofertas, no seguimos buscando
-        }
-      }
-    } else {
-      // Procesar elementos encontrados con selectores principales
-      jobElements.each((index: number, element: any) => {
-        const $job = $(element)
+      elements.each((index: number, element: any) => {
+        const $element = $(element)
         
-        // Selectores múltiples para título
-        const titleSelectors = [
-          '[data-testid="title"]',
-          'h1, h2, h3, h4',
-          '.title, .offer-title', 
-          'a[href*="detail"] h3',
-          'a[href*="detail"]'
-        ]
+        console.log(`🔍 Analizando elemento ${index + 1}...`)
         
-        let title = ''
-        for (const selector of titleSelectors) {
-          const titleText = $job.find(selector).first().text()?.trim()
-          if (titleText && titleText.length > 3) {
-            title = titleText
-            break
+        // Buscar enlaces dentro del elemento
+        const links = $element.find('a[href*="detail"], a[href*="empleo"], a[href]')
+        console.log(`  Enlaces encontrados: ${links.length}`)
+        
+        // Buscar texto que pueda ser el título
+        const allTexts: string[] = []
+        $element.find('*').each((_, child) => {
+          const text = $(child).clone().children().remove().end().text().trim()
+          if (text && text.length > 10 && text.length < 100) {
+            allTexts.push(text)
           }
-        }
+        })
         
-        // Si no encontramos título, usar el texto del enlace principal
-        if (!title) {
-          const mainLink = $job.find('a[href*="detail"], a[href*="empleo"]').first()
-          title = mainLink.text()?.trim() || 'Sin título'
-        }
+        console.log(`  Textos candidatos: ${allTexts.slice(0, 3).join(' | ')}`)
         
-        const company = $job.find('[data-testid="company"], .company, .employer').text()?.trim() || null
-        const location = $job.find('[data-testid="location"], .location, .city').text()?.trim() || null  
-        const salary = $job.find('[data-testid="salary"], .salary, .wage').text()?.trim() || null
+        // Buscar enlace principal
+        let mainLink: string | null = null
+        links.each((_, link) => {
+          const href = $(link).attr('href')
+          if (href && (href.includes('detail') || href.includes('empleo'))) {
+            mainLink = href
+            return false // break
+          }
+        })
         
-        // Buscar URL de la oferta
-        const linkElement = $job.find('a[href*="detail"], a[href*="empleo"]').first()
-        const href = linkElement.attr('href')
-        const fullUrl = href?.startsWith('http') ? href : `https://www.infojobs.net${href}`
-        
-        // Extraer ID
-        const idMatch = href?.match(/detail\/(\w+)/) || href?.match(/\/([a-zA-Z0-9]{8,})/)
-        const externalId = idMatch?.[1] || null
-
-        if (title && title.length > 3) {
+        if (mainLink && typeof mainLink === 'string') {
+          const title = allTexts.find(text => 
+            text.toLowerCase().includes('desarrollador') ||
+            text.toLowerCase().includes('programador') ||
+            text.toLowerCase().includes('react') ||
+            text.toLowerCase().includes('frontend') ||
+            text.toLowerCase().includes('software')
+          ) || allTexts[0] || 'Título extraído'
+          
+          console.log(`  ✅ Oferta encontrada: "${title}" - ${mainLink}`)
+          
+          const linkStr = String(mainLink)
+          const fullUrl = linkStr.startsWith('http') ? linkStr : `https://www.infojobs.net${linkStr}`
+          const externalId = linkStr.match(/\/([a-zA-Z0-9]+)/g)?.pop()?.replace('/', '') || null
+          
           offers.push({
             title,
-            company,
-            location,
-            salary,
+            company: null, // extraer después
+            location: null, // extraer después
+            salary: null, // extraer después
+            description: null,
+            url: fullUrl,
+            external_id: externalId
+          })
+        } else {
+          console.log(`  ❌ No se encontró enlace válido en elemento ${index + 1}`)
+        }
+      })
+    }
+
+    // Fallback: buscar todos los enlaces que contengan palabras clave
+    if (offers.length === 0) {
+      console.log('🔍 Fallback: Buscando enlaces con palabras clave...')
+      
+      const allLinks = $('a[href]')
+      console.log(`🔗 Total de enlaces encontrados: ${allLinks.length}`)
+      
+      allLinks.each((_, link) => {
+        const $link = $(link)
+        const href = $link.attr('href')
+        const text = $link.text().trim()
+        
+        if (href && text && 
+           (text.toLowerCase().includes('desarrollador') ||
+            text.toLowerCase().includes('programador') ||
+            text.toLowerCase().includes('react') ||
+            text.toLowerCase().includes('frontend') ||
+            text.toLowerCase().includes('software'))) {
+          
+          console.log(`🎯 Enlace candidato encontrado: "${text}" -> ${href}`)
+          
+          const fullUrl = href.startsWith('http') ? href : `https://www.infojobs.net${href}`
+          const externalId = href.match(/\/([a-zA-Z0-9]+)/g)?.pop()?.replace('/', '') || null
+          
+          offers.push({
+            title: text,
+            company: null,
+            location: null,
+            salary: null,
             description: null,
             url: fullUrl,
             external_id: externalId
@@ -300,27 +343,29 @@ export class InfoJobsScraperSupabase {
       })
     }
 
-    console.log(`📊 Parseadas ${offers.length} ofertas de trabajo`)
+    console.log(`📊 DEBUG: Total ofertas parseadas: ${offers.length}`)
     
-    // Debug: mostrar las primeras 2 ofertas encontradas
+    // Mostrar las primeras ofertas encontradas
     if (offers.length > 0) {
-      console.log('🔍 Primeras ofertas encontradas:')
-      offers.slice(0, 2).forEach((offer, index) => {
-        console.log(`  ${index + 1}. ${offer.title} - ${offer.company} (${offer.location})`)
+      console.log('🎯 Ofertas encontradas:')
+      offers.slice(0, 3).forEach((offer, index) => {
+        console.log(`  ${index + 1}. ${offer.title}`)
+        console.log(`     URL: ${offer.url}`)
       })
     } else {
-      console.log('⚠️ No se encontraron ofertas - verificando HTML...')
-      const bodyText = $('body').text()
-      if (bodyText.includes('No se han encontrado') || bodyText.includes('0 ofertas')) {
-        console.log('💡 InfoJobs indica que no hay ofertas para esta búsqueda')
-      } else if (bodyText.includes('ofertas')) {
-        console.log('💡 El HTML contiene la palabra "ofertas" pero no pudimos extraerlas')
-        // Guardar una muestra del HTML para debug
-        console.log('📄 Muestra del HTML:', $('body').html()?.substring(0, 500))
-      }
+      console.log('❌ No se encontraron ofertas')
+      
+      // Debug final: mostrar muestra del HTML
+      console.log('📄 Muestra del HTML (primeros 1000 chars):')
+      console.log(html.substring(0, 1000))
     }
     
     return offers
+  }
+
+  // Mantener función original como fallback
+  private parseJobOffers(html: string): ScrapedJobOffer[] {
+    return this.parseJobOffersWithDebug(html)
   }
 
   private async saveOffer(offer: ScrapedJobOffer, jobSearchId: string): Promise<boolean> {
