@@ -1,0 +1,230 @@
+import { getSupabaseClient } from '@/lib/database'
+
+export interface JobSearch {
+  id: string
+  user_id: string
+  keywords: string
+  portals: string[]
+  frequency_minutes: number
+  is_active: boolean
+  created_at: string
+  updated_at: string
+  jobOffers?: JobOffer[]
+  _count?: {
+    jobOffers: number
+  }
+}
+
+export interface JobOffer {
+  id: string
+  job_search_id: string
+  title: string
+  company: string | null
+  location: string | null
+  salary: string | null
+  description: string | null
+  url: string | null
+  portal: string
+  status: 'ACTIVE' | 'DISCARDED' | 'INTERESTED_DAVID' | 'INTERESTED_IVAN'
+  external_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export class SupabaseJobController {
+  private supabase = getSupabaseClient()
+
+  // Obtener búsquedas de trabajo con paginación
+  async getJobSearches(userId: string, page = 1, limit = 10) {
+    const offset = (page - 1) * limit
+
+    // Obtener total de búsquedas
+    const { count: total } = await this.supabase
+      .from('job_searches')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+
+    // Obtener búsquedas con conteo de ofertas
+    const { data: searches, error } = await this.supabase
+      .from('job_searches')
+      .select(`
+        *,
+        job_offers(count)
+      `)
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    if (error) {
+      throw new Error(`Error fetching job searches: ${error.message}`)
+    }
+
+    // Transformar datos para coincidir con la interfaz esperada
+    const transformedSearches = searches?.map(search => ({
+      ...search,
+      _count: {
+        jobOffers: search.job_offers?.length || 0
+      }
+    })) || []
+
+    return {
+      data: transformedSearches,
+      total: total || 0,
+      totalPages: Math.ceil((total || 0) / limit),
+      currentPage: page
+    }
+  }
+
+  // Crear nueva búsqueda de trabajo
+  async createJobSearch(data: {
+    keywords: string
+    userId: string
+    frequencyMinutes: number
+    portals: string[]
+  }): Promise<JobSearch> {
+    const { data: jobSearch, error } = await this.supabase
+      .from('job_searches')
+      .insert({
+        user_id: data.userId,
+        keywords: data.keywords,
+        frequency_minutes: data.frequencyMinutes,
+        portals: data.portals,
+        is_active: true
+      })
+      .select()
+      .single()
+
+    if (error) {
+      throw new Error(`Error creating job search: ${error.message}`)
+    }
+
+    console.log('✅ Búsqueda creada en Supabase:', jobSearch.id)
+
+    // TODO: Iniciar scraping aquí
+    // await this.startScraping(jobSearch.id)
+
+    return jobSearch
+  }
+
+  // Obtener ofertas de trabajo
+  async getJobOffers(
+    userId: string,
+    filters: {
+      jobSearchId?: string
+      status?: string
+      page?: number
+      limit?: number
+    } = {}
+  ) {
+    const { page = 1, limit = 20 } = filters
+    const offset = (page - 1) * limit
+
+    let query = this.supabase
+      .from('job_offers')
+      .select(`
+        *,
+        job_searches!inner(user_id)
+      `)
+      .eq('job_searches.user_id', userId)
+
+    if (filters.jobSearchId) {
+      query = query.eq('job_search_id', filters.jobSearchId)
+    }
+
+    if (filters.status) {
+      query = query.eq('status', filters.status)
+    }
+
+    const { data: offers, error, count } = await query
+      .order('created_at', { ascending: false })
+      .range(offset, offset + limit - 1)
+
+    if (error) {
+      throw new Error(`Error fetching job offers: ${error.message}`)
+    }
+
+    return {
+      data: offers || [],
+      total: count || 0,
+      totalPages: Math.ceil((count || 0) / limit),
+      currentPage: page
+    }
+  }
+
+  // Obtener estadísticas
+  async getStats(userId: string) {
+    // Búsquedas totales
+    const { count: totalSearches } = await this.supabase
+      .from('job_searches')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+
+    // Búsquedas activas
+    const { count: activeSearches } = await this.supabase
+      .from('job_searches')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .eq('is_active', true)
+
+    // Total de ofertas
+    const { count: totalOffers } = await this.supabase
+      .from('job_offers')
+      .select(`
+        *,
+        job_searches!inner(user_id)
+      `, { count: 'exact', head: true })
+      .eq('job_searches.user_id', userId)
+
+    // Ofertas de hoy
+    const today = new Date().toISOString().split('T')[0]
+    const { count: todayOffers } = await this.supabase
+      .from('job_offers')
+      .select(`
+        *,
+        job_searches!inner(user_id)
+      `, { count: 'exact', head: true })
+      .eq('job_searches.user_id', userId)
+      .gte('created_at', `${today}T00:00:00.000Z`)
+
+    // Ofertas por estado
+    const { data: statusCounts } = await this.supabase
+      .from('job_offers')
+      .select(`
+        status,
+        job_searches!inner(user_id)
+      `)
+      .eq('job_searches.user_id', userId)
+
+    const offersByStatus = {
+      ACTIVE: 0,
+      DISCARDED: 0,
+      INTERESTED_DAVID: 0,
+      INTERESTED_IVAN: 0
+    }
+
+    statusCounts?.forEach(offer => {
+      if (offer.status in offersByStatus) {
+        offersByStatus[offer.status as keyof typeof offersByStatus]++
+      }
+    })
+
+    return {
+      totalSearches: totalSearches || 0,
+      activeSearches: activeSearches || 0,
+      totalOffers: totalOffers || 0,
+      todayOffers: todayOffers || 0,
+      offersByStatus
+    }
+  }
+
+  // Scraping manual (placeholder)
+  async manualScraping(jobSearchId: string) {
+    console.log(`🚀 Scraping manual iniciado para: ${jobSearchId}`)
+    
+    // TODO: Implementar scraping real aquí
+    return {
+      newOffersCount: 0,
+      message: 'Scraping completado (placeholder - implementar InfoJobs scraper)'
+    }
+  }
+}

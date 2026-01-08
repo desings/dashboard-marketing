@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { JobController } from '@/controllers/jobController'
+import { SupabaseJobController } from '@/controllers/supabaseJobController'
 import { isDatabaseAvailable } from '@/lib/database'
 
 // Definir el tipo localmente
@@ -39,13 +39,14 @@ export async function GET(request: NextRequest) {
     
     if (dbAvailable) {
       try {
-        const result = await JobController.getJobOffers(filters, page, limit)
+        const controller = new SupabaseJobController()
+        const result = await controller.getJobOffers(rawUserId, { ...filters, page, limit })
         return NextResponse.json({
           success: true,
           ...result
         })
       } catch (dbError) {
-        console.warn('⚠️ Error en base de datos:', dbError)
+        console.warn('⚠️ Error obteniendo ofertas de Supabase:', dbError)
       }
     }
     

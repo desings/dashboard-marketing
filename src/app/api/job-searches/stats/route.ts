@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { JobController } from '@/controllers/jobController'
+import { SupabaseJobController } from '@/controllers/supabaseJobController'
 import { isDatabaseAvailable } from '@/lib/database'
 
 // GET /api/job-searches/stats
@@ -22,13 +22,14 @@ export async function GET(request: NextRequest) {
     
     if (dbAvailable) {
       try {
-        const stats = await JobController.getJobSearchStats(userId)
+        const controller = new SupabaseJobController()
+        const stats = await controller.getStats(userId)
         return NextResponse.json({
           success: true,
           data: stats
         })
       } catch (dbError) {
-        console.warn('⚠️ Error en base de datos:', dbError)
+        console.warn('⚠️ Error obteniendo estadísticas de Supabase:', dbError)
       }
     }
     

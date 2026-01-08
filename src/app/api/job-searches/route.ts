@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { JobController } from '@/controllers/jobController'
+import { SupabaseJobController } from '@/controllers/supabaseJobController'
 import { isDatabaseAvailable } from '@/lib/database'
 
 // GET /api/job-searches
@@ -24,13 +24,14 @@ export async function GET(request: NextRequest) {
     
     if (dbAvailable) {
       try {
-        const result = await JobController.getJobSearches(userId, page, limit)
+        const controller = new SupabaseJobController()
+        const result = await controller.getJobSearches(userId, page, limit)
         return NextResponse.json({
           success: true,
           ...result
         })
       } catch (dbError) {
-        console.warn('⚠️ Error en base de datos:', dbError)
+        console.warn('⚠️ Error en Supabase:', dbError)
       }
     }
     
@@ -79,17 +80,18 @@ export async function POST(request: NextRequest) {
     
     if (dbAvailable) {
       try {
-        const jobSearch = await JobController.createJobSearch(body)
+        const controller = new SupabaseJobController()
+        const jobSearch = await controller.createJobSearch(body)
         
         return NextResponse.json({
           success: true,
           data: jobSearch,
-          message: 'Búsqueda creada exitosamente - scraping iniciado'
+          message: 'Búsqueda creada exitosamente en Supabase - scraping iniciado'
         }, { status: 201 })
       } catch (dbError) {
-        console.error('❌ Error creando búsqueda en base de datos:', dbError)
+        console.error('❌ Error creando búsqueda en Supabase:', dbError)
         return NextResponse.json(
-          { success: false, error: 'Error creando búsqueda en base de datos' },
+          { success: false, error: 'Error creando búsqueda en Supabase' },
           { status: 500 }
         )
       }
