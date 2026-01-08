@@ -26494,3 +26494,35 @@ Published successfully
 [2026-01-08 23:15:01] ❌ SCHEDULER: Error en la respuesta: 
 [2026-01-08 23:15:01] 🏁 SCHEDULER: Verificación completada
 
+[2026-01-08 23:16:00] 🕒 SCHEDULER: Iniciando verificación de posts programados...
+[2026-01-08 23:16:00] ❌ SCHEDULER: Error en la respuesta: 
+[2026-01-08 23:16:00] 🏁 SCHEDULER: Verificación completada
+
+[2026-01-08 23:17:00] 🕒 SCHEDULER: Iniciando verificación de posts programados...
+[2026-01-08 23:17:00] ❌ SCHEDULER: Error de conexión o timeout al ejecutar scheduler
+[2026-01-08 23:17:00] 🏁 SCHEDULER: Verificación completada
+
+[2026-01-08 23:18:00] 🕒 SCHEDULER: Iniciando verificación de posts programados...
+[2026-01-08 23:18:00] ❌ SCHEDULER: Error de conexión o timeout al ejecutar scheduler
+[2026-01-08 23:18:00] 🏁 SCHEDULER: Verificación completada
+
+[2026-01-08 23:19:00] 🕒 SCHEDULER: Iniciando verificación de posts programados...
+[2026-01-08 23:19:00] ❌ SCHEDULER: Error de conexión o timeout al ejecutar scheduler
+[2026-01-08 23:19:00] 🏁 SCHEDULER: Verificación completada
+
+[2026-01-08 23:20:00] 🕒 SCHEDULER: Iniciando verificación de posts programados...
+[2026-01-08 23:20:01] ❌ SCHEDULER: Error de conexión o timeout al ejecutar scheduler
+[2026-01-08 23:20:01] 🏁 SCHEDULER: Verificación completada
+
+[2026-01-08 23:21:00] 🕒 SCHEDULER: Iniciando verificación de posts programados...
+[2026-01-08 23:21:00] ❌ SCHEDULER: Error de conexión o timeout al ejecutar scheduler
+[2026-01-08 23:21:00] 🏁 SCHEDULER: Verificación completada
+
+[2026-01-08 23:22:00] 🕒 SCHEDULER: Iniciando verificación de posts programados...
+[2026-01-08 23:22:00] ❌ SCHEDULER: Error de conexión o timeout al ejecutar scheduler
+[2026-01-08 23:22:00] 🏁 SCHEDULER: Verificación completada
+
+[2026-01-08 23:23:00] 🕒 SCHEDULER: Iniciando verificación de posts programados...
+[2026-01-08 23:23:00] ❌ SCHEDULER: Error de conexión o timeout al ejecutar scheduler
+[2026-01-08 23:23:00] 🏁 SCHEDULER: Verificación completada
+

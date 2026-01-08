@@ -1,22 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { JobController } from '@/controllers/jobController'
+import { isDatabaseAvailable } from '@/lib/database'
 
 // Definir el tipo localmente
 type JobStatus = 'ACTIVE' | 'DISCARDED' | 'INTERESTED_DAVID' | 'INTERESTED_IVAN'
-
-// Función para verificar si la DB está disponible
-async function isDatabaseAvailable(): Promise<boolean> {
-  try {
-    if (!process.env.DATABASE_URL) return false
-    const { PrismaClient } = await import('@prisma/client')
-    const prisma = new PrismaClient()
-    await prisma.$connect()
-    await prisma.$disconnect()
-    return true
-  } catch {
-    return false
-  }
-}
 
 // GET /api/job-offers
 export async function GET(request: NextRequest) {

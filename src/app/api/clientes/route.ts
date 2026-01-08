@@ -2,19 +2,7 @@ import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-
-// Función para verificar si la DB está disponible
-async function isDatabaseAvailable(): Promise<boolean> {
-  try {
-    if (!process.env.DATABASE_URL) return false
-    const prisma = new PrismaClient();
-    await prisma.$connect();
-    await prisma.$disconnect();
-    return true;
-  } catch {
-    return false;
-  }
-}
+import { isDatabaseAvailable } from '@/lib/database'
 
 // Función para obtener userId del JWT  
 function getUserId(req: Request): string {

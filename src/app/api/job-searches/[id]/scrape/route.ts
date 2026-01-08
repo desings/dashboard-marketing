@@ -1,19 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { JobController } from '@/controllers/jobController'
-
-// Función para verificar si la DB está disponible
-async function isDatabaseAvailable(): Promise<boolean> {
-  try {
-    if (!process.env.DATABASE_URL) return false
-    const { PrismaClient } = await import('@prisma/client')
-    const prisma = new PrismaClient()
-    await prisma.$connect()
-    await prisma.$disconnect()
-    return true
-  } catch {
-    return false
-  }
-}
+import { isDatabaseAvailable } from '@/lib/database'
 
 export async function POST(
   request: NextRequest,
