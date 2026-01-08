@@ -26,9 +26,12 @@ export async function POST(request: NextRequest) {
     
     console.log('📊 Tablas existentes:', tables)
 
-    // Crear datos de ejemplo si no existen
-    const existingSearches = await prisma.jobSearch.count()
+    // TODO: Crear datos de ejemplo después de que Vercel genere el cliente correctamente
+    // const existingSearches = await prisma.jobSearch.count()
     
+    console.log('✅ Setup-db completado (datos de ejemplo temporalmente deshabilitados)')
+    
+    /* Datos de ejemplo temporalmente comentados hasta que Vercel genere el cliente Prisma correctamente
     if (existingSearches === 0) {
       console.log('🌱 Creando datos de ejemplo...')
       
@@ -56,12 +59,13 @@ export async function POST(request: NextRequest) {
     } else {
       console.log('⏭️ Ya existen datos, no se crean ejemplos')
     }
+    */
 
     return NextResponse.json({
       success: true,
       message: 'Base de datos configurada correctamente',
       tablesCount: Array.isArray(tables) ? tables.length : 0,
-      searchesCount: existingSearches
+      searchesCount: 0 // Temporalmente en 0 hasta que se habilite la lógica completa
     })
 
   } catch (error) {
