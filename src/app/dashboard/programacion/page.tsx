@@ -108,31 +108,34 @@ export default function ProgramacionPage() {
         })
       })
       
-      for (const post of localPosts) {
-        if (post.status === 'pending') {
-          const scheduledTime = new Date(`${post.date}T${post.time}`)
-          const timeDiff = scheduledTime.getTime() - now.getTime()
-          
-          console.log('⏰ Verificando post:', {
+      // Filtrar solo posts PENDIENTES
+      const pendingPosts = localPosts.filter((post: any) => post.status === 'pending')
+      console.log(`🔍 Posts pendientes a verificar: ${pendingPosts.length} de ${localPosts.length} total`)
+      
+      for (const post of pendingPosts) {
+        const scheduledTime = new Date(`${post.date}T${post.time}`)
+        const timeDiff = scheduledTime.getTime() - now.getTime()
+        
+        console.log('⏰ Verificando post:', {
+          id: post.id.substring(0, 10) + '...',
+          status: post.status, // Re-verificar status
+          programado_para: scheduledTime.toLocaleString(),
+          hora_actual: now.toLocaleString(),
+          diferencia_ms: timeDiff,
+          diferencia_minutos: Math.round(timeDiff / 60000),
+          debe_ejecutarse: scheduledTime <= now,
+          tiene_media: post.media && post.media.length > 0
+        })
+        
+        // Si la hora programada ya pasó, ejecutar el post
+        if (scheduledTime <= now) {
+          console.log('🕒 Ejecutando post programado:', post.id)
+          await executeScheduledPost(post)
+        } else {
+          console.log('⏳ Post aún no está listo para ejecutar:', {
             id: post.id.substring(0, 10) + '...',
-            programado_para: scheduledTime.toLocaleString(),
-            hora_actual: now.toLocaleString(),
-            diferencia_ms: timeDiff,
-            diferencia_minutos: Math.round(timeDiff / 60000),
-            debe_ejecutarse: scheduledTime <= now,
-            tiene_media: post.media && post.media.length > 0
+            faltan_minutos: Math.round(timeDiff / 60000)
           })
-          
-          // Si la hora programada ya pasó, ejecutar el post
-          if (scheduledTime <= now) {
-            console.log('🕒 Ejecutando post programado:', post.id)
-            await executeScheduledPost(post)
-          } else {
-            console.log('⏳ Post aún no está listo para ejecutar:', {
-              id: post.id.substring(0, 10) + '...',
-              faltan_minutos: Math.round(timeDiff / 60000)
-            })
-          }
         }
       }
     } catch (error) {
@@ -755,7 +758,10 @@ export default function ProgramacionPage() {
           const fbAccounts = JSON.parse(localStorage.getItem('facebook_accounts') || '{}')
           const fbAccount = fbAccounts.default || fbAccounts[Object.keys(fbAccounts)[0]]
           
-          console.log('🔍 [DEBUG] Facebook accounts:', Object.keys(fbAccounts))
+          // Debug mejorado
+          console.log('🔍 [DEBUG] localStorage facebook_accounts raw:', localStorage.getItem('facebook_accounts'))
+          console.log('🔍 [DEBUG] Facebook accounts parsed:', fbAccounts)
+          console.log('🔍 [DEBUG] Facebook accounts keys:', Object.keys(fbAccounts))
           console.log('🔍 [DEBUG] Selected account:', fbAccount ? 'Found' : 'Not found')
           console.log('🔍 [DEBUG] Post ID a eliminar:', selectedPost.facebookPostId)
           
