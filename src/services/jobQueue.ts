@@ -1,21 +1,17 @@
 import { Worker, Queue } from 'bullmq'
-import Redis from 'ioredis'
 import { PrismaClient } from '@prisma/client'
 import { JobController } from '@/controllers/jobController'
 
 // Configuración de Redis
-const redis = new Redis({
+const redisConnection = {
   host: process.env.REDIS_HOST || 'localhost',
   port: parseInt(process.env.REDIS_PORT || '6379'),
-  password: process.env.REDIS_PASSWORD,
-  maxRetriesPerRequest: 3,
-  retryDelayOnFailover: 100,
-  enableReadyCheck: false
-})
+  password: process.env.REDIS_PASSWORD
+}
 
 // Queue para jobs de scraping
 export const jobScrapingQueue = new Queue('job-scraping', { 
-  connection: redis,
+  connection: redisConnection,
   defaultJobOptions: {
     removeOnComplete: 10,
     removeOnFail: 5,
@@ -65,10 +61,8 @@ export const jobScrapingWorker = new Worker(
     }
   },
   { 
-    connection: redis,
-    concurrency: 2, // Máximo 2 jobs simultáneos
-    removeOnComplete: 10,
-    removeOnFail: 5
+    connection: redisConnection,
+    concurrency: 2 // Máximo 2 jobs simultáneos
   }
 )
 
@@ -253,7 +247,6 @@ export async function cleanup() {
   try {
     await jobScrapingWorker.close()
     await jobScrapingQueue.close()
-    await redis.quit()
     console.log('🔒 Conexiones cerradas correctamente')
   } catch (error) {
     console.error('❌ Error en cleanup:', error)

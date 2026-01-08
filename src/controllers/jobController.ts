@@ -359,7 +359,8 @@ export class JobController {
         prisma.jobOffer.groupBy({
           by: ['status'],
           where: { jobSearch: { userId } },
-          _count: true
+          _count: true,
+          orderBy: { _count: { status: 'desc' } }
         }),
         
         // Ofertas de hoy
@@ -381,7 +382,10 @@ export class JobController {
         totalOffers,
         todayOffers,
         offersByStatus: offersByStatus.reduce((acc, item) => {
-          acc[item.status] = item._count
+          // Con groupBy y _count: true, obtenemos el número directamente
+          const count = typeof item._count === 'number' ? item._count :
+                       typeof item._count === 'object' ? (item._count._all || 0) : 1
+          acc[item.status] = count
           return acc
         }, {} as Record<string, number>)
       }

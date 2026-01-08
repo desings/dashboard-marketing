@@ -3,10 +3,10 @@ import { JobController } from '@/controllers/jobController'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params
+    const { id } = await params
     
     const result = await JobController.manualScraping(id)
     
