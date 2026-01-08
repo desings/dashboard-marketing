@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { JobController } from '@/controllers/jobController'
 
 // GET /api/job-searches/stats
 export async function GET(request: NextRequest) {
@@ -8,24 +9,10 @@ export async function GET(request: NextRequest) {
     
     console.log('GET job-searches/stats - userId:', userId)
 
-    // Datos demo para estadísticas
-    const mockStats = {
-      totalSearches: 3,
-      activeSearches: 2,
-      totalOffers: 26,
-      todayOffers: 5,
-      offersByStatus: {
-        'PENDING': 15,
-        'REVIEWED': 8,
-        'APPLIED': 2,
-        'REJECTED': 1
-      }
-    }
-
+    const stats = await JobController.getJobSearchStats(userId)
     return NextResponse.json({
       success: true,
-      data: mockStats,
-      message: 'Estadísticas de demostración'
+      data: stats
     })
     
   } catch (error) {

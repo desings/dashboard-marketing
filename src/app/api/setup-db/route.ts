@@ -3,51 +3,72 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-// Solo permitir en desarrollo
 export async function POST(request: NextRequest) {
-  if (process.env.NODE_ENV === 'production') {
-    return NextResponse.json({ error: 'No permitido en producción' }, { status: 403 })
-  }
-
   try {
-    console.log('🔄 Iniciando migración/setup de base de datos...')
-    
+    console.log('🔧 Inicializando base de datos y datos demo...')
+
     // Test de conexión
     await prisma.$connect()
     console.log('✅ Conexión a base de datos establecida')
 
-    // Verificar si las tablas existen
-    const tables = await prisma.$queryRaw`
-      SELECT table_name 
-      FROM information_schema.tables 
-      WHERE table_schema = 'public' 
-      AND table_name IN ('JobSearch', 'JobOffer', 'CompanyProfile');
-    `
-    
-    console.log('📊 Tablas existentes:', tables)
+    // Crear usuario demo si no existe
+    const demoUser = await prisma.user.upsert({
+      where: { email: 'demo@example.com' },
+      update: {},
+      create: {
+        id: 'demo-user',
+        email: 'demo@example.com',
+        passwordHash: '$2b$10$dummy.hash.for.demo'
+      }
+    })
 
-    // TODO: Crear datos de ejemplo después de que Vercel genere el cliente correctamente
-    // const existingSearches = await prisma.jobSearch.count()
-    
-    console.log('✅ Setup-db completado (datos de ejemplo temporalmente deshabilitados)')
-    
-    /* Datos de ejemplo temporalmente comentados hasta que Vercel genere el cliente Prisma correctamente
-    if (existingSearches === 0) {
-      console.log('🌱 Creando datos de ejemplo...')
-      
-      await prisma.jobSearch.create({
-        data: {
-          userId: 'demo-user',
-          keywords: 'desarrollador react javascript',
-          portals: ['infojobs'],
-          frequencyMinutes: 360,
-          isActive: true
+    // Crear tenant demo si no existe
+    const demoTenant = await prisma.tenant.upsert({
+      where: { id: 'demo-tenant' },
+      update: {},
+      create: {
+        id: 'demo-tenant',
+        name: 'Cliente Demo'
+      }
+    })
+
+    // Crear relación UserTenant si no existe
+    await prisma.userTenant.upsert({
+      where: {
+        userId_tenantId: {
+          userId: demoUser.id,
+          tenantId: demoTenant.id
         }
-      })
+      },
+      update: {},
+      create: {
+        id: 'demo-relation',
+        userId: demoUser.id,
+        tenantId: demoTenant.id,
+        role: 'owner'
+      }
+    })
 
-      await prisma.jobSearch.create({
-        data: {
-          userId: 'demo-user',
+    console.log('✅ Base de datos inicializada con datos demo')
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Base de datos inicializada exitosamente',
+      data: {
+        user: demoUser.id,
+        tenant: demoTenant.id
+      }
+    })
+
+  } catch (error) {
+    console.error('❌ Error inicializando base de datos:', error)
+    return NextResponse.json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Error desconocido',
+      message: 'Error con la base de datos. Asegúrate de que DATABASE_URL esté configurado correctamente.'
+    }, { status: 500 })
+  }
+}
           keywords: 'marketing digital seo',
           portals: ['infojobs'],
           frequencyMinutes: 720,

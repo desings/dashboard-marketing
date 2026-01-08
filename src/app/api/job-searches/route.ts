@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { JobController } from '@/controllers/jobController'
 
 // GET /api/job-searches
 export async function GET(request: NextRequest) {
@@ -10,54 +11,10 @@ export async function GET(request: NextRequest) {
 
     console.log('GET job-searches - userId:', userId, 'page:', page, 'limit:', limit)
 
-    // Datos demo para búsquedas de trabajo
-    const mockJobSearches = [
-      {
-        id: '1',
-        keywords: 'desarrollador frontend React',
-        portals: ['infojobs', 'linkedin'],
-        frequencyMinutes: 60,
-        isActive: true,
-        createdAt: new Date().toISOString(),
-        _count: {
-          jobOffers: 15
-        }
-      },
-      {
-        id: '2', 
-        keywords: 'programador javascript nodejs',
-        portals: ['infojobs'],
-        frequencyMinutes: 120,
-        isActive: true,
-        createdAt: new Date(Date.now() - 24*60*60*1000).toISOString(),
-        _count: {
-          jobOffers: 8
-        }
-      },
-      {
-        id: '3',
-        keywords: 'diseñador UX UI',
-        portals: ['linkedin', 'indeed'],
-        frequencyMinutes: 240,
-        isActive: false,
-        createdAt: new Date(Date.now() - 48*60*60*1000).toISOString(),
-        _count: {
-          jobOffers: 3
-        }
-      }
-    ]
-
-    const startIndex = (page - 1) * limit
-    const endIndex = startIndex + limit
-    const paginatedData = mockJobSearches.slice(startIndex, endIndex)
-
+    const result = await JobController.getJobSearches(userId, page, limit)
     return NextResponse.json({
       success: true,
-      data: paginatedData,
-      total: mockJobSearches.length,
-      totalPages: Math.ceil(mockJobSearches.length / limit),
-      currentPage: page,
-      message: 'Datos de demostración - módulo operativo'
+      ...result
     })
     
   } catch (error) {
@@ -83,23 +40,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Simular creación exitosa en modo demo
-    const newJobSearch = {
-      id: Date.now().toString(),
-      keywords: body.keywords,
-      portals: body.portals || ['infojobs'],
-      frequencyMinutes: body.frequencyMinutes || 60,
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      _count: {
-        jobOffers: 0
-      }
+    const data = {
+      ...body,
+      userId: body.userId || 'demo-user'
     }
 
+    const jobSearch = await JobController.createJobSearch(data)
+    
     return NextResponse.json({
       success: true,
-      data: newJobSearch,
-      message: 'Búsqueda creada exitosamente (demo)'
+      data: jobSearch,
+      message: 'Búsqueda creada exitosamente'
     }, { status: 201 })
   } catch (error) {
     console.error('❌ Error en POST job-searches:', error)
