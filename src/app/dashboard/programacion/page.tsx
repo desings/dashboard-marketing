@@ -767,11 +767,17 @@ export default function ProgramacionPage() {
               return
             }
           } else {
-            const deleteUrl = `/api/facebook-delete-post?postId=${selectedPost.facebookPostId}&pageToken=${fbAccount.pageToken}`
-            console.log('🌐 [DEBUG] URL de eliminación:', deleteUrl.replace(fbAccount.pageToken, 'TOKEN_HIDDEN'))
+            console.log('🌐 [DEBUG] Enviando petición de eliminación...')
             
-            const facebookResponse = await fetch(deleteUrl, {
-              method: 'DELETE'
+            const facebookResponse = await fetch('/api/facebook-delete-post', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                postId: selectedPost.facebookPostId,
+                pageToken: fbAccount.pageToken
+              })
             })
             
             console.log('📡 [DEBUG] Response status:', facebookResponse.status)
