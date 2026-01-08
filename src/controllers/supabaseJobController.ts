@@ -217,14 +217,66 @@ export class SupabaseJobController {
     }
   }
 
-  // Scraping manual (placeholder)
-  async manualScraping(jobSearchId: string) {
-    console.log(`🚀 Scraping manual iniciado para: ${jobSearchId}`)
-    
-    // TODO: Implementar scraping real aquí
-    return {
-      newOffersCount: 0,
-      message: 'Scraping completado (placeholder - implementar InfoJobs scraper)'
+  // Scraping manual con InfoJobs REAL
+  async manualScraping(jobSearchId: string): Promise<{
+    success: boolean
+    message: string
+    newOffersCount?: number
+    totalProcessed?: number
+    errors?: string[]
+  }> {
+    try {
+      // Obtener la búsqueda
+      const { data: search, error: searchError } = await this.supabase
+        .from('job_searches')
+        .select('*')
+        .eq('id', jobSearchId)
+        .single()
+
+      if (searchError || !search) {
+        return {
+          success: false,
+          message: 'Búsqueda no encontrada'
+        }
+      }
+
+      console.log(`🔍 Iniciando scraping REAL de InfoJobs para: "${search.keywords}"`)
+
+      // Importar el scraper real
+      const { InfoJobsScraperSupabase } = await import('@/services/infojobsScraperSupabase')
+      const scraper = new InfoJobsScraperSupabase()
+
+      // Realizar scraping real
+      const scrapingResult = await scraper.scrapeJobOffers(
+        search.keywords, 
+        jobSearchId, 
+        3 // máximo 3 páginas
+      )
+
+      // Actualizar última ejecución
+      await this.supabase
+        .from('job_searches')
+        .update({
+          last_execution: new Date().toISOString(),
+          status: 'ACTIVE'
+        })
+        .eq('id', jobSearchId)
+
+      return {
+        success: true,
+        message: `Scraping REAL completado: ${scrapingResult.newOffersCount} nuevas ofertas encontradas de ${scrapingResult.totalProcessed} procesadas`,
+        newOffersCount: scrapingResult.newOffersCount,
+        totalProcessed: scrapingResult.totalProcessed,
+        errors: scrapingResult.errors.length > 0 ? scrapingResult.errors : undefined
+      }
+
+    } catch (error) {
+      console.error('❌ Error en scraping REAL:', error)
+      return {
+        success: false,
+        message: `Error durante el scraping REAL: ${error}`,
+        errors: [String(error)]
+      }
     }
   }
 }

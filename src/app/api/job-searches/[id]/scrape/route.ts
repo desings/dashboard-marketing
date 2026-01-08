@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { JobController } from '@/controllers/jobController'
+import { SupabaseJobController } from '@/controllers/supabaseJobController'
 import { isDatabaseAvailable } from '@/lib/database'
 
 export async function POST(
@@ -15,22 +15,42 @@ export async function POST(
     if (!dbAvailable) {
       return NextResponse.json({
         success: false,
-        error: 'DATABASE_URL no configurada. Configure una base de datos PostgreSQL para realizar scraping real de InfoJobs.',
+        error: 'Supabase no configurado. Configure la base de datos para realizar scraping real de InfoJobs.',
         requiresSetup: true
       }, { status: 400 })
     }
     
-    const result = await JobController.manualScraping(id)
+    console.log(`🚀 Iniciando scraping REAL de InfoJobs para búsqueda: ${id}`)
+    
+    const jobController = new SupabaseJobController()
+    const result = await jobController.manualScraping(id)
+    
+    if (!result.success) {
+      return NextResponse.json({
+        success: false,
+        error: result.message,
+        errors: result.errors
+      }, { status: 500 })
+    }
     
     return NextResponse.json({
       success: true,
-      data: result,
-      message: `Scraping completado: ${result.newOffersCount} nuevas ofertas encontradas en InfoJobs`
+      data: {
+        newOffersCount: result.newOffersCount,
+        totalProcessed: result.totalProcessed,
+        errors: result.errors
+      },
+      message: result.message
     })
+    
   } catch (error) {
-    console.error('❌ Error en scraping manual:', error)
+    console.error('❌ Error en scraping manual REAL:', error)
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : 'Error interno' },
+      { 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Error interno durante scraping real',
+        message: 'Error ejecutando scraper de InfoJobs'
+      },
       { status: 500 }
     )
   }
