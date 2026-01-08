@@ -751,21 +751,34 @@ export default function ProgramacionPage() {
         console.log('🗑️ Eliminando post de Facebook:', selectedPost.facebookPostId)
         
         try {
-          const facebookResponse = await fetch(`/api/facebook-delete-post?postId=${selectedPost.facebookPostId}`, {
-            method: 'DELETE'
-          })
+          // Obtener token de Facebook desde localStorage
+          const fbAccounts = JSON.parse(localStorage.getItem('facebook_accounts') || '{}')
+          const fbAccount = fbAccounts.default || fbAccounts[Object.keys(fbAccounts)[0]]
           
-          const facebookResult = await facebookResponse.json()
-          
-          if (!facebookResult.success && !facebookResult.alreadyDeleted) {
+          if (!fbAccount?.pageToken) {
             const continueAnyway = confirm(
-              `⚠️ No se pudo eliminar de Facebook: ${facebookResult.error}\n\n¿Quieres continuar y eliminar solo del dashboard?`
+              `⚠️ No se encontró token de Facebook para eliminar el post.\n\n¿Quieres continuar y eliminar solo del dashboard?`
             )
             if (!continueAnyway) {
               return
             }
           } else {
-            console.log('✅ Post eliminado de Facebook exitosamente')
+            const facebookResponse = await fetch(`/api/facebook-delete-post?postId=${selectedPost.facebookPostId}&pageToken=${fbAccount.pageToken}`, {
+              method: 'DELETE'
+            })
+            
+            const facebookResult = await facebookResponse.json()
+            
+            if (!facebookResult.success && !facebookResult.alreadyDeleted) {
+              const continueAnyway = confirm(
+                `⚠️ No se pudo eliminar de Facebook: ${facebookResult.error}\n\n¿Quieres continuar y eliminar solo del dashboard?`
+              )
+              if (!continueAnyway) {
+                return
+              }
+            } else {
+              console.log('✅ Post eliminado de Facebook exitosamente')
+            }
           }
         } catch (facebookError) {
           console.error('Error eliminando de Facebook:', facebookError)

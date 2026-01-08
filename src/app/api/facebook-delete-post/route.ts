@@ -4,25 +4,15 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const postId = searchParams.get('postId')
+    const pageToken = searchParams.get('pageToken')
     
     if (!postId) {
       return NextResponse.json({ error: 'Post ID requerido' }, { status: 400 })
     }
 
-    // Obtener token de Facebook desde localStorage o variables de entorno
-    let pageToken = process.env.FACEBOOK_PAGE_ACCESS_TOKEN
-    
-    if (!pageToken) {
-      // Intentar obtener del sistema de OAuth
-      const facebookAccounts = JSON.parse(process.env.FACEBOOK_ACCOUNTS_DATA || '{}')
-      if (facebookAccounts.pageToken) {
-        pageToken = facebookAccounts.pageToken
-      }
-    }
-    
     if (!pageToken) {
       return NextResponse.json({ 
-        error: 'No se encontró token de acceso de Facebook',
+        error: 'Token de acceso de Facebook requerido',
         success: false 
       }, { status: 401 })
     }
