@@ -754,18 +754,19 @@ export default function ProgramacionPage() {
         console.log('🗑️ Eliminando post de Facebook:', selectedPost.facebookPostId)
         
         try {
-          // Obtener token de Facebook desde localStorage
-          const fbAccounts = JSON.parse(localStorage.getItem('facebook_accounts') || '{}')
-          const fbAccount = fbAccounts.default || fbAccounts[Object.keys(fbAccounts)[0]]
+          // Obtener cuentas conectadas desde localStorage (igual que en publishNow)
+          const connectedAccounts = JSON.parse(localStorage.getItem('connected_accounts') || '[]')
+          const fbAccount = connectedAccounts.find((acc: any) => acc.provider === 'facebook')
           
           // Debug mejorado
-          console.log('🔍 [DEBUG] localStorage facebook_accounts raw:', localStorage.getItem('facebook_accounts'))
-          console.log('🔍 [DEBUG] Facebook accounts parsed:', fbAccounts)
-          console.log('🔍 [DEBUG] Facebook accounts keys:', Object.keys(fbAccounts))
-          console.log('🔍 [DEBUG] Selected account:', fbAccount ? 'Found' : 'Not found')
+          console.log('🔍 [DEBUG] localStorage connected_accounts raw:', localStorage.getItem('connected_accounts'))
+          console.log('🔍 [DEBUG] Connected accounts parsed:', connectedAccounts)
+          console.log('🔍 [DEBUG] Facebook account encontrada:', !!fbAccount)
+          console.log('🔍 [DEBUG] Tiene pageToken:', !!fbAccount?.pageToken)
           console.log('🔍 [DEBUG] Post ID a eliminar:', selectedPost.facebookPostId)
           
           if (!fbAccount?.pageToken) {
+            console.log('❌ No se encontró cuenta Facebook o token válido en connected_accounts')
             const continueAnyway = confirm(
               `⚠️ No se encontró token de Facebook para eliminar el post.\n\n¿Quieres continuar y eliminar solo del dashboard?`
             )
@@ -773,7 +774,7 @@ export default function ProgramacionPage() {
               return
             }
           } else {
-            console.log('🌐 [DEBUG] Enviando petición de eliminación...')
+            console.log('🌐 [DEBUG] Enviando petición de eliminación con token válido...')
             
             const facebookResponse = await fetch('/api/facebook-delete-post', {
               method: 'POST',
