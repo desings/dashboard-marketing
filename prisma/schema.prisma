@@ -158,3 +158,67 @@ model AnalyticsSnapshot {
   @@unique([tenantId, date, platform])
   @@index([tenantId, date])
 }
+
+// ==============================================
+// MÓDULO BÚSQUEDA DE CLIENTES (JOB SEARCH)
+// ==============================================
+
+model JobSearch {
+  id               String   @id @default(cuid())
+  userId           String
+  keywords         String
+  portals          String[] @default(["infojobs"])
+  frequencyMinutes Int      @default(360) // 6h
+  isActive         Boolean  @default(true)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  
+  jobOffers JobOffer[]
+  
+  @@index([userId])
+  @@index([isActive])
+}
+
+model JobOffer {
+  id            String      @id @default(cuid())
+  jobSearchId   String
+  title         String
+  company       String
+  url           String      @unique
+  salary        String?
+  location      String?
+  postedAt      String?     // "Hace 2 días"
+  description   String?
+  status        JobStatus   @default(ACTIVE)
+  rawHtml       String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  jobSearch      JobSearch       @relation(fields: [jobSearchId], references: [id], onDelete: Cascade)
+  companyProfile CompanyProfile?
+  
+  @@index([jobSearchId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model CompanyProfile {
+  id         String   @id @default(cuid())
+  jobOfferId String   @unique
+  name       String?
+  website    String?
+  email      String?
+  phone      String?
+  address    String?
+  source     String?  // "scraping", "hunter", "google"
+  createdAt  DateTime @default(now())
+  
+  jobOffer JobOffer @relation(fields: [jobOfferId], references: [id], onDelete: Cascade)
+}
+
+enum JobStatus {
+  ACTIVE
+  DISCARDED
+  INTERESTED_DAVID
+  INTERESTED_IVAN
+}

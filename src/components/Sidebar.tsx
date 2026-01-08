@@ -9,6 +9,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ currentPath = '' }) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [expandedMenus, setExpandedMenus] = useState<string[]>(['clientes']); // Expandir Clientes por defecto
   const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
@@ -26,32 +27,66 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath = '' }) => {
     router.push('/login');
   };
 
+  const toggleSubMenu = (menuId: string) => {
+    setExpandedMenus(prev => 
+      prev.includes(menuId) 
+        ? prev.filter(id => id !== menuId)
+        : [...prev, menuId]
+    );
+  };
+
   const menuItems = [
     {
+      id: 'dashboard',
       icon: 'fas fa-tachometer-alt',
       label: 'Dashboard',
       path: '/dashboard',
       active: currentPath === '/dashboard'
     },
     {
+      id: 'clientes',
       icon: 'fas fa-users',
       label: 'Clientes',
       path: '/dashboard/clientes',
-      active: currentPath.includes('/clientes')
+      active: currentPath.includes('/clientes'),
+      hasSubmenu: true,
+      subItems: [
+        {
+          icon: 'fas fa-list',
+          label: 'Lista de Clientes',
+          path: '/dashboard/clientes',
+          active: currentPath === '/dashboard/clientes'
+        },
+        {
+          icon: 'fas fa-search',
+          label: 'Búsqueda Clientes',
+          path: '/dashboard/clientes/busqueda',
+          active: currentPath.includes('/clientes/busqueda')
+        },
+        {
+          icon: 'fas fa-briefcase',
+          label: 'Ofertas Trabajo',
+          path: '/dashboard/clientes/ofertas',
+          active: currentPath.includes('/clientes/ofertas')
+        }
+      ]
     },
     {
+      id: 'programacion',
       icon: 'fas fa-calendar-alt',
       label: 'Programación',
       path: '/dashboard/programacion',
       active: currentPath.includes('/programacion')
     },
     {
+      id: 'analytics',
       icon: 'fas fa-chart-bar',
       label: 'Analíticas',
       path: '/dashboard/analytics',
       active: currentPath.includes('/analytics')
     },
     {
+      id: 'settings',
       icon: 'fas fa-cogs',
       label: 'Configuración',
       path: '/dashboard/settings',
@@ -107,18 +142,62 @@ const Sidebar: React.FC<SidebarProps> = ({ currentPath = '' }) => {
         <nav className="flex-1 p-4">
           <ul className="space-y-2">
             {menuItems.map((item) => (
-              <li key={item.path}>
-                <button
-                  onClick={() => router.push(item.path)}
-                  className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-left transition-all duration-200 ${
-                    item.active
-                      ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
-                      : 'text-slate-300 hover:text-white hover:bg-slate-700'
-                  }`}
-                >
-                  <i className={`${item.icon} ${isCollapsed ? 'text-center w-full' : 'w-5'}`}></i>
-                  {!isCollapsed && <span className="font-medium">{item.label}</span>}
-                </button>
+              <li key={item.id}>
+                {item.hasSubmenu ? (
+                  // Menú con submenús
+                  <div>
+                    <button
+                      onClick={() => toggleSubMenu(item.id)}
+                      className={`w-full flex items-center justify-between space-x-3 px-3 py-2.5 rounded-lg text-left transition-all duration-200 ${
+                        item.active
+                          ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                          : 'text-slate-300 hover:text-white hover:bg-slate-700'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <i className={`${item.icon} ${isCollapsed ? 'text-center w-full' : 'w-5'}`}></i>
+                        {!isCollapsed && <span className="font-medium">{item.label}</span>}
+                      </div>
+                      {!isCollapsed && (
+                        <i className={`fas fa-chevron-${expandedMenus.includes(item.id) ? 'down' : 'right'} text-xs`}></i>
+                      )}
+                    </button>
+                    
+                    {/* Submenú */}
+                    {!isCollapsed && expandedMenus.includes(item.id) && item.subItems && (
+                      <ul className="mt-2 ml-4 space-y-1">
+                        {item.subItems.map((subItem) => (
+                          <li key={subItem.path}>
+                            <button
+                              onClick={() => router.push(subItem.path)}
+                              className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-left transition-all duration-200 text-sm ${
+                                subItem.active
+                                  ? 'bg-blue-500 text-white shadow'
+                                  : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                              }`}
+                            >
+                              <i className={`${subItem.icon} w-4`}></i>
+                              <span>{subItem.label}</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ) : (
+                  // Menú simple
+                  <button
+                    onClick={() => router.push(item.path)}
+                    className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-lg text-left transition-all duration-200 ${
+                      item.active
+                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg'
+                        : 'text-slate-300 hover:text-white hover:bg-slate-700'
+                    }`}
+                  >
+                    <i className={`${item.icon} ${isCollapsed ? 'text-center w-full' : 'w-5'}`}></i>
+                    {!isCollapsed && <span className="font-medium">{item.label}</span>}
+                  </button>
+                )}
               </li>
             ))}
           </ul>
