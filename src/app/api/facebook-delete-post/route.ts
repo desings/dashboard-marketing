@@ -18,13 +18,26 @@ export async function DELETE(request: NextRequest) {
     }
 
     console.log('🗑️ [FACEBOOK DELETE] Intentando eliminar post:', postId)
+    console.log('🔑 [FACEBOOK DELETE] Token preview:', pageToken.substring(0, 20) + '...')
 
     // Llamada a la API de Facebook para eliminar el post
-    const facebookResponse = await fetch(`https://graph.facebook.com/v18.0/${postId}?access_token=${pageToken}`, {
+    const deleteUrl = `https://graph.facebook.com/v18.0/${postId}?access_token=${pageToken}`
+    console.log('🌐 [FACEBOOK DELETE] URL de eliminación:', deleteUrl.replace(pageToken, 'TOKEN_HIDDEN'))
+    
+    const facebookResponse = await fetch(deleteUrl, {
       method: 'DELETE'
     })
 
-    const result = await facebookResponse.json()
+    console.log('📡 [FACEBOOK DELETE] Status de respuesta:', facebookResponse.status)
+    
+    let result
+    try {
+      result = await facebookResponse.json()
+      console.log('📄 [FACEBOOK DELETE] Respuesta de Facebook:', result)
+    } catch (jsonError) {
+      console.error('❌ [FACEBOOK DELETE] Error parseando JSON:', jsonError)
+      result = { error: { message: 'Error parseando respuesta de Facebook' } }
+    }
 
     if (!facebookResponse.ok) {
       console.error('❌ [FACEBOOK DELETE] Error de Facebook:', result)

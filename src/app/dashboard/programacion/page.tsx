@@ -755,6 +755,10 @@ export default function ProgramacionPage() {
           const fbAccounts = JSON.parse(localStorage.getItem('facebook_accounts') || '{}')
           const fbAccount = fbAccounts.default || fbAccounts[Object.keys(fbAccounts)[0]]
           
+          console.log('🔍 [DEBUG] Facebook accounts:', Object.keys(fbAccounts))
+          console.log('🔍 [DEBUG] Selected account:', fbAccount ? 'Found' : 'Not found')
+          console.log('🔍 [DEBUG] Post ID a eliminar:', selectedPost.facebookPostId)
+          
           if (!fbAccount?.pageToken) {
             const continueAnyway = confirm(
               `⚠️ No se encontró token de Facebook para eliminar el post.\n\n¿Quieres continuar y eliminar solo del dashboard?`
@@ -763,11 +767,16 @@ export default function ProgramacionPage() {
               return
             }
           } else {
-            const facebookResponse = await fetch(`/api/facebook-delete-post?postId=${selectedPost.facebookPostId}&pageToken=${fbAccount.pageToken}`, {
+            const deleteUrl = `/api/facebook-delete-post?postId=${selectedPost.facebookPostId}&pageToken=${fbAccount.pageToken}`
+            console.log('🌐 [DEBUG] URL de eliminación:', deleteUrl.replace(fbAccount.pageToken, 'TOKEN_HIDDEN'))
+            
+            const facebookResponse = await fetch(deleteUrl, {
               method: 'DELETE'
             })
             
+            console.log('📡 [DEBUG] Response status:', facebookResponse.status)
             const facebookResult = await facebookResponse.json()
+            console.log('📄 [DEBUG] Response body:', facebookResult)
             
             if (!facebookResult.success && !facebookResult.alreadyDeleted) {
               const continueAnyway = confirm(
