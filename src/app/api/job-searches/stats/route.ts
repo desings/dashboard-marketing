@@ -48,11 +48,16 @@ export async function GET(request: NextRequest) {
     // Sistema temporal hasta configurar DATABASE_URL
     console.log('🔄 Base de datos no disponible - Usando stats temporales')
     const mockStats = {
-      totalJobSearches: 2,
+      totalSearches: 2,
       activeSearches: 1,
-      totalJobOffers: 17,
-      newOffersToday: 3,
-      interestedOffers: 2
+      totalOffers: 17,
+      todayOffers: 3,
+      offersByStatus: {
+        ACTIVE: 12,
+        DISCARDED: 3,
+        INTERESTED_DAVID: 2,
+        INTERESTED_IVAN: 0
+      }
     }
 
     return NextResponse.json({
