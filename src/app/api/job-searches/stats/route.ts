@@ -36,7 +36,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: mockStats,
-        message: 'Usando estadísticas demo - configura DATABASE_URL para datos reales'
+        message: 'Estadísticas demo - módulo en inicialización'
       })
     }
     

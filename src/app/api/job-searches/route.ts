@@ -59,13 +59,10 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: paginatedData,
-        pagination: {
-          page,
-          limit,
-          total: mockJobSearches.length,
-          pages: Math.ceil(mockJobSearches.length / limit)
-        },
-        message: 'Usando datos demo - configura DATABASE_URL para funcionalidad completa'
+        total: mockJobSearches.length,
+        totalPages: Math.ceil(mockJobSearches.length / limit),
+        currentPage: page,
+        message: 'Módulo en inicialización - datos temporales'
       })
     }
     
@@ -123,7 +120,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         data: newJobSearch,
-        message: 'Búsqueda simulada exitosamente - configura DATABASE_URL para scraping real'
+        message: 'Búsqueda creada exitosamente (modo demo)'
       }, { status: 201 })
     }
   } catch (error) {
