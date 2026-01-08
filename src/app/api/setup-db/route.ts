@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
       },
       update: {},
       create: {
-        id: 'demo-relation',
         userId: demoUser.id,
         tenantId: demoTenant.id,
         role: 'owner'
@@ -67,35 +66,5 @@ export async function POST(request: NextRequest) {
       error: error instanceof Error ? error.message : 'Error desconocido',
       message: 'Error con la base de datos. Asegúrate de que DATABASE_URL esté configurado correctamente.'
     }, { status: 500 })
-  }
-}
-          keywords: 'marketing digital seo',
-          portals: ['infojobs'],
-          frequencyMinutes: 720,
-          isActive: false
-        }
-      })
-
-      console.log('✅ Datos de ejemplo creados')
-    } else {
-      console.log('⏭️ Ya existen datos, no se crean ejemplos')
-    }
-    */
-
-    return NextResponse.json({
-      success: true,
-      message: 'Base de datos configurada correctamente',
-      tablesCount: Array.isArray(tables) ? tables.length : 0,
-      searchesCount: 0 // Temporalmente en 0 hasta que se habilite la lógica completa
-    })
-
-  } catch (error) {
-    console.error('❌ Error en setup de base de datos:', error)
-    return NextResponse.json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Error desconocido'
-    }, { status: 500 })
-  } finally {
-    await prisma.$disconnect()
   }
 }
