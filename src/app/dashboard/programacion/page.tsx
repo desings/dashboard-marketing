@@ -351,7 +351,7 @@ export default function ProgramacionPage() {
       const newPost = {
         ...postData,
         id: `post_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        status: 'pending',
+        status: postData.status || 'pending', // Usar el status enviado o 'pending' por defecto
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
@@ -359,7 +359,11 @@ export default function ProgramacionPage() {
       existingPosts.push(newPost)
       localStorage.setItem('scheduled_posts', JSON.stringify(existingPosts))
       
-      console.log('✅ Post guardado en localStorage:', newPost.id)
+      console.log('✅ Post guardado en localStorage:', {
+        id: newPost.id,
+        status: newPost.status,
+        content_preview: newPost.content?.substring(0, 50) + '...'
+      })
       return newPost
     } catch (error) {
       console.error('Error saving scheduled post to localStorage:', error)
@@ -916,7 +920,10 @@ export default function ProgramacionPage() {
           const result = await response.json()
           console.log(`Resultado de ${platform}:`, result)
           
-          if (!result.success) {
+          // Verificar si la publicación fue exitosa (success=true O si tiene postId)
+          const wasSuccessful = result.success || result.postId
+          
+          if (!wasSuccessful) {
             console.error(`Error detallado de ${platform}:`, result)
             alert(`❌ Error en Facebook: ${result.error}`)
             setPublishing(false)
@@ -925,6 +932,12 @@ export default function ProgramacionPage() {
 
           // Capturar ID del post para guardarlo en historial
           facebookPostId = result.postId
+
+          console.log('✅ Publicación en Facebook exitosa:', {
+            postId: facebookPostId,
+            hasWarning: !!result.warning,
+            message: result.message
+          })
 
           // Mostrar mensaje específico según el resultado
           if (result.warning) {
@@ -986,14 +999,23 @@ export default function ProgramacionPage() {
           updatedAt: now.toISOString()
         }
 
-        await saveScheduledPost(publishedPost)
-        console.log('✅ Post guardado en historial como publicado:', publishedPost)
+        const savedPost = await saveScheduledPost(publishedPost)
+        console.log('✅ Post guardado en historial como publicado:', {
+          id: savedPost.id,
+          status: savedPost.status,
+          facebookPostId: savedPost.facebookPostId,
+          platforms: savedPost.platforms
+        })
+        
+        // Recargar lista para mostrar el nuevo post
+        await loadScheduledPosts()
+        
       } catch (saveError) {
         console.error('⚠️ Error guardando post en historial:', saveError)
         // No fallar la publicación por esto
       }
 
-      alert(`✅ Post publicado exitosamente!`)
+      alert(`✅ Post publicado exitosamente en ${selectedAccounts.join(', ')}!`)
       setPostText('')
       setSelectedAccounts([])
       setMediaFiles([]) // Limpiar archivos multimedia
