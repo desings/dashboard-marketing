@@ -818,6 +818,8 @@ export default function ProgramacionPage() {
     try {
       setPublishing(true)
       
+      let facebookPostId: string | undefined // Para capturar ID del post de Facebook
+      
       // Preparar URLs de multimedia
       const mediaUrls = mediaFiles.map(file => ({
         url: file.cloudinaryUrl || file.url,
@@ -886,6 +888,9 @@ export default function ProgramacionPage() {
             return
           }
 
+          // Capturar ID del post para guardarlo en historial
+          facebookPostId = result.postId
+
           // Mostrar mensaje específico según el resultado
           if (result.warning) {
             alert(`⚠️ Publicado con advertencia:\n${result.message}\n\nAdvertencia: ${result.warning}`)
@@ -921,11 +926,46 @@ export default function ProgramacionPage() {
         }
       }
 
+      // Guardar el post en el historial como "publicado"
+      try {
+        const now = new Date()
+        const mediaData = mediaFiles.map(file => ({
+          id: file.id,
+          fileName: file.fileName,
+          url: file.cloudinaryUrl || file.url,
+          type: file.type,
+          isCloudinary: file.isCloudinary || !!file.cloudinaryUrl,
+          cloudinaryUrl: file.cloudinaryUrl
+        }))
+
+        const publishedPost = {
+          content: postText,
+          date: now.toISOString().split('T')[0], // Fecha actual
+          time: now.toTimeString().slice(0, 5),  // Hora actual (HH:MM)
+          platforms: [...selectedAccounts],
+          type: postType,
+          media: mediaData,
+          status: 'published' as const,
+          facebookPostId: facebookPostId, // Incluir ID del post de Facebook
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString()
+        }
+
+        await saveScheduledPost(publishedPost)
+        console.log('✅ Post guardado en historial como publicado:', publishedPost)
+      } catch (saveError) {
+        console.error('⚠️ Error guardando post en historial:', saveError)
+        // No fallar la publicación por esto
+      }
+
       alert(`✅ Post publicado exitosamente!`)
       setPostText('')
       setSelectedAccounts([])
       setMediaFiles([]) // Limpiar archivos multimedia
       setShowCreateModal(false) // Cerrar el modal
+      
+      // Recargar la lista para mostrar el nuevo post publicado
+      await loadScheduledPosts()
     } catch (error) {
       console.error('Error al publicar:', error)
       alert('Error al publicar el post: ' + (error instanceof Error ? error.message : 'Error desconocido'))
