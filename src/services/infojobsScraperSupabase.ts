@@ -1,4 +1,5 @@
 import * as cheerio from 'cheerio'
+import puppeteer, { Browser, Page } from 'puppeteer'
 import { getSupabaseClient } from '@/lib/database'
 
 export interface ScrapedJobOffer {
@@ -75,31 +76,65 @@ export class InfoJobsScraperSupabase {
     // URL exacta proporcionada por el usuario
     const url = `https://www.infojobs.net/ofertas-trabajo?keyword=${encodeURIComponent(keywords)}&segmentId=&page=${page}&sortBy=RELEVANCE&onlyForeignCountry=false&countryIds=17&sinceDate=ANY`
     
-    console.log(`🌐 Accediendo a: ${url}`)
+    console.log(`🌐 Accediendo con Puppeteer a: ${url}`)
 
+    let browser: Browser | null = null
+    
     try {
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-          'Accept-Language': 'es-ES,es;q=0.8,en-US;q=0.5,en;q=0.3',
-          'Accept-Encoding': 'gzip, deflate, br',
-          'DNT': '1',
-          'Connection': 'keep-alive',
-          'Upgrade-Insecure-Requests': '1',
-        },
+      // Lanzar navegador con configuración optimizada
+      browser = await puppeteer.launch({
+        headless: true,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-web-security',
+          '--disable-features=VizDisplayCompositor'
+        ]
       })
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      const page: Page = await browser.newPage()
+      
+      // Configurar user agent y viewport
+      await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+      await page.setViewport({ width: 1920, height: 1080 })
+
+      console.log(`📱 Navegando a InfoJobs...`)
+      
+      // Navegar con timeout extendido
+      await page.goto(url, { 
+        waitUntil: 'networkidle2', 
+        timeout: 30000 
+      })
+
+      console.log(`⏳ Esperando a que carguen las ofertas...`)
+
+      // Esperar a que aparezcan las ofertas (múltiples selectores)
+      try {
+        await page.waitForSelector('[data-testid="offer-item"], .offer-item, .js-offer-item, [data-cy="OfferItem"], .list-offers article', {
+          timeout: 15000
+        })
+        console.log(`✅ Ofertas cargadas correctamente`)
+      } catch (waitError) {
+        console.log(`⚠️ Timeout esperando ofertas, continuando con el HTML disponible...`)
       }
 
-      const html = await response.text()
+      // Esperar un poco más para asegurar que todo el contenido dinámico se ha cargado
+      await new Promise(resolve => setTimeout(resolve, 3000))
+
+      // Obtener el HTML renderizado
+      const html = await page.content()
+      console.log(`📄 HTML obtenido, tamaño: ${html.length} caracteres`)
+
       return this.parseJobOffers(html)
 
     } catch (error) {
-      console.error('❌ Error haciendo fetch:', error)
-      throw new Error(`Error accediendo a InfoJobs: ${error}`)
+      console.error('❌ Error usando Puppeteer:', error)
+      throw new Error(`Error scrapeando con Puppeteer: ${error}`)
+    } finally {
+      if (browser) {
+        await browser.close()
+      }
     }
   }
 
@@ -109,12 +144,14 @@ export class InfoJobsScraperSupabase {
 
     console.log('🔍 Parseando ofertas de trabajo...')
 
-    // Selectores para InfoJobs (pueden necesitar ajustes según la estructura actual)
+    // Selectores actualizados para InfoJobs 2024/2025
     const jobSelectors = [
-      '.offer-item', 
-      '.job-item',
-      '.js-offer-item',
       '[data-testid="offer-item"]',
+      '[data-cy="OfferItem"]', 
+      '.list-offers article',
+      '.offer-item', 
+      '.js-offer-item',
+      'article[data-adid]',
       '.list-group-item'
     ]
 
@@ -132,69 +169,124 @@ export class InfoJobsScraperSupabase {
 
     if (!jobElements || jobElements.length === 0) {
       console.log('⚠️ No se encontraron ofertas con selectores conocidos, intentando estructura alternativa...')
-      // Fallback: buscar enlaces que contengan '/ofertas-de-empleo/detail/'
-      const links = $('a[href*="/ofertas-de-empleo/detail/"]')
-      console.log(`🔗 Encontrados ${links.length} enlaces de ofertas`)
+      
+      // Fallback mejorado: buscar múltiples patrones de enlaces
+      const linkPatterns = [
+        'a[href*="/ofertas-trabajo/"]',
+        'a[href*="/ofertas-de-empleo/detail/"]', 
+        'a[href*="/empleo/"]',
+        'a[href*="infojobs.net"][href*="detail"]'
+      ]
 
-      links.each((_, element: any) => {
-        const $link = $(element)
-        const $container = $link.closest('div, li, article, section')
-        
-        const title = $link.text()?.trim() || 
-                     $link.find('h1, h2, h3, h4, .title').text()?.trim() ||
-                     'Título no disponible'
-        
-        const href = $link.attr('href')
-        const fullUrl = href?.startsWith('http') ? href : `https://www.infojobs.net${href}`
-        
-        // Extraer ID de la URL
-        const idMatch = href?.match(/detail\/(\w+)/)
-        const externalId = idMatch ? idMatch[1] : null
+      for (const pattern of linkPatterns) {
+        const links = $(pattern)
+        if (links.length > 0) {
+          console.log(`🔗 Encontrados ${links.length} enlaces con patrón: ${pattern}`)
+          
+          links.each((_, element: any) => {
+            const $link = $(element)
+            const $container = $link.closest('div, li, article, section')
+            
+            const title = $link.text()?.trim() || 
+                         $link.find('h1, h2, h3, h4, .title, [data-testid="title"]').text()?.trim() ||
+                         $container.find('h1, h2, h3, h4').first().text()?.trim() ||
+                         'Título no disponible'
+            
+            const href = $link.attr('href')
+            if (!href) return
+            
+            const fullUrl = href.startsWith('http') ? href : `https://www.infojobs.net${href}`
+            
+            // Extraer ID de diferentes formatos de URL de InfoJobs
+            const idMatches = [
+              href.match(/\/detail\/(\w+)/),
+              href.match(/\/(\w+)\.html/),
+              href.match(/oferta-(\w+)/),
+              href.match(/\/([a-zA-Z0-9]{8,})/),
+            ]
+            
+            const externalId = idMatches.find(match => match)?.[1] || null
 
-        // Buscar información adicional en el contenedor
-        const company = $container.find('.company, .employer, [data-testid="company"]').text()?.trim() || null
-        const location = $container.find('.location, .city, [data-testid="location"]').text()?.trim() || null
-        const salary = $container.find('.salary, .wage, [data-testid="salary"]').text()?.trim() || null
+            const company = $container.find('[data-testid="company"], .company, .employer').text()?.trim() || 
+                           $container.find('span, p').filter((_, el) => {
+                             const text = $(el).text()
+                             return text.includes('S.L.') || text.includes('S.A.') || text.includes('Ltd')
+                           }).first().text()?.trim() ||
+                           null
+                           
+            const location = $container.find('[data-testid="location"], .location, .city').text()?.trim() ||
+                            $container.find('span, p').filter((_, el) => {
+                              const text = $(el).text()
+                              return text.includes('Madrid') || text.includes('Barcelona') || text.includes('Valencia') || text.includes('Sevilla') || text.includes(',')
+                            }).first().text()?.trim() ||
+                            null
+                            
+            const salary = $container.find('[data-testid="salary"], .salary, .wage').text()?.trim() ||
+                          $container.find('span, p').filter((_, el) => {
+                            const text = $(el).text()
+                            return text.includes('€') || text.includes('euros') || Boolean(text.match(/\d+\.?\d*/))
+                          }).first().text()?.trim() ||
+                          null
 
-        if (title && title !== 'Título no disponible') {
-          offers.push({
-            title,
-            company,
-            location,
-            salary,
-            description: null, // Se puede obtener accediendo a la URL individual
-            url: fullUrl,
-            external_id: externalId
+            if (title && title !== 'Título no disponible' && title.length > 5) {
+              offers.push({
+                title,
+                company,
+                location,
+                salary,
+                description: null,
+                url: fullUrl,
+                external_id: externalId
+              })
+            }
           })
+          
+          if (offers.length > 0) break // Si encontramos ofertas, no seguimos buscando
         }
-      })
+      }
     } else {
-      // Procesar elementos encontrados con selectores
+      // Procesar elementos encontrados con selectores principales
       jobElements.each((index: number, element: any) => {
         const $job = $(element)
         
-        const titleSelectors = ['h1', 'h2', 'h3', '.title', '.offer-title', '[data-testid="title"]', 'a']
-        let title = ''
+        // Selectores múltiples para título
+        const titleSelectors = [
+          '[data-testid="title"]',
+          'h1, h2, h3, h4',
+          '.title, .offer-title', 
+          'a[href*="detail"] h3',
+          'a[href*="detail"]'
+        ]
         
+        let title = ''
         for (const selector of titleSelectors) {
-          title = $job.find(selector).first().text()?.trim()
-          if (title) break
+          const titleText = $job.find(selector).first().text()?.trim()
+          if (titleText && titleText.length > 3) {
+            title = titleText
+            break
+          }
         }
         
-        const company = $job.find('.company, .employer, [data-testid="company"]').text()?.trim() || null
-        const location = $job.find('.location, .city, [data-testid="location"]').text()?.trim() || null
-        const salary = $job.find('.salary, .wage, [data-testid="salary"]').text()?.trim() || null
+        // Si no encontramos título, usar el texto del enlace principal
+        if (!title) {
+          const mainLink = $job.find('a[href*="detail"], a[href*="empleo"]').first()
+          title = mainLink.text()?.trim() || 'Sin título'
+        }
+        
+        const company = $job.find('[data-testid="company"], .company, .employer').text()?.trim() || null
+        const location = $job.find('[data-testid="location"], .location, .city').text()?.trim() || null  
+        const salary = $job.find('[data-testid="salary"], .salary, .wage').text()?.trim() || null
         
         // Buscar URL de la oferta
-        const linkElement = $job.find('a[href*="/ofertas-de-empleo/detail/"]').first()
+        const linkElement = $job.find('a[href*="detail"], a[href*="empleo"]').first()
         const href = linkElement.attr('href')
         const fullUrl = href?.startsWith('http') ? href : `https://www.infojobs.net${href}`
         
         // Extraer ID
-        const idMatch = href?.match(/detail\/(\w+)/)
-        const externalId = idMatch ? idMatch[1] : null
+        const idMatch = href?.match(/detail\/(\w+)/) || href?.match(/\/([a-zA-Z0-9]{8,})/)
+        const externalId = idMatch?.[1] || null
 
-        if (title) {
+        if (title && title.length > 3) {
           offers.push({
             title,
             company,
@@ -209,6 +301,25 @@ export class InfoJobsScraperSupabase {
     }
 
     console.log(`📊 Parseadas ${offers.length} ofertas de trabajo`)
+    
+    // Debug: mostrar las primeras 2 ofertas encontradas
+    if (offers.length > 0) {
+      console.log('🔍 Primeras ofertas encontradas:')
+      offers.slice(0, 2).forEach((offer, index) => {
+        console.log(`  ${index + 1}. ${offer.title} - ${offer.company} (${offer.location})`)
+      })
+    } else {
+      console.log('⚠️ No se encontraron ofertas - verificando HTML...')
+      const bodyText = $('body').text()
+      if (bodyText.includes('No se han encontrado') || bodyText.includes('0 ofertas')) {
+        console.log('💡 InfoJobs indica que no hay ofertas para esta búsqueda')
+      } else if (bodyText.includes('ofertas')) {
+        console.log('💡 El HTML contiene la palabra "ofertas" pero no pudimos extraerlas')
+        // Guardar una muestra del HTML para debug
+        console.log('📄 Muestra del HTML:', $('body').html()?.substring(0, 500))
+      }
+    }
+    
     return offers
   }
 
