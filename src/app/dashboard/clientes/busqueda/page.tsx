@@ -1,8 +1,13 @@
 'use client'
 
 import React from 'react'
+import DashboardLayout from '@/components/DashboardLayout'
 import JobSearchListPage from '@/components/JobSearch/JobSearchListPage'
 
 export default function BusquedaClientesPage() {
-  return <JobSearchListPage />
+  return (
+    <DashboardLayout>
+      <JobSearchListPage />
+    </DashboardLayout>
+  )
 }
