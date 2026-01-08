@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { JobController } from '@/controllers/jobController'
-import { JobStatus } from '@prisma/client'
+
+// Definir el tipo localmente
+type JobStatus = 'ACTIVE' | 'DISCARDED' | 'INTERESTED_DAVID' | 'INTERESTED_IVAN'
 
 // POST /api/job-offers/[id]/status
 export async function POST(
