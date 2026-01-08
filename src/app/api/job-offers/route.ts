@@ -34,12 +34,38 @@ export async function GET(request: NextRequest) {
     } catch (modelError) {
       // Si hay error con los modelos, devolver datos mock
       console.warn('⚠️ Modelos no disponibles para ofertas, devolviendo mock:', modelError)
+      
+      const mockOffers = [
+        {
+          id: '1',
+          title: 'Desarrollador Frontend React',
+          company: 'TechCorp',
+          location: 'Madrid',
+          salary: '35.000 - 45.000 €',
+          url: 'https://infojobs.net/ejemplo1',
+          portal: 'infojobs',
+          status: 'PENDING',
+          createdAt: new Date().toISOString()
+        },
+        {
+          id: '2',
+          title: 'Programador JavaScript Full Stack',
+          company: 'StartupTech',
+          location: 'Barcelona',
+          salary: '40.000 - 50.000 €',
+          url: 'https://infojobs.net/ejemplo2',
+          portal: 'infojobs',
+          status: 'REVIEWED',
+          createdAt: new Date(Date.now() - 86400000).toISOString()
+        }
+      ]
+      
       return NextResponse.json({
         success: true,
-        data: [],
-        total: 0,
-        totalPages: 0,
-        message: 'Módulo en inicialización - datos temporales'
+        data: mockOffers,
+        total: mockOffers.length,
+        totalPages: 1,
+        message: 'Ofertas demo - configura DATABASE_URL para datos reales'
       })
     }
   } catch (error) {
