@@ -58,47 +58,19 @@ export async function GET(request: NextRequest) {
           ...result
         })
       } catch (dbError) {
-        console.warn('⚠️ Error en base de datos, usando datos temporales:', dbError)
+        console.warn('⚠️ Error en base de datos:', dbError)
       }
     }
     
-    // Sistema temporal hasta configurar DATABASE_URL
-    console.log('🔄 Base de datos no disponible - Usando datos temporales')
-    const mockOffers = [
-      {
-        id: '1',
-        title: 'Desarrollador Frontend React',
-        company: 'TechCorp Madrid',
-        location: 'Madrid',
-        salary: '35.000 - 45.000 €',
-        url: 'https://infojobs.net/ejemplo1',
-        portal: 'infojobs',
-        status: 'ACTIVE',
-        publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        scrapedAt: new Date().toISOString(),
-        jobSearch: { keywords: 'react developer' }
-      },
-      {
-        id: '2',
-        title: 'Programador JavaScript Full Stack',
-        company: 'StartupTech Barcelona',
-        location: 'Barcelona',
-        salary: '40.000 - 50.000 €',
-        url: 'https://infojobs.net/ejemplo2',
-        portal: 'infojobs',
-        status: 'ACTIVE',
-        publishedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        scrapedAt: new Date().toISOString(),
-        jobSearch: { keywords: 'javascript fullstack' }
-      }
-    ]
+    // Sin base de datos configurada - devolver vacío
+    console.log('🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL')
     
     return NextResponse.json({
       success: true,
-      data: mockOffers,
-      total: mockOffers.length,
-      totalPages: 1,
-      message: '⚠️ DATOS TEMPORALES - Configura DATABASE_URL para ofertas reales'
+      data: [],
+      total: 0,
+      totalPages: 0,
+      message: '⚠️ Configura DATABASE_URL para ver ofertas reales de InfoJobs'
     })
   } catch (error) {
     console.error('❌ Error en GET job-offers:', error)

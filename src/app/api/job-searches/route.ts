@@ -43,41 +43,19 @@ export async function GET(request: NextRequest) {
           ...result
         })
       } catch (dbError) {
-        console.warn('⚠️ Error en base de datos, usando datos temporales:', dbError)
+        console.warn('⚠️ Error en base de datos:', dbError)
       }
     }
     
-    // Sistema temporal hasta configurar DATABASE_URL
-    console.log('🔄 Base de datos no disponible - Usando datos temporales')
-    const mockJobSearches = [
-      {
-        id: '1',
-        keywords: 'desarrollador frontend',
-        portals: ['infojobs'],
-        frequencyMinutes: 240,
-        isActive: true,
-        userId,
-        createdAt: new Date().toISOString(),
-        _count: { jobOffers: 5 }
-      },
-      {
-        id: '2', 
-        keywords: 'programador javascript',
-        portals: ['infojobs'],
-        frequencyMinutes: 480,
-        isActive: false,
-        userId,
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-        _count: { jobOffers: 12 }
-      }
-    ]
+    // Sin base de datos configurada - devolver vacío
+    console.log('🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL')
     
     return NextResponse.json({
       success: true,
-      data: mockJobSearches,
-      total: mockJobSearches.length,
-      totalPages: 1,
-      message: '⚠️ DATOS TEMPORALES - Configura DATABASE_URL para funcionalidad real'
+      data: [],
+      total: 0,
+      totalPages: 0,
+      message: '⚠️ Configura DATABASE_URL para crear búsquedas reales de InfoJobs'
     })
     
   } catch (error) {
@@ -122,28 +100,21 @@ export async function POST(request: NextRequest) {
           message: 'Búsqueda creada exitosamente - scraping iniciado'
         }, { status: 201 })
       } catch (dbError) {
-        console.warn('⚠️ Error en base de datos, simulando creación:', dbError)
+        console.error('❌ Error creando búsqueda en base de datos:', dbError)
+        return NextResponse.json(
+          { success: false, error: 'Error creando búsqueda en base de datos' },
+          { status: 500 }
+        )
       }
     }
     
-    // Sistema temporal hasta configurar DATABASE_URL
-    console.log('🔄 Base de datos no disponible - Simulando creación')
-    const newJobSearch = {
-      id: Date.now().toString(),
-      keywords: body.keywords,
-      portals: body.portals || ['infojobs'],
-      frequencyMinutes: body.frequencyMinutes || 60,
-      isActive: true,
-      userId: body.userId,
-      createdAt: new Date().toISOString(),
-      _count: { jobOffers: 0 }
-    }
-
+    // Sin base de datos configurada - no permitir crear búsquedas
+    console.log('🚫 DATABASE_URL no configurada - No se pueden crear búsquedas')
     return NextResponse.json({
-      success: true,
-      data: newJobSearch,
-      message: '⚠️ SIMULADO - Configura DATABASE_URL para crear búsquedas reales'
-    }, { status: 201 })
+      success: false,
+      error: 'DATABASE_URL no configurada. Configure una base de datos PostgreSQL para crear búsquedas reales de InfoJobs.',
+      requiresSetup: true
+    }, { status: 400 })
   } catch (error) {
     console.error('❌ Error en POST job-searches:', error)
     return NextResponse.json(

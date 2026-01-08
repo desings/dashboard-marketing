@@ -41,29 +41,29 @@ export async function GET(request: NextRequest) {
           data: stats
         })
       } catch (dbError) {
-        console.warn('⚠️ Error en base de datos, usando stats temporales:', dbError)
+        console.warn('⚠️ Error en base de datos:', dbError)
       }
     }
     
-    // Sistema temporal hasta configurar DATABASE_URL
-    console.log('🔄 Base de datos no disponible - Usando stats temporales')
-    const mockStats = {
-      totalSearches: 2,
-      activeSearches: 1,
-      totalOffers: 17,
-      todayOffers: 3,
+    // Sin base de datos configurada - devolver estadísticas en cero
+    console.log('🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL')
+    const emptyStats = {
+      totalSearches: 0,
+      activeSearches: 0,
+      totalOffers: 0,
+      todayOffers: 0,
       offersByStatus: {
-        ACTIVE: 12,
-        DISCARDED: 3,
-        INTERESTED_DAVID: 2,
+        ACTIVE: 0,
+        DISCARDED: 0,
+        INTERESTED_DAVID: 0,
         INTERESTED_IVAN: 0
       }
     }
 
     return NextResponse.json({
       success: true,
-      data: mockStats,
-      message: '⚠️ DATOS TEMPORALES - Configura DATABASE_URL para estadísticas reales'
+      data: emptyStats,
+      message: '⚠️ Configura DATABASE_URL para estadísticas reales'
     })
     
   } catch (error) {

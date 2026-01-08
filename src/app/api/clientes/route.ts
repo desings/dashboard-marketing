@@ -61,42 +61,16 @@ export async function GET(req: Request) {
         await prisma.$disconnect();
         return NextResponse.json({ clients: formattedClients });
       } catch (dbError) {
-        console.warn('⚠️ Error en base de datos, usando datos temporales:', dbError);
+        console.warn('⚠️ Error en base de datos:', dbError);
       }
     }
     
-    // Sistema temporal hasta configurar DATABASE_URL
-    console.log('🔄 Base de datos no disponible - Usando datos temporales');
-    const mockClients = [
-      {
-        tenant: {
-          id: "1",
-          name: "Mi Empresa",
-          logoUrl: null,
-          createdAt: new Date().toISOString()
-        },
-        socialAccounts: [
-          {
-            id: "1",
-            platform: "facebook",
-            username: "mi_empresa_fb",
-            isActive: true,
-            createdAt: new Date().toISOString()
-          },
-          {
-            id: "2",
-            platform: "linkedin", 
-            username: "mi_empresa_ln",
-            isActive: true,
-            createdAt: new Date().toISOString()
-          }
-        ]
-      }
-    ];
-
+    // Sin base de datos configurada - devolver vacío
+    console.log('🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL');
+    
     return NextResponse.json({ 
-      clients: mockClients,
-      message: '⚠️ DATOS TEMPORALES - Configura DATABASE_URL para clientes reales'
+      clients: [],
+      message: '⚠️ Configura DATABASE_URL para gestionar clientes reales'
     });
   } catch (error) {
     console.error("Error fetching clients:", error);
@@ -135,26 +109,19 @@ export async function POST(req: Request) {
         await prisma.$disconnect();
         return NextResponse.json({ client: { tenant: newTenant, socialAccounts: [] } });
       } catch (dbError) {
-        console.warn('⚠️ Error en base de datos, simulando creación:', dbError);
+        console.error('❌ Error creando cliente:', dbError);
+        return NextResponse.json(
+          { error: 'Error creando cliente en base de datos' },
+          { status: 500 }
+        );
       }
     }
     
-    // Sistema temporal hasta configurar DATABASE_URL
-    console.log('🔄 Base de datos no disponible - Simulando creación');
-    const newClient = {
-      tenant: {
-        id: Date.now().toString(),
-        name: body.name || "Nuevo Cliente",
-        logoUrl: body.logoUrl || null,
-        createdAt: new Date().toISOString()
-      },
-      socialAccounts: []
-    };
-
-    return NextResponse.json({ 
-      client: newClient,
-      message: '⚠️ SIMULADO - Configura DATABASE_URL para crear clientes reales'
-    });
+    // Sin base de datos configurada - no permitir crear clientes
+    return NextResponse.json({
+      error: 'DATABASE_URL no configurada. Configure una base de datos PostgreSQL para gestionar clientes.',
+      requiresSetup: true
+    }, { status: 400 });
   } catch (error) {
     console.error("Error creating client:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
@@ -185,24 +152,19 @@ export async function PUT(req: Request) {
         await prisma.$disconnect();
         return NextResponse.json({ tenant: updatedTenant });
       } catch (dbError) {
-        console.warn('⚠️ Error en base de datos, simulando actualización:', dbError);
+        console.error('❌ Error actualizando cliente:', dbError);
+        return NextResponse.json(
+          { error: 'Error actualizando cliente en base de datos' },
+          { status: 500 }
+        );
       }
     }
     
-    // Sistema temporal hasta configurar DATABASE_URL
-    const updatedClient = {
-      tenant: {
-        id: body.tenantId || "1",
-        name: body.name || "Cliente Actualizado",
-        logoUrl: body.logoUrl || null,
-        createdAt: new Date().toISOString()
-      }
-    };
-
-    return NextResponse.json({ 
-      tenant: updatedClient.tenant,
-      message: '⚠️ SIMULADO - Configura DATABASE_URL para actualizar clientes reales'
-    });
+    // Sin base de datos configurada - no permitir actualizar
+    return NextResponse.json({
+      error: 'DATABASE_URL no configurada. Configure una base de datos PostgreSQL para gestionar clientes.',
+      requiresSetup: true
+    }, { status: 400 });
   } catch (error) {
     console.error("Error updating client:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
@@ -229,15 +191,19 @@ export async function DELETE(req: Request) {
         await prisma.$disconnect();
         return NextResponse.json({ success: true });
       } catch (dbError) {
-        console.warn('⚠️ Error en base de datos, simulando eliminación:', dbError);
+        console.error('❌ Error eliminando cliente:', dbError);
+        return NextResponse.json(
+          { error: 'Error eliminando cliente de base de datos' },
+          { status: 500 }
+        );
       }
     }
     
-    // Sistema temporal hasta configurar DATABASE_URL
-    return NextResponse.json({ 
-      success: true,
-      message: '⚠️ SIMULADO - Configura DATABASE_URL para eliminar clientes reales'
-    });
+    // Sin base de datos configurada - no permitir eliminar
+    return NextResponse.json({
+      error: 'DATABASE_URL no configurada. Configure una base de datos PostgreSQL para gestionar clientes.',
+      requiresSetup: true
+    }, { status: 400 });
   } catch (error) {
     console.error("Error deleting client:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
