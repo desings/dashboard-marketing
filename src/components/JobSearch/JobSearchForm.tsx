@@ -75,7 +75,7 @@ export default function JobSearchForm({ initialData, onSubmit, onCancel }: JobSe
           type="text"
           value={formData.keywords}
           onChange={(e) => setFormData(prev => ({ ...prev, keywords: e.target.value }))}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
           placeholder="ej: desarrollador react, frontend developer"
         />
         {errors.keywords && (
@@ -124,7 +124,7 @@ export default function JobSearchForm({ initialData, onSubmit, onCancel }: JobSe
         <select
           value={formData.frequencyMinutes}
           onChange={(e) => setFormData(prev => ({ ...prev, frequencyMinutes: Number(e.target.value) }))}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         >
           {frequencyOptions.map((option) => (
             <option key={option.value} value={option.value}>
