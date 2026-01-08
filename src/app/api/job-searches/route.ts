@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
       }
     }
     
-    // Sin base de datos configurada - devolver vacío
+    // Sin base de datos configurada - devolver vacío (Última actualización: 8 enero 2026)
     console.log('🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL')
     
     return NextResponse.json({
