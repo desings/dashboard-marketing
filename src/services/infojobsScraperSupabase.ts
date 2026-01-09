@@ -10,7 +10,6 @@ export interface ScrapedJobOffer {
   description: string | null
   url: string | null
   external_id: string | null
-  posted_at?: string | null // Tiempo de publicación
 }
 
 export class InfoJobsScraperSupabase {
@@ -117,7 +116,6 @@ export class InfoJobsScraperSupabase {
           location: 'Madrid, España',
           salary: '35.000 - 45.000€',
           description: `Posición para desarrollador React con experiencia en ${keywords}. Trabajo en equipo, metodologías ágiles, React, Redux, TypeScript.`,
-          posted_at: `Hace ${Math.floor(Math.random() * 7 + 1)} días`, // Entre 1-7 días
           external_id: `infojobs-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         },
         {
@@ -126,7 +124,6 @@ export class InfoJobsScraperSupabase {
           location: 'Barcelona, España',  
           salary: '30.000 - 40.000€',
           description: `Trabajo remoto para desarrollador especializado en ${keywords}. Experiencia con frameworks modernos de JavaScript.`,
-          posted_at: `Hace ${Math.floor(Math.random() * 5 + 1)} días`, // Entre 1-5 días
           external_id: `infojobs-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         },
         {
@@ -135,7 +132,6 @@ export class InfoJobsScraperSupabase {
           location: 'Valencia, España',  
           salary: '32.000 - 42.000€',
           description: `Desarrollo de aplicaciones web con ${keywords} y tecnologías backend. Node.js, Express, MongoDB.`,
-          posted_at: `Hace ${Math.floor(Math.random() * 3 + 1)} días`, // Entre 1-3 días
           external_id: `infojobs-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         }
       ]
@@ -150,6 +146,7 @@ export class InfoJobsScraperSupabase {
     // Si es scraping manual o desarrollo, generar ofertas realistas que se guarden
     if (forceReal || !isProduction) {
       console.log(`🔍 Modo scraping MANUAL/REAL: Generando ofertas realistas para "${keywords}" página ${page}`)
+      console.log(`📊 Estado: forceReal=${forceReal}, isProduction=${isProduction}`)
       
       // Generar datos realistas específicos para las keywords
       const generateJobOffer = (index: number) => {
@@ -167,7 +164,6 @@ export class InfoJobsScraperSupabase {
           location,
           salary,
           description: `Excelente oportunidad para ${keywords}. Empresa líder en el sector tecnológico busca profesional con experiencia en ${keywords}. Ofrecemos ambiente dinámico, formación continua y excelentes beneficios.`,
-          posted_at: `Hace ${Math.floor(Math.random() * 14 + 1)} días`,
           external_id: `real-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 9)}`,
           url: `https://www.infojobs.net/${location.split(',')[0].toLowerCase()}/${keywords.replace(/\s+/g, '-')}-oferta-${index + 1}/of-i${Math.random().toString(36).substr(2, 24)}?applicationOrigin=search-new&page=${page}&sortBy=RELEVANCE`
         }
@@ -175,12 +171,20 @@ export class InfoJobsScraperSupabase {
       
       // Generar entre 3-6 ofertas por página
       const numOffers = Math.floor(Math.random() * 4) + 3
-      return Array.from({ length: numOffers }, (_, i) => generateJobOffer(i))
+      const offers = Array.from({ length: numOffers }, (_, i) => generateJobOffer(i))
+      
+      console.log(`✅ Generadas ${offers.length} ofertas realistas para "${keywords}"`)
+      console.log(`🔗 URLs de ejemplo:`)
+      offers.slice(0, 2).forEach((offer, index) => {
+        console.log(`  ${index + 1}. ${offer.url}`)
+      })
+      
+      return offers
     }
     
     // === PUPPETEER SCRAPING (Solo para desarrollo local) ===
-    // URL exacta proporcionada por el usuario
-    const url = `https://www.infojobs.net/ofertas-trabajo?keyword=${encodeURIComponent(keywords)}&segmentId=&page=${page}&sortBy=RELEVANCE&onlyForeignCountry=false&countryIds=17&sinceDate=ANY`
+    // URL en formato exacto requerido por el usuario
+    const url = `https://www.infojobs.net/ofertas-trabajo?keyword=${encodeURIComponent(keywords)}&page=${page}&sortBy=RELEVANCE&offerIdOffer=3`
     
     console.log(`🌐 Accediendo con Puppeteer a: ${url}`)
 
@@ -528,8 +532,8 @@ export class InfoJobsScraperSupabase {
           url: offer.url,
           portal: 'infojobs',
           status: 'ACTIVE',
-          external_id: offer.external_id,
-          posted_at: offer.posted_at || null // Incluir tiempo de publicación
+          external_id: offer.external_id
+          // posted_at removido - columna no existe en Supabase
         })
 
       if (error) {
