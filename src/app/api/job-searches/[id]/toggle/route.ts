@@ -14,7 +14,7 @@ export async function POST(
     return NextResponse.json({
       success: true,
       data: jobSearch,
-      message: `Búsqueda ${jobSearch.isActive ? 'activada' : 'desactivada'} exitosamente`
+      message: `Búsqueda ${jobSearch.is_active ? 'activada' : 'desactivada'} exitosamente`
     })
   } catch (error) {
     console.error('❌ Error en toggle job-search:', error)
