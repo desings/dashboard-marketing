@@ -54,13 +54,31 @@ export default function JobOfferDetailModal({ offer, onClose, onStatusChange }: 
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-ES', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
+    if (!dateString || dateString === 'Invalid Date') {
+      return 'Fecha no disponible'
+    }
+    
+    // Si es un string como "Hace X días", devolverlo tal como está
+    if (dateString.includes('Hace')) {
+      return dateString
+    }
+    
+    try {
+      const date = new Date(dateString)
+      if (isNaN(date.getTime())) {
+        return 'Fecha no disponible'
+      }
+      
+      return date.toLocaleDateString('es-ES', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    } catch (error) {
+      return 'Fecha no disponible'
+    }
   }
 
   return (

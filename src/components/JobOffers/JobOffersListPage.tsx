@@ -254,6 +254,12 @@ export default function JobOffersListPage() {
                               🌐 {offer.portal}
                             </span>
                           )}
+                          {/* Mostrar tiempo de publicación si está disponible */}
+                          {offer.publishedAt && offer.publishedAt !== 'Invalid Date' && (
+                            <span className="flex items-center text-blue-600">
+                              ⏰ {offer.publishedAt.includes('Hace') ? offer.publishedAt : `Publicado: ${new Date(offer.publishedAt).toLocaleDateString('es-ES')}`}
+                            </span>
+                          )}
                         </div>
 
                         <div className="mt-2 flex items-center space-x-2">
@@ -263,7 +269,14 @@ export default function JobOffersListPage() {
                             {statusLabels[offer.status]}
                           </span>
                           <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded-full">
-                            {new Date(offer.publishedAt).toLocaleDateString('es-ES')}
+                            Scraped: {offer.scrapedAt && offer.scrapedAt !== 'Invalid Date' ? 
+                              new Date(offer.scrapedAt).toLocaleDateString('es-ES', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              }) : 'Reciente'
+                            }
                           </span>
                           {offer.companyProfile && (
                             <span className="px-2 py-1 text-xs bg-green-100 text-green-600 rounded-full">

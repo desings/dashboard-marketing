@@ -62,6 +62,13 @@ export class SupabaseJobController {
     // Transformar datos para coincidir con la interfaz esperada
     const transformedSearches = searches?.map(search => ({
       ...search,
+      id: search.id,
+      keywords: search.keywords,
+      portals: search.portals,
+      frequencyMinutes: search.frequency_minutes,
+      isActive: search.is_active,
+      createdAt: search.created_at,
+      updatedAt: search.updated_at,
       _count: {
         jobOffers: search.job_offers?.length || 0
       }
@@ -144,7 +151,20 @@ export class SupabaseJobController {
     }
 
     return {
-      data: offers || [],
+      data: offers?.map(offer => ({
+        id: offer.id,
+        title: offer.title,
+        company: offer.company,
+        location: offer.location,
+        salary: offer.salary,
+        description: offer.description,
+        url: offer.url,
+        portal: offer.portal || 'infojobs',
+        status: offer.status,
+        publishedAt: offer.posted_at || offer.created_at, // Usar posted_at si existe, sino created_at
+        scrapedAt: offer.created_at,
+        companyProfile: offer.company_profile
+      })) || [],
       total: count || 0,
       totalPages: Math.ceil((count || 0) / limit),
       currentPage: page
