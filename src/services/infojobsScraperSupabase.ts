@@ -84,8 +84,6 @@ export class InfoJobsScraperSupabase {
       // Configuración específica para entornos de producción (Vercel)
       const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL
       
-      let browser: Browser
-      
       if (isProduction) {
         // En producción usamos puppeteer-core con @sparticuz/chromium
         const puppeteerCore = await import('puppeteer-core')
