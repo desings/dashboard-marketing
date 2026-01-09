@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { JobController } from '@/controllers/jobController'
+import { SupabaseJobController } from '@/controllers/supabaseJobController'
 
 export async function POST(
   request: NextRequest,
@@ -8,7 +8,8 @@ export async function POST(
   try {
     const { id } = await params
     
-    const jobSearch = await JobController.toggleJobSearchStatus(id)
+    const controller = new SupabaseJobController()
+    const jobSearch = await controller.toggleJobSearchStatus(id)
     
     return NextResponse.json({
       success: true,

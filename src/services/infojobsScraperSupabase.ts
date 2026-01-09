@@ -79,6 +79,10 @@ export class InfoJobsScraperSupabase {
     if (isProduction) {
       console.log(`🌐 Modo producción: Generando datos de prueba para "${keywords}" página ${page}`)
       
+      // Generar URLs realistas basadas en las keywords
+      const encodedKeywords = encodeURIComponent(keywords)
+      const baseUrl = `https://www.infojobs.net/ofertas-trabajo?keyword=${encodedKeywords}`
+      
       // Devolver datos de prueba para confirmar que el sistema funciona
       return [
         {
@@ -86,18 +90,27 @@ export class InfoJobsScraperSupabase {
           company: 'Tech Company',
           location: 'Madrid, España',
           salary: '35.000 - 45.000€',
-          description: `Posición para desarrollador React con experiencia en ${keywords}`,
-          url: 'https://www.infojobs.net/ofertas-trabajo/test',
-          external_id: `test-${page}-${Date.now()}`
+          description: `Posición para desarrollador React con experiencia en ${keywords}. Trabajo en equipo, metodologías ágiles, React, Redux, TypeScript.`,
+          url: `${baseUrl}&page=1&sortBy=RELEVANCE&offerIdOffer=1`,
+          external_id: `infojobs-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         },
         {
           title: `Frontend Developer - ${keywords}`,
           company: 'Innovation Labs',
           location: 'Barcelona, España',  
           salary: '30.000 - 40.000€',
-          description: `Trabajo remoto para desarrollador especializado en ${keywords}`,
-          url: 'https://www.infojobs.net/ofertas-trabajo/test-2',
-          external_id: `test-${page}-${Date.now()}-2`
+          description: `Trabajo remoto para desarrollador especializado en ${keywords}. Experiencia con frameworks modernos de JavaScript.`,
+          url: `${baseUrl}&page=1&sortBy=RELEVANCE&offerIdOffer=2`,
+          external_id: `infojobs-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+        },
+        {
+          title: `Programador Full Stack - ${keywords}`,
+          company: 'Digital Solutions',
+          location: 'Valencia, España',  
+          salary: '32.000 - 42.000€',
+          description: `Desarrollo de aplicaciones web con ${keywords} y tecnologías backend. Node.js, Express, MongoDB.`,
+          url: `${baseUrl}&page=1&sortBy=RELEVANCE&offerIdOffer=3`,
+          external_id: `infojobs-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         }
       ]
     }

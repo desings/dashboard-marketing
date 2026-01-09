@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { JobController } from '@/controllers/jobController'
+import { SupabaseJobController } from '@/controllers/supabaseJobController'
 
 export async function PUT(
   request: NextRequest,
@@ -9,7 +9,8 @@ export async function PUT(
     const { id } = await params
     const body = await request.json()
     
-    const jobSearch = await JobController.updateJobSearch(id, body)
+    const controller = new SupabaseJobController()
+    const jobSearch = await controller.updateJobSearch(id, body)
     
     return NextResponse.json({
       success: true,
@@ -31,7 +32,8 @@ export async function DELETE(
   try {
     const { id } = await params
     
-    await JobController.deleteJobSearch(id)
+    const controller = new SupabaseJobController()
+    await controller.deleteJobSearch(id)
     
     return NextResponse.json({
       success: true,

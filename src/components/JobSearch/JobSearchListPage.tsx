@@ -284,7 +284,17 @@ export default function JobSearchListPage() {
                       <div className="mt-2 text-sm text-gray-600 space-y-1">
                         <p><strong>Portales:</strong> {search.portals.join(', ')}</p>
                         <p><strong>Frecuencia:</strong> Cada {search.frequencyMinutes} minutos</p>
-                        <p><strong>Creada:</strong> {new Date(search.createdAt).toLocaleDateString('es-ES')}</p>
+                        <p><strong>Creada:</strong> {
+                          search.createdAt ? 
+                            new Date(search.createdAt).toLocaleString('es-ES', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })
+                            : 'Fecha no disponible'
+                        }</p>
                       </div>
                     </div>
                     

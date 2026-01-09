@@ -279,4 +279,87 @@ export class SupabaseJobController {
       }
     }
   }
+
+  // Actualizar búsqueda de trabajo
+  async updateJobSearch(id: string, data: Partial<{
+    keywords: string
+    frequencyMinutes: number
+    portals: string[]
+    isActive: boolean
+  }>): Promise<JobSearch> {
+    const { data: jobSearch, error } = await this.supabase
+      .from('job_searches')
+      .update({
+        ...(data.keywords && { keywords: data.keywords }),
+        ...(data.frequencyMinutes && { frequency_minutes: data.frequencyMinutes }),
+        ...(data.portals && { portals: data.portals }),
+        ...(data.isActive !== undefined && { is_active: data.isActive }),
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      throw new Error(`Error updating job search: ${error.message}`)
+    }
+
+    return jobSearch
+  }
+
+  // Eliminar búsqueda de trabajo
+  async deleteJobSearch(id: string): Promise<void> {
+    // Primero eliminar todas las ofertas asociadas
+    const { error: offersError } = await this.supabase
+      .from('job_offers')
+      .delete()
+      .eq('job_search_id', id)
+
+    if (offersError) {
+      throw new Error(`Error deleting job offers: ${offersError.message}`)
+    }
+
+    // Luego eliminar la búsqueda
+    const { error } = await this.supabase
+      .from('job_searches')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      throw new Error(`Error deleting job search: ${error.message}`)
+    }
+  }
+
+  // Cambiar estado activo/inactivo de búsqueda
+  async toggleJobSearchStatus(id: string): Promise<JobSearch> {
+    // Primero obtener el estado actual
+    const { data: currentSearch, error: fetchError } = await this.supabase
+      .from('job_searches')
+      .select('is_active')
+      .eq('id', id)
+      .single()
+
+    if (fetchError) {
+      throw new Error(`Error fetching job search: ${fetchError.message}`)
+    }
+
+    // Cambiar el estado
+    const newStatus = !currentSearch.is_active
+    
+    const { data: jobSearch, error } = await this.supabase
+      .from('job_searches')
+      .update({
+        is_active: newStatus,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', id)
+      .select()
+      .single()
+
+    if (error) {
+      throw new Error(`Error toggling job search status: ${error.message}`)
+    }
+
+    return jobSearch
+  }
 }
