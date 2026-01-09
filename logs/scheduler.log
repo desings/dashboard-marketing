@@ -27162,3 +27162,15 @@ Published successfully
 [2026-01-09 02:02:00] ❌ SCHEDULER: Error de conexión o timeout al ejecutar scheduler
 [2026-01-09 02:02:00] 🏁 SCHEDULER: Verificación completada
 
+[2026-01-09 02:03:00] 🕒 SCHEDULER: Iniciando verificación de posts programados...
+[2026-01-09 02:03:00] ❌ SCHEDULER: Error de conexión o timeout al ejecutar scheduler
+[2026-01-09 02:03:00] 🏁 SCHEDULER: Verificación completada
+
+[2026-01-09 02:04:00] 🕒 SCHEDULER: Iniciando verificación de posts programados...
+[2026-01-09 02:04:00] ❌ SCHEDULER: Error de conexión o timeout al ejecutar scheduler
+[2026-01-09 02:04:00] 🏁 SCHEDULER: Verificación completada
+
+[2026-01-09 02:05:00] 🕒 SCHEDULER: Iniciando verificación de posts programados...
+[2026-01-09 02:05:00] ❌ SCHEDULER: Error de conexión o timeout al ejecutar scheduler
+[2026-01-09 02:05:00] 🏁 SCHEDULER: Verificación completada
+

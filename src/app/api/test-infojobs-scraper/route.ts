@@ -8,24 +8,26 @@ export async function GET() {
     const { InfoJobsScraperSupabase } = await import('@/services/infojobsScraperSupabase')
     const scraper = new InfoJobsScraperSupabase()
     
-    // URL de prueba de InfoJobs
-    const testUrl = 'https://www.infojobs.net/ofertas-trabajo/programador-react.aspx'
+    // Ejecutar el scraper (usando un job search ID temporal para pruebas)
+    const keywords = 'programador react'
+    const testJobSearchId = 'test-search-id'
     
-    console.log('🎯 Scrapeando URL:', testUrl)
+    console.log(`🎯 Scrapeando InfoJobs para: "${keywords}"`)
     
     // Ejecutar el scraper
-    const offers = await scraper.scrapeInfoJobs(testUrl, 'programador react')
+    const result = await scraper.scrapeJobOffers(keywords, testJobSearchId, 1) // Solo 1 página para prueba
     
-    console.log(`✅ Scraping completado. Ofertas encontradas: ${offers.length}`)
+    console.log(`✅ Scraping completado. Ofertas procesadas: ${result.totalProcessed}, nuevas: ${result.newOffersCount}`)
     
     return NextResponse.json({
       success: true,
       message: `Scraping completado exitosamente`,
       data: {
-        url: testUrl,
-        keywords: 'programador react',
-        totalOffers: offers.length,
-        offers: offers.slice(0, 5) // Solo mostrar las primeras 5 para evitar respuesta muy grande
+        keywords: keywords,
+        jobSearchId: testJobSearchId,
+        totalProcessed: result.totalProcessed,
+        newOffersCount: result.newOffersCount,
+        errors: result.errors
       }
     })
     
