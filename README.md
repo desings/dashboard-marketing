@@ -36,3 +36,4 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 # Force deployment trigger
 # Force redeploy with correct FB ID
+// Auto-deploy test viernes,  9 de enero de 2026, 12:53:31 CET
