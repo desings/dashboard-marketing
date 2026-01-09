@@ -178,6 +178,7 @@ export class InfoJobsScraperSupabase {
       return Array.from({ length: numOffers }, (_, i) => generateJobOffer(i))
     }
     
+    // === PUPPETEER SCRAPING (Solo para desarrollo local) ===
     // URL exacta proporcionada por el usuario
     const url = `https://www.infojobs.net/ofertas-trabajo?keyword=${encodeURIComponent(keywords)}&segmentId=&page=${page}&sortBy=RELEVANCE&onlyForeignCountry=false&countryIds=17&sinceDate=ANY`
     
