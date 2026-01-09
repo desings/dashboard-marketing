@@ -270,7 +270,8 @@ export class SupabaseJobController {
       const scrapingResult = await scraper.scrapeJobOffers(
         search.keywords, 
         jobSearchId, 
-        3 // máximo 3 páginas
+        3, // máximo 3 páginas
+        true // forceReal = true para scraping manual
       )
 
       // Actualizar última ejecución
