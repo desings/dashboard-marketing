@@ -1,6 +1,5 @@
 import * as cheerio from 'cheerio'
-import puppeteer, { Browser, Page } from 'puppeteer'
-import chromium from '@sparticuz/chromium'
+import { Browser, Page } from 'puppeteer'
 import { getSupabaseClient } from '@/lib/database'
 
 export interface ScrapedJobOffer {
@@ -85,13 +84,18 @@ export class InfoJobsScraperSupabase {
       // Configuración específica para entornos de producción (Vercel)
       const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL
       
-      // Lanzar navegador con configuración optimizada para InfoJobs
-      browser = await puppeteer.launch({
-        headless: true,
-        ...(isProduction ? {
-          executablePath: await chromium.executablePath(),
+      let browser: Browser
+      
+      if (isProduction) {
+        // En producción usamos puppeteer-core con @sparticuz/chromium
+        const puppeteerCore = await import('puppeteer-core')
+        const chromium = await import('@sparticuz/chromium')
+        
+        browser = await puppeteerCore.default.launch({
+          headless: true,
+          executablePath: await chromium.default.executablePath(),
           args: [
-            ...chromium.args,
+            ...chromium.default.args,
             '--disable-dev-shm-usage',
             '--disable-blink-features=AutomationControlled',
             '--no-first-run',
@@ -100,8 +104,15 @@ export class InfoJobsScraperSupabase {
             '--disable-background-timer-throttling',
             '--disable-backgrounding-occluded-windows',
             '--disable-renderer-backgrounding'
-          ]
-        } : {
+          ],
+          defaultViewport: null
+        })
+      } else {
+        // En desarrollo usamos puppeteer normal
+        const puppeteerDev = await import('puppeteer')
+        
+        browser = await puppeteerDev.default.launch({
+          headless: true,
           args: [
             '--no-sandbox',
             '--disable-setuid-sandbox',
@@ -111,10 +122,10 @@ export class InfoJobsScraperSupabase {
             '--no-first-run',
             '--disable-default-apps',
             '--disable-features=TranslateUI'
-          ]
-        }),
-        defaultViewport: null
-      })
+          ],
+          defaultViewport: null
+        })
+      }
 
       const page: Page = await browser.newPage()
       
