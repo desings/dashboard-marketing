@@ -1,5 +1,6 @@
 import * as cheerio from 'cheerio'
 import puppeteer, { Browser, Page } from 'puppeteer'
+import chromium from '@sparticuz/chromium'
 import { getSupabaseClient } from '@/lib/database'
 
 export interface ScrapedJobOffer {
@@ -81,19 +82,37 @@ export class InfoJobsScraperSupabase {
     let browser: Browser | null = null
     
     try {
+      // Configuración específica para entornos de producción (Vercel)
+      const isProduction = process.env.NODE_ENV === 'production' || process.env.VERCEL
+      
       // Lanzar navegador con configuración optimizada para InfoJobs
       browser = await puppeteer.launch({
         headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-          '--disable-blink-features=AutomationControlled',
-          '--disable-extensions',
-          '--no-first-run',
-          '--disable-default-apps',
-          '--disable-features=TranslateUI'
-        ],
+        ...(isProduction ? {
+          executablePath: await chromium.executablePath(),
+          args: [
+            ...chromium.args,
+            '--disable-dev-shm-usage',
+            '--disable-blink-features=AutomationControlled',
+            '--no-first-run',
+            '--disable-default-apps',
+            '--disable-features=TranslateUI',
+            '--disable-background-timer-throttling',
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding'
+          ]
+        } : {
+          args: [
+            '--no-sandbox',
+            '--disable-setuid-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-blink-features=AutomationControlled',
+            '--disable-extensions',
+            '--no-first-run',
+            '--disable-default-apps',
+            '--disable-features=TranslateUI'
+          ]
+        }),
         defaultViewport: null
       })
 
