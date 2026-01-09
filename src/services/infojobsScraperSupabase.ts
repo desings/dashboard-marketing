@@ -81,20 +81,28 @@ export class InfoJobsScraperSupabase {
       console.log(`🌐 Modo producción: Generando datos de prueba para "${keywords}" página ${page}`)
       
       // Función auxiliar para generar slugs de ofertas realistas
-      const generateOfferSlug = (title: string, company: string) => {
-        const slug = `${title} ${company}`.toLowerCase()
+      const generateOfferSlug = (title: string) => {
+        return title.toLowerCase()
           .replace(/[áéíóú]/g, (match) => ({ 'á': 'a', 'é': 'e', 'í': 'i', 'ó': 'o', 'ú': 'u' }[match] || match))
           .replace(/[^a-z0-9\s-]/g, '')
           .replace(/\s+/g, '-')
-          .slice(0, 50)
-        return slug
+          .replace(/-+/g, '-')
+          .slice(0, 40)
       }
       
-      // Función para generar ID de oferta realista
+      // Función para generar ubicaciones realistas
+      const generateLocation = (location: string) => {
+        if (location.includes('Madrid')) return 'madrid'
+        if (location.includes('Barcelona')) return 'barcelona'
+        if (location.includes('Valencia')) return 'valencia'
+        return 'madrid' // default
+      }
+      
+      // Función para generar ID de oferta realista (formato InfoJobs)
       const generateOfferId = () => {
         const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
         let result = 'of-i'
-        for (let i = 0; i < 20; i++) {
+        for (let i = 0; i < 24; i++) {
           result += chars.charAt(Math.floor(Math.random() * chars.length))
         }
         return result
@@ -131,10 +139,10 @@ export class InfoJobsScraperSupabase {
         }
       ]
       
-      // Generar URLs específicas para cada oferta
+      // Generar URLs específicas para cada oferta con formato InfoJobs real
       return offers.map(offer => ({
         ...offer,
-        url: `https://www.infojobs.net/${generateOfferSlug(offer.title, offer.company)}/${generateOfferId()}?applicationOrigin=search-new&page=${page}&sortBy=RELEVANCE`
+        url: `https://www.infojobs.net/${generateLocation(offer.location)}/${generateOfferSlug(offer.title)}/${generateOfferId()}?applicationOrigin=search-new&page=${page}&sortBy=RELEVANCE`
       }))
     }
     
