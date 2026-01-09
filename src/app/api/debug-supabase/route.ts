@@ -5,49 +5,40 @@ export async function GET() {
   try {
     console.log('🔍 Debug: Verificando configuración Supabase...')
     
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+    // Forzar valores correctos para debug
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://rgmltuyfabxomkplvzij.supabase.co'
+    const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnbWx0dXlmYWJ4b21rcGx2emlqIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczNTEyOTc0MywiZXhwIjoyMDUwNzA1NzQzfQ.L0hO5CL2KUnOxLFSmRrnGv0DjKCd6lE4zAqAq2KH9oA'
     
-    console.log('📍 NEXT_PUBLIC_SUPABASE_URL:', supabaseUrl ? 'configurado' : 'NO configurado')
-    console.log('📍 SUPABASE_SERVICE_ROLE_KEY:', supabaseKey ? 'configurado' : 'NO configurado')
+    console.log('📍 URL:', supabaseUrl)
+    console.log('📍 Key length:', supabaseKey.length)
     
-    const dbAvailable = await isDatabaseAvailable()
+    const { createClient } = await import('@supabase/supabase-js')
+    const supabase = createClient(supabaseUrl, supabaseKey)
     
-    if (dbAvailable) {
-      const supabase = getSupabaseClient()
-      const { data, error } = await supabase
-        .from('job_searches')
-        .select('count', { count: 'exact', head: true })
+    // Test directo
+    const { data, error } = await supabase
+      .from('job_searches')
+      .select('count', { count: 'exact', head: true })
         
-      return NextResponse.json({
-        success: true,
-        debug: {
-          supabaseUrl: supabaseUrl ? 'configurado' : 'NO configurado',
-          supabaseKey: supabaseKey ? 'configurado' : 'NO configurado',
-          dbAvailable,
-          testQuery: { data, error: error?.message || null }
+    return NextResponse.json({
+      success: !error,
+      debug: {
+        supabaseUrl,
+        supabaseKeyLength: supabaseKey.length,
+        testQuery: { 
+          data, 
+          error: error?.message || null,
+          details: error?.details || null,
+          hint: error?.hint || null 
         }
-      })
-    } else {
-      return NextResponse.json({
-        success: false,
-        debug: {
-          supabaseUrl: supabaseUrl ? 'configurado' : 'NO configurado',
-          supabaseKey: supabaseKey ? 'configurado' : 'NO configurado',
-          dbAvailable
-        }
-      })
-    }
+      }
+    })
     
   } catch (error) {
     console.error('❌ Error en debug:', error)
     return NextResponse.json({
       success: false,
-      error: error instanceof Error ? error.message : 'Error desconocido',
-      debug: {
-        supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL ? 'configurado' : 'NO configurado',
-        supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY ? 'configurado' : 'NO configurado'
-      }
+      error: error instanceof Error ? error.message : 'Error desconocido'
     }, { status: 500 })
   }
 }
