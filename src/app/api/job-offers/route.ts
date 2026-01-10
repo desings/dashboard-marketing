@@ -39,30 +39,22 @@ export async function GET(request: NextRequest) {
 
     // Intentar usar base de datos real
     const dbAvailable = await isDatabaseAvailable()
-    console.log('🔧 Database availability check result:', dbAvailable)
     
     if (dbAvailable) {
-      console.log('✅ Database available - proceeding with Supabase')
       try {
-        console.log('🔧 Creating SupabaseJobController...')
         const controller = new SupabaseJobController()
-        console.log('🔧 Calling getJobOffers with:', { rawUserId, filters, page, limit })
         const result = await controller.getJobOffers(rawUserId, { ...filters, page, limit })
-        console.log('✅ Result from Supabase controller:', result)
         return NextResponse.json({
           success: true,
           ...result
         })
       } catch (dbError) {
         console.error('❌ Error obteniendo ofertas de Supabase:', dbError)
-        // No hacer fallback, mostrar el error real
         return NextResponse.json({
           success: false,
           error: `Database error: ${dbError instanceof Error ? dbError.message : 'Unknown error'}`
         }, { status: 500 })
       }
-    } else {
-      console.log('❌ Database not available - falling back to empty response')
     }
     
     // Sin base de datos configurada - devolver vacío

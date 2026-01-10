@@ -6,12 +6,6 @@ export async function isDatabaseAvailable(): Promise<boolean> {
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
     const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY
     
-    console.log('🔧 Verificando credenciales Supabase...')
-    console.log('   URL disponible:', !!supabaseUrl)
-    console.log('   Key disponible:', !!supabaseKey)
-    console.log('   URL completa:', supabaseUrl)
-    console.log('   Key length:', supabaseKey?.length || 0)
-    
     if (!supabaseUrl || !supabaseKey) {
       console.warn('⚠️ Supabase credentials missing')
       return false
@@ -22,13 +16,11 @@ export async function isDatabaseAvailable(): Promise<boolean> {
       return false
     }
 
-    // ✅ FORZAR: Asumir que la base de datos está disponible
-    console.log('✅ Supabase credenciales presentes - Forzando modo producción')
+    // ✅ Base de datos configurada correctamente
     return true
   } catch (error) {
     console.warn('⚠️ Database connection failed:', error)
-    // Devolver true de todos modos para forzar el uso de BD
-    return true
+    return false
   }
 }
 
