@@ -196,8 +196,7 @@ export class SupabaseJobController {
         portal: 'infojobs', // Default since we removed portal column
         status: offer.status,
         publishedAt: offer.created_at, // Use created_at as published date
-        scrapedAt: offer.created_at,
-        id: offer.id
+        scrapedAt: offer.created_at
       })) || [],
       total: total || 0,
       totalPages,
