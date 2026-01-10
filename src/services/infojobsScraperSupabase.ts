@@ -81,220 +81,204 @@ export class InfoJobsScraperSupabase {
     return this.performRealScraping(keywords, page)
   }
 
-  // Método que realiza scraping real usando Puppeteer
+  // Método que realiza scraping real usando HTTP directo
   private async performRealScraping(keywords: string, page: number): Promise<ScrapedJobOffer[]> {
-    console.log(`🌐 INICIANDO SCRAPING REAL DE INFOJOBS para: "${keywords}" página ${page}`)
+    console.log(`🌐 SCRAPING REAL HTTP de InfoJobs: "${keywords}" página ${page}`)
     
-    // ===== MÉTODO 1: USAR API DE INFOJOBS DIRECTAMENTE =====
+    // ===== SOLO SCRAPING HTTP REAL - SIN SIMULACIONES =====
+    const searchUrl = `https://www.infojobs.net/ofertas-trabajo?keyword=${encodeURIComponent(keywords)}&page=${page}`
+    console.log(`🔍 Fetch directo a InfoJobs: ${searchUrl}`)
+    
     try {
-      const response = await fetch(`https://api.infojobs.net/api/9/offer?q=${encodeURIComponent(keywords)}&page=${page}&maxResults=50`, {
+      const response = await fetch(searchUrl, {
         method: 'GET',
         headers: {
-          'Authorization': 'Basic ' + Buffer.from(process.env.INFOJOBS_CLIENT_ID + ':' + process.env.INFOJOBS_CLIENT_SECRET).toString('base64'),
-          'Accept': 'application/json',
-          'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+          'Accept-Language': 'es-ES,es;q=0.9,en;q=0.8',
+          'Accept-Encoding': 'gzip, deflate, br',
+          'Cache-Control': 'no-cache',
+          'Pragma': 'no-cache',
+          'Sec-Fetch-Dest': 'document',
+          'Sec-Fetch-Mode': 'navigate',
+          'Sec-Fetch-Site': 'none'
         }
       })
 
-      if (response.ok) {
-        const data = await response.json()
-        console.log(`✅ InfoJobs API: ${data.offers?.length || 0} ofertas encontradas`)
-        
-        if (data.offers && data.offers.length > 0) {
-          return data.offers.map((offer: any) => ({
-            title: offer.title || 'Oferta sin título',
-            company: offer.author?.name || 'Empresa no especificada',
-            location: offer.province?.value || offer.city || 'Ubicación no especificada',
-            salary: offer.salaryDescription || null,
-            description: offer.description || offer.title,
-            url: offer.link || `https://www.infojobs.net/oferta/${offer.id}`,
-            external_id: offer.id || `api-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-          }))
-        }
-      }
-    } catch (apiError) {
-      console.warn('⚠️ InfoJobs API falló, usando scraping directo:', apiError)
-    }
-
-    // ===== MÉTODO 2: SCRAPING DIRECTO CON PUPPETEER =====
-    const puppeteer = await import('puppeteer')
-    let browser: any = null
-
-    try {
-      browser = await puppeteer.default.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox', 
-          '--disable-dev-shm-usage',
-          '--disable-web-security',
-          '--disable-features=VizDisplayCompositor'
-        ]
-      })
-
-      const browserPage = await browser.newPage()
-      
-      await browserPage.setUserAgent(
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-      )
-
-      // URL de búsqueda directa de InfoJobs
-      const searchUrl = `https://www.infojobs.net/ofertas-trabajo/${encodeURIComponent(keywords.toLowerCase().replace(/\s+/g, '-'))}.aspx?p=${page}`
-      console.log(`🔍 Navegando a InfoJobs: ${searchUrl}`)
-      
-      await browserPage.goto(searchUrl, { waitUntil: 'networkidle0', timeout: 30000 })
-      await browserPage.waitForTimeout(5000)
-      
-      // Extraer ofertas directamente del DOM
-      const offers = await browserPage.evaluate(() => {
-        const results: any[] = []
-        
-        // Buscar elementos de ofertas en InfoJobs
-        const offerElements = document.querySelectorAll('article, .offer-item, [data-testid*="offer"], .list-offer')
-        
-        offerElements.forEach((element: any, index: number) => {
-          try {
-            const titleEl = element.querySelector('h2, h3, .offer-title, [data-testid="offer-title"], a[title]')
-            const companyEl = element.querySelector('.company, .company-name, [data-testid="company-name"]')
-            const locationEl = element.querySelector('.location, .offer-location, [data-testid="offer-location"]')
-            const salaryEl = element.querySelector('.salary, .offer-salary, [data-testid="salary"]')
-            const linkEl = element.querySelector('a[href*="/detail/"], a[href*="/oferta/"], a[href*="infojobs.net"]')
-            
-            if (titleEl) {
-              const title = titleEl.textContent?.trim() || titleEl.title || `Oferta ${index + 1}`
-              const company = companyEl?.textContent?.trim() || 'Empresa'
-              const location = locationEl?.textContent?.trim() || 'España'
-              const salary = salaryEl?.textContent?.trim() || null
-              const url = linkEl?.href || `https://www.infojobs.net/oferta-${index}`
-              
-              results.push({
-                title: title.substring(0, 100),
-                company: company.substring(0, 50),
-                location: location.substring(0, 50), 
-                salary: salary?.substring(0, 30) || null,
-                description: `Oferta de empleo para ${title}`,
-                url: url.includes('infojobs.net') ? url : `https://www.infojobs.net${url}`,
-                external_id: `scraped-${Date.now()}-${index}`
-              })
-            }
-          } catch (err) {
-            console.warn('Error procesando elemento:', err)
-          }
-        })
-        
-        return results
-      })
-
-      console.log(`📋 Ofertas extraídas de InfoJobs: ${offers.length}`)
-      
-      if (offers.length > 0) {
-        return offers
+      if (!response.ok) {
+        throw new Error(`InfoJobs HTTP ${response.status}: ${response.statusText}`)
       }
 
-      // Si no encontró ofertas, hacer scraping alternativo
-      const html = await browserPage.content()
-      return this.extractOffersFromHTML(html, keywords)
-
+      const html = await response.text()
+      console.log(`📄 HTML descargado de InfoJobs: ${html.length} caracteres`)
+      
+      // Verificar que contiene ofertas de trabajo
+      if (!html.includes('oferta') && !html.includes('empleo') && !html.includes('trabajo')) {
+        throw new Error('HTML de InfoJobs no contiene ofertas de trabajo')
+      }
+      
+      // Extraer ofertas reales del HTML
+      const offers = this.extractRealOffersFromHTML(html, keywords)
+      
+      if (offers.length === 0) {
+        throw new Error(`No se encontraron ofertas reales en InfoJobs para "${keywords}"`)
+      }
+      
+      console.log(`✅ SCRAPING REAL EXITOSO: ${offers.length} ofertas reales extraídas`)
+      return offers
+      
     } catch (error) {
-      console.error('❌ Error en scraping real:', error)
-      throw new Error(`No se pudieron obtener ofertas reales de InfoJobs: ${error}`)
-    } finally {
-      if (browser) {
-        await browser.close()
-      }
+      console.error('❌ SCRAPING REAL FALLÓ:', error)
+      throw new Error(`FALLO SCRAPING REAL InfoJobs: ${error}`)
     }
   }
 
-  // Método directo para extraer ofertas del HTML de InfoJobs
-  private extractOffersFromHTML(html: string, keywords: string): ScrapedJobOffer[] {
+  // Método REAL para extraer ofertas del HTML de InfoJobs
+  private extractRealOffersFromHTML(html: string, keywords: string): ScrapedJobOffer[] {
     const $ = cheerio.load(html)
     const offers: ScrapedJobOffer[] = []
 
-    console.log('🔍 Extrayendo ofertas directamente del HTML de InfoJobs...')
+    console.log('🔍 EXTRAYENDO OFERTAS REALES de InfoJobs HTML...')
 
-    // Buscar ofertas usando múltiples selectores
-    const offerSelectors = [
-      'article',
+    // Buscar ofertas usando selectores de InfoJobs específicos
+    const possibleSelectors = [
+      'article.offer',
+      'div[data-testid*="offer"]',
       '.offer-item',
-      '[data-testid*="offer"]',
       '.js-offer-link',
-      '.offer-element'
+      'article',
+      '[data-offer-id]',
+      '.list-offer-element'
     ]
 
-    for (const selector of offerSelectors) {
+    let foundOffers = false
+    
+    for (const selector of possibleSelectors) {
       const elements = $(selector)
-      console.log(`📋 Selector "${selector}": ${elements.length} elementos`)
+      console.log(`🔍 Selector "${selector}": ${elements.length} elementos`)
 
-      elements.each((index, element) => {
-        const $element = $(element)
-        
-        const titleEl = $element.find('h2, h3, .offer-title, [data-testid="offer-title"], a[title]').first()
-        const companyEl = $element.find('.company-name, .company, [data-testid="company-name"]').first()  
-        const locationEl = $element.find('.offer-location, .location, [data-testid="offer-location"]').first()
-        const linkEl = $element.find('a[href*="/detail/"], a[href*="/oferta/"]').first()
-
-        const title = titleEl.text()?.trim() || titleEl.attr('title') || ''
-        const company = companyEl.text()?.trim() || 'Empresa'
-        const location = locationEl.text()?.trim() || 'España'
-        const link = linkEl.attr('href') || ''
-
-        if (title && title.length > 5) {
-          const fullUrl = link.startsWith('http') ? link : `https://www.infojobs.net${link}`
+      if (elements.length > 0) {
+        elements.each((index, element) => {
+          const $element = $(element)
           
-          offers.push({
-            title: title.substring(0, 100),
-            company: company.substring(0, 50),
-            location: location.substring(0, 50),
-            salary: null,
-            description: `Oferta de empleo: ${title}`,
-            url: fullUrl,
-            external_id: `scraped-${Date.now()}-${index}-${Math.random().toString(36).substr(2, 5)}`
-          })
+          // Buscar título de la oferta
+          const titleEl = $element.find('h2 a, h3 a, .offer-title a, a[title]').first()
+          const titleText = titleEl.text()?.trim() || titleEl.attr('title')?.trim() || ''
+          
+          // Buscar enlace de la oferta
+          const linkEl = $element.find('a[href*="/detail/"], a[href*="/empleo-"], a[href*="/oferta"]').first()
+          const href = linkEl.attr('href') || ''
+          
+          // Buscar empresa
+          const companyEl = $element.find('.company-name, .company, .offer-company').first()
+          const companyText = companyEl.text()?.trim() || ''
+          
+          // Buscar ubicación
+          const locationEl = $element.find('.offer-location, .location, [data-testid*="location"]').first()
+          const locationText = locationEl.text()?.trim() || ''
+          
+          // Buscar salario
+          const salaryEl = $element.find('.offer-salary, .salary, [data-testid*="salary"]').first()
+          const salaryText = salaryEl.text()?.trim() || null
+          
+          // Validar que es una oferta real
+          if (titleText && titleText.length > 5 && href && href.includes('infojobs')) {
+            const fullUrl = href.startsWith('http') ? href : `https://www.infojobs.net${href}`
+            
+            // Extraer ID real de InfoJobs del href
+            const idMatch = href.match(/\/([a-zA-Z0-9-]+)\.aspx/) || href.match(/detail\/([^\/\?]+)/) || href.match(/empleo-([^\/\?]+)/)
+            const realId = idMatch ? idMatch[1] : `scraped-${Date.now()}-${index}`
+            
+            offers.push({
+              title: titleText.substring(0, 100),
+              company: companyText.substring(0, 50) || 'Empresa InfoJobs',
+              location: locationText.substring(0, 50) || 'España',
+              salary: salaryText?.substring(0, 30) || null,
+              description: `Oferta real extraída de InfoJobs: ${titleText}`,
+              url: fullUrl,
+              external_id: realId
+            })
+            
+            console.log(`  ✅ REAL: "${titleText}" - ${companyText} - ${fullUrl}`)
+            foundOffers = true
+          }
+        })
+        
+        if (foundOffers && offers.length > 0) {
+          break // Si encontramos ofertas con este selector, parar
         }
-      })
-
-      if (offers.length > 0) break // Si encontró ofertas, no seguir buscando
+      }
     }
 
-    // Si aún no encontró ofertas, buscar enlaces directos
+    // Si no encontró ofertas con selectores, buscar enlaces directos
     if (offers.length === 0) {
-      console.log('🔍 No se encontraron ofertas, buscando enlaces directos...')
+      console.log('🔍 Buscando enlaces directos de ofertas...')
       
-      const links = $('a[href*="infojobs.net"], a[href*="/detail/"], a[href*="/oferta/"]')
+      const links = $('a[href*="infojobs.net"], a[href*="/detail/"], a[href*="/empleo"]')
+      
       links.each((index, element) => {
         const $link = $(element)
-        const title = $link.text()?.trim() || $link.attr('title') || `Oferta ${index + 1}`
         const href = $link.attr('href') || ''
+        const text = $link.text()?.trim() || ''
         
-        if (title.length > 5 && href) {
-          const fullUrl = href.startsWith('http') ? href : `https://www.infojobs.net${href}`
-          
-          offers.push({
-            title: title.substring(0, 100),
-            company: 'InfoJobs',
-            location: 'España',
-            salary: null,
-            description: `Oferta encontrada: ${title}`,
-            url: fullUrl,
-            external_id: `link-${Date.now()}-${index}`
-          })
+        if (href && text && text.length > 10 && text.length < 200) {
+          // Verificar que parece una oferta de trabajo
+          const lowerText = text.toLowerCase()
+          if (lowerText.includes('desarrollador') || 
+              lowerText.includes('programador') ||
+              lowerText.includes('ingeniero') ||
+              lowerText.includes('analista') ||
+              lowerText.includes('técnico') ||
+              lowerText.includes(keywords.toLowerCase())) {
+            
+            const fullUrl = href.startsWith('http') ? href : `https://www.infojobs.net${href}`
+            const linkId = href.match(/\/([a-zA-Z0-9-]+)/) ? href.match(/\/([a-zA-Z0-9-]+)/)![1] : `link-${index}`
+            
+            offers.push({
+              title: text.substring(0, 100),
+              company: 'Empresa InfoJobs',
+              location: 'España',
+              salary: null,
+              description: `Oferta real encontrada: ${text}`,
+              url: fullUrl,
+              external_id: linkId
+            })
+            
+            console.log(`  ✅ ENLACE REAL: "${text}" - ${fullUrl}`)
+          }
         }
       })
     }
 
-    console.log(`✅ Extraídas ${offers.length} ofertas reales del HTML`)
+    console.log(`📊 OFERTAS REALES EXTRAÍDAS: ${offers.length}`)
     
-    // Si aún no hay ofertas, es porque InfoJobs cambió su estructura
     if (offers.length === 0) {
-      throw new Error('No se pudieron extraer ofertas de InfoJobs - posible cambio en estructura web')
+      // Mostrar debug del HTML para análisis
+      console.log('❌ NO SE ENCONTRARON OFERTAS REALES')
+      console.log('📄 Muestra HTML (primeros 1000 chars):')
+      console.log(html.substring(0, 1000))
+      
+      // Verificar qué enlaces hay en la página
+      const allLinks = $('a[href]')
+      console.log(`🔗 Total enlaces en página: ${allLinks.length}`)
+      allLinks.slice(0, 10).each((i, el) => {
+        const href = $(el).attr('href')
+        const text = $(el).text().trim().substring(0, 50)
+        console.log(`  Link ${i + 1}: "${text}" -> ${href}`)
+      })
     }
 
     return offers
   }
 
+  // Método directo para extraer ofertas del HTML de InfoJobs
+  private extractOffersFromHTML(html: string, keywords: string): ScrapedJobOffer[] {
+    return this.extractRealOffersFromHTML(html, keywords)
+  }
+
   private parseJobOffersWithDebug(html: string): ScrapedJobOffer[] {
-    console.log('🔍 Usando método directo de extracción...')
-    return this.extractOffersFromHTML(html, 'búsqueda')
+    console.log('🔍 Parseando ofertas REALES de InfoJobs...')
+    return this.extractRealOffersFromHTML(html, 'búsqueda')
   }
 
   // Mantener función original como fallback
