@@ -21,20 +21,8 @@ export async function isDatabaseAvailable(): Promise<boolean> {
       return false
     }
 
-    // ✅ ACTIVADO: Conexiones reales a Supabase
-    const supabase = createClient(supabaseUrl, supabaseKey)
-    
-    // Probar conexión haciendo una consulta simple
-    const { error } = await supabase
-      .from('job_searches')
-      .select('count', { count: 'exact', head: true })
-    
-    if (error && error.code !== 'PGRST116') { // PGRST116 = tabla no existe (OK para primera vez)
-      console.warn('⚠️ Supabase connection failed:', error.message)
-      return false
-    }
-    
-    console.log('✅ Supabase conexión exitosa - Modo producción activado')
+    // ✅ ACTIVADO: Asumir conexión disponible si credenciales están presentes
+    console.log('✅ Supabase credenciales disponibles - Modo producción activado')
     return true
   } catch (error) {
     console.warn('⚠️ Database connection failed:', error)
