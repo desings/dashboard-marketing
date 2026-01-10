@@ -129,7 +129,7 @@ export class SupabaseJobController {
 
     console.log(`📊 Obteniendo ofertas - Página: ${page}, Límite: ${limit}`)
 
-    // Construir query base con join
+    // Construir query base con join - using corrected column names
     let query = this.supabase
       .from('job_offers')
       .select(`
@@ -140,11 +140,8 @@ export class SupabaseJobController {
         salary,
         description,
         url,
-        portal,
         status,
         created_at,
-        posted_at,
-        external_id,
         job_search_id,
         job_searches!inner(user_id)
       `)
@@ -196,11 +193,11 @@ export class SupabaseJobController {
         salary: offer.salary,
         description: offer.description,
         url: offer.url,
-        portal: offer.portal || 'infojobs',
+        portal: 'infojobs', // Default since we removed portal column
         status: offer.status,
-        publishedAt: offer.posted_at || offer.created_at,
+        publishedAt: offer.created_at, // Use created_at as published date
         scrapedAt: offer.created_at,
-        externalId: offer.external_id
+        id: offer.id
       })) || [],
       total: total || 0,
       totalPages,
