@@ -64,6 +64,7 @@ export default function JobOffersListPage() {
     totalPages: 0
   })
   const [loading, setLoading] = useState(true)
+  const [showingSampleData, setShowingSampleData] = useState(false)
   const [selectedOffer, setSelectedOffer] = useState<JobOffer | null>(null)
 
   useEffect(() => {
@@ -103,12 +104,112 @@ export default function JobOffersListPage() {
       const data = await response.json()
 
       if (data.success) {
-        setOffers(data.data || [])
-        setPagination(prev => ({
-          ...prev,
-          total: data.total,
-          totalPages: data.totalPages
-        }))
+        // Si no hay base de datos configurada, mostrar ofertas de ejemplo
+        if (data.message && data.message.includes('Configura DATABASE_URL')) {
+          console.log('⚠️ Base de datos no configurada, mostrando ofertas de ejemplo')
+          setShowingSampleData(true)
+          
+          const sampleOffers: JobOffer[] = [
+            {
+              id: 'sample-1',
+              title: 'Desarrollador Node.js Senior - Madrid',
+              company: 'TechCorp Solutions',
+              location: 'Madrid, España',
+              salary: '45.000-55.000 €',
+              description: 'Buscamos desarrollador Node.js con experiencia en APIs REST, MongoDB y AWS para nuestro equipo de backend.',
+              url: 'https://www.infojobs.net/empleo-desarrollador-nodejs-senior-madrid',
+              portal: 'infojobs',
+              status: 'ACTIVE',
+              publishedAt: new Date().toISOString(),
+              scrapedAt: new Date().toISOString()
+            },
+            {
+              id: 'sample-2',
+              title: 'Full Stack Developer JavaScript - React/Node.js',
+              company: 'StartupInnovadora',
+              location: 'Barcelona, España',
+              salary: '40.000-50.000 €',
+              description: 'Oportunidad en startup para desarrollador full-stack con React, Node.js, TypeScript y experiencia en microservicios.',
+              url: 'https://www.infojobs.net/empleo-fullstack-javascript-react-nodejs',
+              portal: 'infojobs',
+              status: 'ACTIVE',
+              publishedAt: new Date(Date.now() - 3600000).toISOString(),
+              scrapedAt: new Date(Date.now() - 3600000).toISOString()
+            },
+            {
+              id: 'sample-3',
+              title: 'Backend Developer Node.js - Remoto',
+              company: 'DigitalAgency Pro',
+              location: 'Remoto, España',
+              salary: '38.000-48.000 €',
+              description: 'Desarrollador backend con Node.js, Express, PostgreSQL para proyectos de transformación digital.',
+              url: 'https://www.infojobs.net/empleo-backend-nodejs-remoto',
+              portal: 'infojobs',
+              status: 'ACTIVE',
+              publishedAt: new Date(Date.now() - 7200000).toISOString(),
+              scrapedAt: new Date(Date.now() - 7200000).toISOString()
+            },
+            {
+              id: 'sample-4',
+              title: 'JavaScript Developer - Vue.js y Node.js',
+              company: 'WebSolutions Inc',
+              location: 'Valencia, España',
+              salary: '35.000-45.000 €',
+              description: 'Desarrollador JavaScript para proyectos web con Vue.js en frontend y Node.js en backend.',
+              url: 'https://www.infojobs.net/empleo-javascript-vue-nodejs',
+              portal: 'infojobs',
+              status: 'ACTIVE',
+              publishedAt: new Date(Date.now() - 10800000).toISOString(),
+              scrapedAt: new Date(Date.now() - 10800000).toISOString()
+            },
+            {
+              id: 'sample-5',
+              title: 'Node.js Architect - Microservicios',
+              company: 'Enterprise Systems',
+              location: 'Madrid, España',
+              salary: '60.000-70.000 €',
+              description: 'Arquitecto de software con amplia experiencia en Node.js, microservicios, Docker, Kubernetes.',
+              url: 'https://www.infojobs.net/empleo-nodejs-architect-microservices',
+              portal: 'infojobs',
+              status: 'ACTIVE',
+              publishedAt: new Date(Date.now() - 14400000).toISOString(),
+              scrapedAt: new Date(Date.now() - 14400000).toISOString()
+            }
+          ]
+
+          // Aplicar filtros a las ofertas de ejemplo
+          let filteredSampleOffers = sampleOffers
+          
+          if (filters.search) {
+            const searchLower = filters.search.toLowerCase()
+            filteredSampleOffers = sampleOffers.filter(offer => 
+              offer.title.toLowerCase().includes(searchLower) ||
+              offer.company.toLowerCase().includes(searchLower) ||
+              offer.description?.toLowerCase().includes(searchLower)
+            )
+          }
+
+          // Simular paginación
+          const startIndex = (pagination.page - 1) * pagination.limit
+          const endIndex = startIndex + pagination.limit
+          const paginatedOffers = filteredSampleOffers.slice(startIndex, endIndex)
+
+          setOffers(paginatedOffers)
+          setPagination(prev => ({
+            ...prev,
+            total: filteredSampleOffers.length,
+            totalPages: Math.ceil(filteredSampleOffers.length / pagination.limit)
+          }))
+        } else {
+          // Datos reales de la base de datos
+          setShowingSampleData(false)
+          setOffers(data.data || [])
+          setPagination(prev => ({
+            ...prev,
+            total: data.total || 0,
+            totalPages: data.totalPages || 0
+          }))
+        }
       }
     } catch (error) {
       console.error('Error cargando ofertas:', error)
@@ -163,6 +264,21 @@ export default function JobOffersListPage() {
     <div className="space-y-6">
       <div className="bg-white rounded-lg shadow p-6">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">Ofertas de Trabajo</h1>
+        
+        {showingSampleData && (
+          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+            <div className="flex items-center space-x-2">
+              <span className="text-blue-600">ℹ️</span>
+              <div>
+                <p className="text-blue-800 font-medium">Mostrando datos de ejemplo</p>
+                <p className="text-blue-600 text-sm">
+                  Estas ofertas demuestran el filtrado específico implementado. 
+                  Configure la base de datos para ver ofertas reales de InfoJobs.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
         
         <div className="flex flex-wrap gap-2">
           <select
