@@ -104,104 +104,26 @@ export default function JobOffersListPage() {
       const data = await response.json()
 
       if (data.success) {
-        // Si no hay base de datos configurada, mostrar ofertas de ejemplo
+        // Verificar si hay mensaje de configuración pero intentar datos reales
         if (data.message && data.message.includes('Configura DATABASE_URL')) {
-          console.log('⚠️ Base de datos no configurada, mostrando ofertas de ejemplo')
-          setShowingSampleData(true)
-          
-          const sampleOffers: JobOffer[] = [
-            {
-              id: 'sample-1',
-              title: 'Desarrollador Node.js Senior - Madrid',
-              company: 'TechCorp Solutions',
-              location: 'Madrid, España',
-              salary: '45.000-55.000 €',
-              description: 'Buscamos desarrollador Node.js con experiencia en APIs REST, MongoDB y AWS para nuestro equipo de backend.',
-              url: 'https://www.infojobs.net/empleo-desarrollador-nodejs-senior-madrid',
-              portal: 'infojobs',
-              status: 'ACTIVE',
-              publishedAt: new Date().toISOString(),
-              scrapedAt: new Date().toISOString()
-            },
-            {
-              id: 'sample-2',
-              title: 'Full Stack Developer JavaScript - React/Node.js',
-              company: 'StartupInnovadora',
-              location: 'Barcelona, España',
-              salary: '40.000-50.000 €',
-              description: 'Oportunidad en startup para desarrollador full-stack con React, Node.js, TypeScript y experiencia en microservicios.',
-              url: 'https://www.infojobs.net/empleo-fullstack-javascript-react-nodejs',
-              portal: 'infojobs',
-              status: 'ACTIVE',
-              publishedAt: new Date(Date.now() - 3600000).toISOString(),
-              scrapedAt: new Date(Date.now() - 3600000).toISOString()
-            },
-            {
-              id: 'sample-3',
-              title: 'Backend Developer Node.js - Remoto',
-              company: 'DigitalAgency Pro',
-              location: 'Remoto, España',
-              salary: '38.000-48.000 €',
-              description: 'Desarrollador backend con Node.js, Express, PostgreSQL para proyectos de transformación digital.',
-              url: 'https://www.infojobs.net/empleo-backend-nodejs-remoto',
-              portal: 'infojobs',
-              status: 'ACTIVE',
-              publishedAt: new Date(Date.now() - 7200000).toISOString(),
-              scrapedAt: new Date(Date.now() - 7200000).toISOString()
-            },
-            {
-              id: 'sample-4',
-              title: 'JavaScript Developer - Vue.js y Node.js',
-              company: 'WebSolutions Inc',
-              location: 'Valencia, España',
-              salary: '35.000-45.000 €',
-              description: 'Desarrollador JavaScript para proyectos web con Vue.js en frontend y Node.js en backend.',
-              url: 'https://www.infojobs.net/empleo-javascript-vue-nodejs',
-              portal: 'infojobs',
-              status: 'ACTIVE',
-              publishedAt: new Date(Date.now() - 10800000).toISOString(),
-              scrapedAt: new Date(Date.now() - 10800000).toISOString()
-            },
-            {
-              id: 'sample-5',
-              title: 'Node.js Architect - Microservicios',
-              company: 'Enterprise Systems',
-              location: 'Madrid, España',
-              salary: '60.000-70.000 €',
-              description: 'Arquitecto de software con amplia experiencia en Node.js, microservicios, Docker, Kubernetes.',
-              url: 'https://www.infojobs.net/empleo-nodejs-architect-microservices',
-              portal: 'infojobs',
-              status: 'ACTIVE',
-              publishedAt: new Date(Date.now() - 14400000).toISOString(),
-              scrapedAt: new Date(Date.now() - 14400000).toISOString()
-            }
-          ]
-
-          // Aplicar filtros a las ofertas de ejemplo
-          let filteredSampleOffers = sampleOffers
-          
-          if (filters.search) {
-            const searchLower = filters.search.toLowerCase()
-            filteredSampleOffers = sampleOffers.filter(offer => 
-              offer.title.toLowerCase().includes(searchLower) ||
-              offer.company.toLowerCase().includes(searchLower) ||
-              offer.description?.toLowerCase().includes(searchLower)
-            )
-          }
-
-          // Simular paginación
-          const startIndex = (pagination.page - 1) * pagination.limit
-          const endIndex = startIndex + pagination.limit
-          const paginatedOffers = filteredSampleOffers.slice(startIndex, endIndex)
-
-          setOffers(paginatedOffers)
+          console.warn('⚠️ Problema de configuración de BD, reintentando...')
+          // Reintentar cargando datos reales en lugar de mostrar ejemplos
+          setTimeout(() => loadOffers(), 2000)
+          return
+        }
+        
+        // Si hay datos reales, usarlos
+        if (data.data && data.data.length > 0) {
+          console.log('✅ Datos reales cargados:', data.data.length)
+          setShowingSampleData(false)
+          setOffers(data.data || [])
           setPagination(prev => ({
             ...prev,
-            total: filteredSampleOffers.length,
-            totalPages: Math.ceil(filteredSampleOffers.length / pagination.limit)
+            total: data.total || 0,
+            totalPages: data.totalPages || 0
           }))
         } else {
-          // Datos reales de la base de datos
+          // Datos reales de la base de datos (puede estar vacío)
           setShowingSampleData(false)
           setOffers(data.data || [])
           setPagination(prev => ({
@@ -432,26 +354,103 @@ export default function JobOffersListPage() {
         )}
 
         {pagination.totalPages > 1 && (
-          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-            <button
-              onClick={() => handlePageChange(pagination.page - 1)}
-              disabled={pagination.page <= 1}
-              className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded disabled:opacity-50"
-            >
-              ← Anterior
-            </button>
+          <div className="px-6 py-4 border-t border-gray-200">
+            {/* Información de paginación */}
+            <div className="text-sm text-gray-600 mb-4 text-center">
+              Mostrando {((pagination.page - 1) * pagination.limit) + 1} - {Math.min(pagination.page * pagination.limit, pagination.total)} de {pagination.total} ofertas
+            </div>
             
-            <span className="text-sm text-gray-600">
-              Página {pagination.page} de {pagination.totalPages}
-            </span>
+            {/* Navegación numérica */}
+            <div className="flex items-center justify-center space-x-1">
+              {/* Botón Anterior */}
+              <button
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={pagination.page <= 1}
+                className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                ← Anterior
+              </button>
+              
+              {/* Números de página */}
+              {(() => {
+                const pages = []
+                const currentPage = pagination.page
+                const totalPages = pagination.totalPages
+                
+                // Siempre mostrar primera página
+                if (currentPage > 3) {
+                  pages.push(1)
+                  if (currentPage > 4) {
+                    pages.push('...')
+                  }
+                }
+                
+                // Páginas alrededor de la actual
+                for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+                  pages.push(i)
+                }
+                
+                // Siempre mostrar última página
+                if (currentPage < totalPages - 2) {
+                  if (currentPage < totalPages - 3) {
+                    pages.push('...')
+                  }
+                  pages.push(totalPages)
+                }
+                
+                return pages.map((page, index) => {
+                  if (page === '...') {
+                    return (
+                      <span key={index} className="px-3 py-2 text-gray-500">
+                        ...
+                      </span>
+                    )
+                  }
+                  
+                  const isActive = page === currentPage
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page as number)}
+                      className={`px-3 py-2 text-sm border rounded-md ${
+                        isActive
+                          ? 'bg-blue-500 text-white border-blue-500'
+                          : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                })
+              })()}
+              
+              {/* Botón Siguiente */}
+              <button
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={pagination.page >= pagination.totalPages}
+                className="px-3 py-2 text-sm border border-gray-300 rounded-md bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Siguiente →
+              </button>
+            </div>
             
-            <button
-              onClick={() => handlePageChange(pagination.page + 1)}
-              disabled={pagination.page >= pagination.totalPages}
-              className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded disabled:opacity-50"
-            >
-              Siguiente →
-            </button>
+            {/* Selector de resultados por página */}
+            <div className="mt-4 flex items-center justify-center space-x-2">
+              <label className="text-sm text-gray-600">Mostrar:</label>
+              <select
+                value={pagination.limit}
+                onChange={(e) => {
+                  setPagination(prev => ({ ...prev, limit: parseInt(e.target.value), page: 1 }))
+                }}
+                className="px-2 py-1 text-sm border border-gray-300 rounded"
+              >
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+              </select>
+              <span className="text-sm text-gray-600">ofertas por página</span>
+            </div>
           </div>
         )}
       </div>
