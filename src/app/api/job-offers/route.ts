@@ -39,8 +39,10 @@ export async function GET(request: NextRequest) {
 
     // Intentar usar base de datos real
     const dbAvailable = await isDatabaseAvailable()
+    console.log('🔧 Database availability check result:', dbAvailable)
     
     if (dbAvailable) {
+      console.log('✅ Database available - proceeding with Supabase')
       try {
         const controller = new SupabaseJobController()
         const result = await controller.getJobOffers(rawUserId, { ...filters, page, limit })
@@ -51,6 +53,8 @@ export async function GET(request: NextRequest) {
       } catch (dbError) {
         console.warn('⚠️ Error obteniendo ofertas de Supabase:', dbError)
       }
+    } else {
+      console.log('❌ Database not available - falling back to empty response')
     }
     
     // Sin base de datos configurada - devolver vacío

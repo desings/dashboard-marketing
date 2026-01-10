@@ -9,7 +9,8 @@ export async function isDatabaseAvailable(): Promise<boolean> {
     console.log('🔧 Verificando credenciales Supabase...')
     console.log('   URL disponible:', !!supabaseUrl)
     console.log('   Key disponible:', !!supabaseKey)
-    console.log('   URL:', supabaseUrl?.substring(0, 30) + '...')
+    console.log('   URL completa:', supabaseUrl)
+    console.log('   Key length:', supabaseKey?.length || 0)
     
     if (!supabaseUrl || !supabaseKey) {
       console.warn('⚠️ Supabase credentials missing')
