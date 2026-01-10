@@ -21,11 +21,14 @@ export async function GET(request: NextRequest) {
     const filters = {
       status: searchParams.get('status') as JobStatus || undefined,
       jobSearchId: searchParams.get('jobSearchId') || undefined,
+      search: searchParams.get('search') || undefined,
       userId: rawUserId
     }
     
     const page = parseInt(searchParams.get('page') || '1')
-    const limit = parseInt(searchParams.get('limit') || '20')
+    const limit = Math.min(parseInt(searchParams.get('limit') || '10'), 50) // Máximo 50, default 10
+
+    console.log(`📊 API Job Offers - Página: ${page}, Límite: ${limit}, Búsqueda: ${filters.search || 'N/A'}`)
 
     // Limpiar filtros undefined
     Object.keys(filters).forEach(key => {

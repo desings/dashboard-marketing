@@ -16,12 +16,12 @@ export interface ScrapedJobOffer {
 export class InfoJobsScraperSupabase {
   private supabase = getSupabaseClient()
 
-  async scrapeJobOffers(keywords: string, jobSearchId: string, maxPages = 3, forceReal = false): Promise<{
+  async scrapeJobOffers(keywords: string, jobSearchId: string, maxPages = 1, forceReal = false): Promise<{
     newOffersCount: number
     totalProcessed: number
     errors: string[]
   }> {
-    console.log(`🚀 Iniciando scraping de InfoJobs para: "${keywords}" (forceReal: ${forceReal})`)
+    console.log(`🚀 Iniciando scraping de InfoJobs para: "${keywords}" (limitado a 1 página para obtener las 10 más recientes)`)
     
     let totalProcessed = 0
     let newOffersCount = 0
@@ -201,72 +201,60 @@ export class InfoJobsScraperSupabase {
     const offers: ScrapedJobOffer[] = []
 
     console.log('🔍 EXTRAYENDO OFERTAS REALES de InfoJobs HTML...')
+    console.log(`🎯 Keywords objetivo: "${keywords}"`)
 
-    // Buscar enlaces de ofertas con múltiples patrones
-    const linkSelectors = [
+    // Buscar enlaces de ofertas específicas (evitar enlaces de categorías generales)
+    const specificOfferSelectors = [
       'a[href*="/detail/"]',
       'a[href*="/empleo-"]', 
       'a[href*=".aspx"]',
-      'a[href*="of-i"]',
-      'a[href*="oferta"]',
-      'a[href*="trabajo"]'
+      'a[href*="of-i"]'
     ]
     
     let totalLinks = 0
-    linkSelectors.forEach(selector => {
+    const allOfferLinks: any[] = []
+    
+    specificOfferSelectors.forEach(selector => {
       const links = $(selector)
       totalLinks += links.length
+      links.each((i, el) => {
+        allOfferLinks.push({ element: el, selector })
+      })
       console.log(`🔗 Selector "${selector}": ${links.length} enlaces`)
     })
     
-    console.log(`📊 Total enlaces de ofertas potenciales: ${totalLinks}`)
+    console.log(`📊 Total enlaces de ofertas específicas: ${totalLinks}`)
     
-    // Si no hay enlaces específicos, buscar patrones alternativos
-    if (totalLinks === 0) {
-      console.log('🔍 No se encontraron enlaces específicos, buscando patrones alternativos...')
+    // Procesar cada enlace de oferta
+    allOfferLinks.forEach(({ element, selector }, index) => {
+      const $link = $(element)
+      const href = $link.attr('href') || ''
+      const titleText = $link.text()?.trim() || $link.attr('title')?.trim() || ''
       
-      // Buscar en texto cualquier mención de trabajos
-      const allLinks = $('a[href]')
-      console.log(`🔗 Total enlaces en página: ${allLinks.length}`)
-      
-      allLinks.each((i, el) => {
-        const href = $(el).attr('href') || ''
-        const text = $(el).text()?.trim() || ''
+      if (href && titleText && titleText.length > 5) {
+        // FILTRO CRÍTICO: Solo ofertas que contengan las keywords específicas
+        const titleLower = titleText.toLowerCase()
+        const keywordsArray = keywords.toLowerCase().split(' ')
         
-        // Buscar ofertas por texto del enlace
-        if (text.length > 10 && (
-          text.toLowerCase().includes('desarrollador') ||
-          text.toLowerCase().includes('programador') ||
-          text.toLowerCase().includes('react') ||
-          text.toLowerCase().includes('javascript') ||
-          text.toLowerCase().includes(keywords.toLowerCase())
-        )) {
-          console.log(`🎯 Posible oferta por texto: "${text.substring(0, 60)}" -> ${href}`)
-          
-          if (href && href.includes('infojobs')) {
-            offers.push({
-              title: text.substring(0, 100),
-              company: 'Empresa extraída por texto',
-              location: 'España',
-              salary: null,
-              description: `Oferta encontrada por análisis de texto: ${text}`,
-              url: href.startsWith('http') ? href : `https://www.infojobs.net${href}`,
-              external_id: `text-${Date.now()}-${i}`,
-              publishDate: null
-            })
-          }
-        }
-      })
-    } else {
-      // Procesar enlaces específicos encontrados
-      const offerLinks = $(`${linkSelectors.join(', ')}`)
-      
-      offerLinks.each((index, element) => {
-        const $link = $(element)
-        const href = $link.attr('href') || ''
-        const titleText = $link.text()?.trim() || $link.attr('title')?.trim() || ''
+        const containsKeywords = keywordsArray.some(keyword => 
+          keyword.length > 2 && titleLower.includes(keyword)
+        )
         
-        if (href && titleText && titleText.length > 5) {
+        // Excluir enlaces de categorías generales y navegación
+        const isGenericLink = 
+          href.includes('/ofertas-trabajo/') ||  // Categorías generales
+          href.includes('/trabajo-') ||        // Enlaces de ciudades
+          href.includes('.trabajo.infojobs.net') || // Portales de empresas
+          href.includes('/ofertas-empleo') ||   // Página principal
+          titleLower.includes('trabajar en') || // "Trabajar en empresa X"
+          titleLower.includes('empleo de') ||   // "Empleo de categoría"
+          titleLower.includes('trabajo en') ||  // "Trabajo en ciudad"
+          titleLower.startsWith('ofertas') ||  // "Ofertas de empleo"
+          titleLower === 'trabaja con nosotros' ||
+          titleLower.length < 10 // Títulos muy cortos suelen ser navegación
+        
+        // Solo incluir ofertas específicas que contengan las keywords
+        if (containsKeywords && !isGenericLink) {
           // Buscar datos en el contexto del enlace
           const $context = $link.closest('article, div, li, tr').length > 0 ? 
                           $link.closest('article, div, li, tr') : 
@@ -346,41 +334,45 @@ export class InfoJobsScraperSupabase {
                          href.match(/empleo-([^\/\?]+)/)
           const realId = idMatch ? idMatch[1] : `scraped-${Date.now()}-${index}`
           
-          if (titleText.length > 5) {
-            offers.push({
-              title: titleText.substring(0, 100),
-              company: companyText.substring(0, 50) || 'Empresa no especificada',
-              location: locationText.substring(0, 50),
-              salary: null, // Por ahora null, se puede mejorar
-              description: `Oferta real extraída de InfoJobs: ${titleText}`,
-              url: fullUrl,
-              external_id: realId,
-              publishDate: publishDate
-            })
-            
-            console.log(`  ✅ EXTRAÍDO: "${titleText.substring(0, 40)}"`) 
-            console.log(`     🏢 Empresa: "${companyText || 'No especificada'}"`)  
-            console.log(`     📍 Ubicación: "${locationText}"`)  
-            console.log(`     📅 Fecha: "${publishDate || 'No disponible'}"`)  
-            console.log(`     🔗 URL: ${fullUrl.substring(0, 80)}...`)
-          }
+          offers.push({
+            title: titleText.substring(0, 100),
+            company: companyText.substring(0, 50) || 'Empresa no especificada',
+            location: locationText.substring(0, 50),
+            salary: null, // Por ahora null, se puede mejorar
+            description: `Oferta específica de ${keywords}: ${titleText}`,
+            url: fullUrl,
+            external_id: realId,
+            publishDate: publishDate
+          })
+          
+          console.log(`  ✅ OFERTA ESPECÍFICA: "${titleText.substring(0, 50)}"`) 
+          console.log(`     🎯 Keywords: ${keywordsArray.filter(k => titleLower.includes(k)).join(', ')}`)
+          console.log(`     🏢 Empresa: "${companyText || 'No especificada'}"`)  
+          console.log(`     📍 Ubicación: "${locationText}"`)  
+          console.log(`     🔗 URL: ${fullUrl.substring(0, 80)}...`)
+        } else if (!containsKeywords) {
+          console.log(`  ⏭️ OMITIDO (sin keywords): "${titleText.substring(0, 40)}"`) 
+        } else if (isGenericLink) {
+          console.log(`  ⏭️ OMITIDO (genérico): "${titleText.substring(0, 40)}"`)
         }
-      })
-    }
+      }
+    })
 
-    console.log(`📊 OFERTAS REALES EXTRAÍDAS: ${offers.length}`)
+    console.log(`🎯 OFERTAS ESPECÍFICAS EXTRAÍDAS: ${offers.length} (filtradas de ${totalLinks} enlaces)`)
     
     if (offers.length === 0) {
-      console.log('❌ NO SE ENCONTRARON OFERTAS REALES')
+      console.log('⚠️ NO SE ENCONTRARON OFERTAS ESPECÍFICAS')
       console.log('📊 ESTADÍSTICAS DE DEBUG:')
       console.log(`   - HTML tamaño: ${html.length} caracteres`)
-      console.log(`   - Contiene "ofertas": ${html.includes('ofertas')}`)
-      console.log(`   - Contiene keywords: ${html.toLowerCase().includes(keywords.toLowerCase())}`)
-      console.log(`   - Enlaces totales: ${$('a').length}`)
+      console.log(`   - Keywords buscadas: ${keywords}`)
+      console.log(`   - Enlaces totales analizados: ${totalLinks}`)
       
-      // Mostrar muestra del HTML
-      console.log('📄 Muestra HTML (primeros 500 chars):')
-      console.log(html.substring(0, 500))
+      // Mostrar algunos títulos encontrados para debug
+      console.log('📄 Muestra de títulos encontrados:')
+      allOfferLinks.slice(0, 5).forEach(({element}, i) => {
+        const title = $(element).text()?.trim().substring(0, 50)
+        console.log(`   ${i+1}. "${title}"`)
+      })
     }
 
     return offers

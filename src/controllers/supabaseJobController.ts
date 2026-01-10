@@ -113,7 +113,7 @@ export class SupabaseJobController {
     return jobSearch
   }
 
-  // Obtener ofertas de trabajo
+  // Obtener ofertas de trabajo con paginación mejorada
   async getJobOffers(
     userId: string,
     filters: {
@@ -121,19 +121,37 @@ export class SupabaseJobController {
       status?: string
       page?: number
       limit?: number
+      search?: string
     } = {}
   ) {
-    const { page = 1, limit = 20 } = filters
+    const { page = 1, limit = 10 } = filters // Reducir a 10 por defecto
     const offset = (page - 1) * limit
 
+    console.log(`📊 Obteniendo ofertas - Página: ${page}, Límite: ${limit}`)
+
+    // Construir query base con join
     let query = this.supabase
       .from('job_offers')
       .select(`
-        *,
+        id,
+        title,
+        company,
+        location,
+        salary,
+        description,
+        url,
+        portal,
+        status,
+        created_at,
+        posted_at,
+        external_id,
+        job_search_id,
         job_searches!inner(user_id)
       `)
       .eq('job_searches.user_id', userId)
+      .eq('status', 'ACTIVE') // Solo ofertas activas
 
+    // Filtros opcionales
     if (filters.jobSearchId) {
       query = query.eq('job_search_id', filters.jobSearchId)
     }
@@ -142,13 +160,32 @@ export class SupabaseJobController {
       query = query.eq('status', filters.status)
     }
 
-    const { data: offers, error, count } = await query
+    if (filters.search) {
+      query = query.or(`title.ilike.%${filters.search}%,company.ilike.%${filters.search}%,description.ilike.%${filters.search}%`)
+    }
+
+    // Obtener conteo total primero (sin paginación)
+    const { count: total } = await this.supabase
+      .from('job_offers')
+      .select(`
+        id,
+        job_searches!inner(user_id)
+      `, { count: 'exact', head: true })
+      .eq('job_searches.user_id', userId)
+      .eq('status', 'ACTIVE')
+
+    // Aplicar paginación y orden para obtener las más recientes
+    const { data: offers, error } = await query
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1)
 
     if (error) {
       throw new Error(`Error fetching job offers: ${error.message}`)
     }
+
+    const totalPages = Math.ceil((total || 0) / limit)
+
+    console.log(`✅ Ofertas obtenidas: ${offers?.length || 0} de ${total || 0} total`)
 
     return {
       data: offers?.map(offer => ({
@@ -161,13 +198,16 @@ export class SupabaseJobController {
         url: offer.url,
         portal: offer.portal || 'infojobs',
         status: offer.status,
-        publishedAt: offer.posted_at || offer.created_at, // Usar posted_at si existe, sino created_at
+        publishedAt: offer.posted_at || offer.created_at,
         scrapedAt: offer.created_at,
-        companyProfile: offer.company_profile
+        externalId: offer.external_id
       })) || [],
-      total: count || 0,
-      totalPages: Math.ceil((count || 0) / limit),
-      currentPage: page
+      total: total || 0,
+      totalPages,
+      currentPage: page,
+      hasNext: page < totalPages,
+      hasPrev: page > 1,
+      limit
     }
   }
 
