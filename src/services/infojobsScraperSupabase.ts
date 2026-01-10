@@ -427,8 +427,8 @@ export class InfoJobsScraperSupabase {
           url: offer.url,
           portal: 'infojobs',
           status: 'ACTIVE',
-          external_id: offer.external_id,
-          posted_at: offer.publishDate || new Date().toISOString()
+          external_id: offer.external_id
+          // posted_at removido - columna no existe en Supabase
         })
 
       if (error) {
