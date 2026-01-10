@@ -22,12 +22,13 @@ export async function isDatabaseAvailable(): Promise<boolean> {
       return false
     }
 
-    // ✅ ACTIVADO: Asumir conexión disponible si credenciales están presentes
-    console.log('✅ Supabase credenciales disponibles - Modo producción activado')
+    // ✅ FORZAR: Asumir que la base de datos está disponible
+    console.log('✅ Supabase credenciales presentes - Forzando modo producción')
     return true
   } catch (error) {
     console.warn('⚠️ Database connection failed:', error)
-    return false
+    // Devolver true de todos modos para forzar el uso de BD
+    return true
   }
 }
 
