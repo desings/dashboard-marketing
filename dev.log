@@ -2,13 +2,1858 @@
 > dashboard-marketing@0.1.0 dev
 > next dev
 
-⚠ Port 3000 is in use by process 95716, using available port 3001 instead.
 ▲ Next.js 16.1.0 (Turbopack)
-- Local:         http://localhost:3001
-- Network:       http://192.168.1.37:3001
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.37:3000
 - Environments: .env.local, .env
 
 ✓ Starting...
-⨯ Unable to acquire lock at /Users/deivid/dashboard-marketing/.next/dev/lock, is another instance of next dev running?
-  Suggestion: If you intended to restart next dev, terminate the other process, and then try again.
+✓ Ready in 1043ms
+⚠️ Supabase connection failed: 
+ POST /api/job-searches/38d45f37-03b3-4c09-8c3b-feb278b3580d/scrape 400 in 956ms (compile: 822ms, render: 133ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 45ms (compile: 39ms, render: 6ms)
+ GET /api/test 404 in 285ms (compile: 149ms, render: 135ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 9ms (compile: 3ms, render: 5ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 35ms (compile: 26ms, render: 8ms)
+ GET /api/env-test 200 in 165ms (compile: 160ms, render: 5ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 45ms (compile: 35ms, render: 10ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 10ms (compile: 3ms, render: 7ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 11ms (compile: 4ms, render: 7ms)
+Testing Supabase connection...
+URL: https://rgmltuyfabxomkplvzij.supabase.co
+Key exists: true
+ GET /api/test-supabase 200 in 471ms (compile: 268ms, render: 203ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 21ms (compile: 7ms, render: 14ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 6ms (compile: 2ms, render: 4ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 6ms (compile: 2ms, render: 4ms)
+  Reload env: .env.local
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 43ms (compile: 36ms, render: 7ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 30ms (compile: 13ms, render: 17ms)
+RPC failed, trying direct SQL execution...
+ GET /api/setup-tables 200 in 587ms (compile: 341ms, render: 245ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 7ms (compile: 2ms, render: 5ms)
+ POST /api/create-tables 200 in 435ms (compile: 204ms, render: 232ms)
+ POST /api/seed-data 200 in 277ms (compile: 156ms, render: 121ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 26ms (compile: 21ms, render: 5ms)
+Error en test del scraper: TypeError: Cannot destructure property 'id' of '(intermediate value)' as it is undefined.
+    at POST (src/app/api/test-scraper/route.ts:6:13)
+  4 | export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  5 |   try {
+> 6 |     const { id } = await params
+    |             ^
+  7 |     
+  8 |     console.log(`🧪 TEST: Probando scraper sin base de datos para: ${id}`)
+  9 |     
+ POST /api/test-scraper 500 in 758ms (compile: 637ms, render: 121ms)
+Error en test del scraper: TypeError: Cannot destructure property 'id' of '(intermediate value)' as it is undefined.
+    at POST (src/app/api/test-scraper/route.ts:6:13)
+  4 | export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  5 |   try {
+> 6 |     const { id } = await params
+    |             ^
+  7 |     
+  8 |     console.log(`🧪 TEST: Probando scraper sin base de datos para: ${id}`)
+  9 |     
+ POST /api/test-scraper 500 in 66ms (compile: 5ms, render: 61ms)
+🧪 TEST: Probando scraper sin base de datos para: 38d45f37-03b3-4c09-8c3b-feb278b3580d
+🚀 Iniciando scraping de InfoJobs para: "diseño web" (forceReal: true)
+📄 Scrapeando página 1/1...
+🔍 Modo scraping MANUAL/REAL: Generando ofertas realistas para "diseño web" página 1
+📊 Estado: forceReal=true, isProduction=undefined
+✅ Generadas 5 ofertas realistas para "diseño web"
+🔗 URLs de ejemplo:
+  1. https://www.infojobs.net/bilbao/diseño-web-oferta-1/of-i3jmjsu45kk6?applicationOrigin=search-new&page=1&sortBy=RELEVANCE
+  2. https://www.infojobs.net/sevilla/diseño-web-oferta-2/of-ivl2xe7bz9e?applicationOrigin=search-new&page=1&sortBy=RELEVANCE
+✅ Encontradas 5 ofertas en página 1
+❌ Error guardando oferta: Error: Error insertando en Supabase: Invalid API key
+    at InfoJobsScraperSupabase.saveOffer (src/services/infojobsScraperSupabase.ts:540:15)
+    at async InfoJobsScraperSupabase.scrapeJobOffers (src/services/infojobsScraperSupabase.ts:39:29)
+    at async POST (src/app/api/test-scraper/route.ts:14:20)
+  538 |
+  539 |       if (error) {
+> 540 |         throw new Error(`Error insertando en Supabase: ${error.message}`)
+      |               ^
+  541 |       }
+  542 |
+  543 |       console.log(`✅ Nueva oferta guardada: ${offer.title}`)
+⚠️ Error guardando oferta: Error: Error insertando en Supabase: Invalid API key
+    at InfoJobsScraperSupabase.saveOffer (src/services/infojobsScraperSupabase.ts:540:15)
+    at async InfoJobsScraperSupabase.scrapeJobOffers (src/services/infojobsScraperSupabase.ts:39:29)
+    at async POST (src/app/api/test-scraper/route.ts:14:20)
+  538 |
+  539 |       if (error) {
+> 540 |         throw new Error(`Error insertando en Supabase: ${error.message}`)
+      |               ^
+  541 |       }
+  542 |
+  543 |       console.log(`✅ Nueva oferta guardada: ${offer.title}`)
+❌ Error guardando oferta: Error: Error insertando en Supabase: Invalid API key
+    at InfoJobsScraperSupabase.saveOffer (src/services/infojobsScraperSupabase.ts:540:15)
+    at async InfoJobsScraperSupabase.scrapeJobOffers (src/services/infojobsScraperSupabase.ts:39:29)
+    at async POST (src/app/api/test-scraper/route.ts:14:20)
+  538 |
+  539 |       if (error) {
+> 540 |         throw new Error(`Error insertando en Supabase: ${error.message}`)
+      |               ^
+  541 |       }
+  542 |
+  543 |       console.log(`✅ Nueva oferta guardada: ${offer.title}`)
+⚠️ Error guardando oferta: Error: Error insertando en Supabase: Invalid API key
+    at InfoJobsScraperSupabase.saveOffer (src/services/infojobsScraperSupabase.ts:540:15)
+    at async InfoJobsScraperSupabase.scrapeJobOffers (src/services/infojobsScraperSupabase.ts:39:29)
+    at async POST (src/app/api/test-scraper/route.ts:14:20)
+  538 |
+  539 |       if (error) {
+> 540 |         throw new Error(`Error insertando en Supabase: ${error.message}`)
+      |               ^
+  541 |       }
+  542 |
+  543 |       console.log(`✅ Nueva oferta guardada: ${offer.title}`)
+❌ Error guardando oferta: Error: Error insertando en Supabase: Invalid API key
+    at InfoJobsScraperSupabase.saveOffer (src/services/infojobsScraperSupabase.ts:540:15)
+    at async InfoJobsScraperSupabase.scrapeJobOffers (src/services/infojobsScraperSupabase.ts:39:29)
+    at async POST (src/app/api/test-scraper/route.ts:14:20)
+  538 |
+  539 |       if (error) {
+> 540 |         throw new Error(`Error insertando en Supabase: ${error.message}`)
+      |               ^
+  541 |       }
+  542 |
+  543 |       console.log(`✅ Nueva oferta guardada: ${offer.title}`)
+⚠️ Error guardando oferta: Error: Error insertando en Supabase: Invalid API key
+    at InfoJobsScraperSupabase.saveOffer (src/services/infojobsScraperSupabase.ts:540:15)
+    at async InfoJobsScraperSupabase.scrapeJobOffers (src/services/infojobsScraperSupabase.ts:39:29)
+    at async POST (src/app/api/test-scraper/route.ts:14:20)
+  538 |
+  539 |       if (error) {
+> 540 |         throw new Error(`Error insertando en Supabase: ${error.message}`)
+      |               ^
+  541 |       }
+  542 |
+  543 |       console.log(`✅ Nueva oferta guardada: ${offer.title}`)
+❌ Error guardando oferta: Error: Error insertando en Supabase: Invalid API key
+    at InfoJobsScraperSupabase.saveOffer (src/services/infojobsScraperSupabase.ts:540:15)
+    at async InfoJobsScraperSupabase.scrapeJobOffers (src/services/infojobsScraperSupabase.ts:39:29)
+    at async POST (src/app/api/test-scraper/route.ts:14:20)
+  538 |
+  539 |       if (error) {
+> 540 |         throw new Error(`Error insertando en Supabase: ${error.message}`)
+      |               ^
+  541 |       }
+  542 |
+  543 |       console.log(`✅ Nueva oferta guardada: ${offer.title}`)
+⚠️ Error guardando oferta: Error: Error insertando en Supabase: Invalid API key
+    at InfoJobsScraperSupabase.saveOffer (src/services/infojobsScraperSupabase.ts:540:15)
+    at async InfoJobsScraperSupabase.scrapeJobOffers (src/services/infojobsScraperSupabase.ts:39:29)
+    at async POST (src/app/api/test-scraper/route.ts:14:20)
+  538 |
+  539 |       if (error) {
+> 540 |         throw new Error(`Error insertando en Supabase: ${error.message}`)
+      |               ^
+  541 |       }
+  542 |
+  543 |       console.log(`✅ Nueva oferta guardada: ${offer.title}`)
+❌ Error guardando oferta: Error: Error insertando en Supabase: Invalid API key
+    at InfoJobsScraperSupabase.saveOffer (src/services/infojobsScraperSupabase.ts:540:15)
+    at async InfoJobsScraperSupabase.scrapeJobOffers (src/services/infojobsScraperSupabase.ts:39:29)
+    at async POST (src/app/api/test-scraper/route.ts:14:20)
+  538 |
+  539 |       if (error) {
+> 540 |         throw new Error(`Error insertando en Supabase: ${error.message}`)
+      |               ^
+  541 |       }
+  542 |
+  543 |       console.log(`✅ Nueva oferta guardada: ${offer.title}`)
+⚠️ Error guardando oferta: Error: Error insertando en Supabase: Invalid API key
+    at InfoJobsScraperSupabase.saveOffer (src/services/infojobsScraperSupabase.ts:540:15)
+    at async InfoJobsScraperSupabase.scrapeJobOffers (src/services/infojobsScraperSupabase.ts:39:29)
+    at async POST (src/app/api/test-scraper/route.ts:14:20)
+  538 |
+  539 |       if (error) {
+> 540 |         throw new Error(`Error insertando en Supabase: ${error.message}`)
+      |               ^
+  541 |       }
+  542 |
+  543 |       console.log(`✅ Nueva oferta guardada: ${offer.title}`)
+✅ Scraping completado: 0 nuevas ofertas de 0 procesadas
+✅ TEST: Scraper funcionó. Ofertas: 0
+ POST /api/test-scraper 200 in 1570ms (compile: 111ms, render: 1460ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 34ms (compile: 29ms, render: 5ms)
+🧪 TEST: Simulando scraper completamente offline
+✅ TEST: Scraper simulado generó 4 ofertas
+ POST /api/test-offline-scraper 200 in 1637ms (compile: 127ms, render: 1510ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 31ms (compile: 25ms, render: 6ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 6ms (compile: 2ms, render: 4ms)
+ GET / 307 in 911ms (compile: 780ms, render: 131ms)
+ GET /dashboard 200 in 730ms (compile: 614ms, render: 116ms)
+UserId en tenants: demo-user
+ GET /api/tenants 200 in 567ms (compile: 459ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 57ms (compile: 26ms, render: 32ms)
+GET job-searches - userId: user-1 page: 1 limit: 10
+GET job-searches/stats - userId: user-1
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches/stats?userId=user-1 200 in 403ms (compile: 218ms, render: 185ms)
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=user-1 200 in 412ms (compile: 140ms, render: 272ms)
+GET job-searches/stats - userId: user-1
+GET job-searches - userId: user-1 page: 1 limit: 10
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches/stats?userId=user-1 200 in 98ms (compile: 11ms, render: 87ms)
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=user-1 200 in 89ms (compile: 2ms, render: 87ms)
+POST job-searches - body: {
+  keywords: 'pagina web',
+  portals: [ 'infojobs' ],
+  frequencyMinutes: 240,
+  userId: 'user-1'
+}
+⚠️ Supabase connection failed: 
+🚫 DATABASE_URL no configurada - No se pueden crear búsquedas
+ POST /api/job-searches 400 in 103ms (compile: 2ms, render: 101ms)
+ GET /dashboard/clientes/ofertas 200 in 340ms (compile: 308ms, render: 32ms)
+GET job-searches - userId: user-1 page: 1 limit: 10
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=user-1 200 in 127ms (compile: 11ms, render: 116ms)
+GET job-searches - userId: user-1 page: 1 limit: 10
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=user-1 200 in 115ms (compile: 1863µs, render: 113ms)
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-offers?userId=user-1&page=1&limit=10 200 in 306ms (compile: 227ms, render: 79ms)
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-offers?userId=user-1&page=1&limit=10 200 in 191ms (compile: 1960µs, render: 190ms)
+ GET /dashboard/clientes/busqueda 200 in 842ms (compile: 465ms, render: 377ms)
+GET job-searches - userId: user-1 page: 1 limit: 10
+GET job-searches/stats - userId: user-1
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=user-1 200 in 376ms (compile: 11ms, render: 365ms)
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches/stats?userId=user-1 200 in 393ms (compile: 24ms, render: 369ms)
+GET job-searches - userId: user-1 page: 1 limit: 10
+GET job-searches/stats - userId: user-1
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches/stats?userId=user-1 200 in 242ms (compile: 17ms, render: 224ms)
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=user-1 200 in 248ms (compile: 7ms, render: 240ms)
+🔥 SCRAPER REAL: Obteniendo datos reales de InfoJobs para: "desarrollador javascript"
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 38ms (compile: 33ms, render: 5ms)
+📄 Cargando página 1: https://www.infojobs.net/ofertas-trabajo?keyword=desarrollador%20javascript&page=1&sortBy=RELEVANCE
+❌ Error en scraper real: Error [TimeoutError]: Waiting for selector `[data-testid="offer-card"]` failed
+    at async POST (src/app/api/real-scraper/route.ts:46:9)
+  44 |         
+  45 |         // Esperar a que carguen las ofertas
+> 46 |         await page.waitForSelector('[data-testid="offer-card"]', { timeout: 10000 })
+     |         ^
+  47 |         
+  48 |         const html = await page.content()
+  49 |         const $ = cheerio.load(html) {
+  [cause]: Error [TimeoutError]: Waiting failed: 10000ms exceeded
+      at async POST (src/app/api/real-scraper/route.ts:46:9)
+    44 |         
+    45 |         // Esperar a que carguen las ofertas
+  > 46 |         await page.waitForSelector('[data-testid="offer-card"]', { timeout: 10000 })
+       |         ^
+    47 |         
+    48 |         const html = await page.content()
+    49 |         const $ = cheerio.load(html)
+}
+ POST /api/real-scraper 500 in 20.3s (compile: 1042ms, render: 19.2s)
+🔥 SCRAPER REAL: Obteniendo datos reales de InfoJobs para: "diseño web"
+📄 Cargando página 1: https://www.infojobs.net/ofertas-trabajo?keyword=dise%C3%B1o%20web&page=1&sortBy=RELEVANCE
+❌ Error en scraper real: Error [TimeoutError]: Waiting for selector `[data-testid="offer-card"]` failed
+    at async POST (src/app/api/real-scraper/route.ts:46:9)
+  44 |         
+  45 |         // Esperar a que carguen las ofertas
+> 46 |         await page.waitForSelector('[data-testid="offer-card"]', { timeout: 10000 })
+     |         ^
+  47 |         
+  48 |         const html = await page.content()
+  49 |         const $ = cheerio.load(html) {
+  [cause]: Error [TimeoutError]: Waiting failed: 10000ms exceeded
+      at async POST (src/app/api/real-scraper/route.ts:46:9)
+    44 |         
+    45 |         // Esperar a que carguen las ofertas
+  > 46 |         await page.waitForSelector('[data-testid="offer-card"]', { timeout: 10000 })
+       |         ^
+    47 |         
+    48 |         const html = await page.content()
+    49 |         const $ = cheerio.load(html)
+}
+ POST /api/real-scraper 500 in 14.1s (compile: 4ms, render: 14.1s)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 13ms (compile: 6ms, render: 6ms)
+🔥 SCRAPER REAL: Obteniendo datos reales de InfoJobs para: "diseño web"
+📄 Cargando página 1: https://www.infojobs.net/ofertas-trabajo?keyword=dise%C3%B1o%20web&page=1&sortBy=RELEVANCE
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 11ms (compile: 6ms, render: 5ms)
+⚠️ No se pudieron obtener ofertas reales, generando datos realistas como fallback...
+✅ SCRAPER REAL: Se obtuvieron 3 ofertas reales de InfoJobs
+ POST /api/real-scraper 200 in 7.3s (compile: 254ms, render: 7.0s)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 13ms (compile: 5ms, render: 8ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 12ms (compile: 4ms, render: 8ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 6ms (compile: 3ms, render: 3ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 7ms (compile: 3ms, render: 4ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 12ms (compile: 3ms, render: 9ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 10ms (compile: 4ms, render: 6ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 10ms (compile: 7ms, render: 3ms)
+ GET /dashboard/clientes/busqueda 200 in 114ms (compile: 15ms, render: 100ms)
+GET job-searches - userId: user-1 page: 1 limit: 10
+GET job-searches/stats - userId: user-1
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches/stats?userId=user-1 200 in 204ms (compile: 34ms, render: 169ms)
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=user-1 200 in 213ms (compile: 11ms, render: 202ms)
+POST job-searches - body: {
+  keywords: 'pagina web',
+  portals: [ 'infojobs' ],
+  frequencyMinutes: 240,
+  userId: 'user-1'
+}
+⚠️ Supabase connection failed: 
+🚫 DATABASE_URL no configurada - No se pueden crear búsquedas
+ POST /api/job-searches 400 in 128ms (compile: 4ms, render: 124ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 6ms (compile: 2ms, render: 4ms)
+ GET /api/job-searches 400 in 6ms (compile: 3ms, render: 3ms)
+GET job-searches - userId: test-user page: 1 limit: 10
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=test-user 200 in 93ms (compile: 1784µs, render: 91ms)
+GET job-searches - userId: test-user page: 1 limit: 10
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=test-user 200 in 216ms (compile: 39ms, render: 176ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 14ms (compile: 8ms, render: 6ms)
+POST job-searches - body: {
+  keywords: 'desarrollador react',
+  userId: 'test-user',
+  frequencyMinutes: 60,
+  portals: [ 'infojobs' ]
+}
+⚠️ Supabase connection failed: 
+🚫 DATABASE_URL no configurada - No se pueden crear búsquedas
+ POST /api/job-searches 400 in 105ms (compile: 7ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 893ms (compile: 641ms, render: 251ms)
+ GET /dashboard/clientes/busqueda 200 in 214ms (compile: 5ms, render: 209ms)
+ GET /dashboard/clientes/busqueda 200 in 262ms (compile: 4ms, render: 258ms)
+ GET /dashboard/clientes/busqueda 200 in 252ms (compile: 4ms, render: 248ms)
+ GET /dashboard/clientes/busqueda 200 in 229ms (compile: 7ms, render: 223ms)
+ GET /dashboard/clientes/busqueda 200 in 89ms (compile: 13ms, render: 75ms)
+ GET /dashboard/clientes/busqueda 200 in 364ms (compile: 85ms, render: 278ms)
+ GET /dashboard/clientes/busqueda 200 in 164ms (compile: 15ms, render: 149ms)
+ GET /dashboard/clientes/busqueda 200 in 147ms (compile: 6ms, render: 141ms)
+ GET /dashboard/clientes/busqueda 200 in 145ms (compile: 3ms, render: 142ms)
+ GET /dashboard/clientes/busqueda 200 in 149ms (compile: 6ms, render: 143ms)
+ GET /dashboard/clientes/busqueda 200 in 228ms (compile: 4ms, render: 224ms)
+ GET /dashboard/clientes/busqueda 200 in 215ms (compile: 7ms, render: 208ms)
+ GET /dashboard/clientes/busqueda 200 in 207ms (compile: 6ms, render: 200ms)
+ GET /dashboard/clientes/busqueda 200 in 186ms (compile: 8ms, render: 178ms)
+ GET /dashboard/clientes/busqueda 200 in 202ms (compile: 3ms, render: 199ms)
+ GET /dashboard/clientes/busqueda 200 in 215ms (compile: 6ms, render: 209ms)
+ GET /dashboard/clientes/busqueda 200 in 254ms (compile: 7ms, render: 247ms)
+ GET /dashboard/clientes/busqueda 200 in 278ms (compile: 3ms, render: 275ms)
+ GET /dashboard/clientes/busqueda 200 in 318ms (compile: 18ms, render: 299ms)
+ GET /dashboard/clientes/busqueda 200 in 333ms (compile: 10ms, render: 323ms)
+ GET /dashboard/clientes/busqueda 200 in 250ms (compile: 3ms, render: 246ms)
+ GET /dashboard/clientes/busqueda 200 in 163ms (compile: 6ms, render: 157ms)
+ GET /dashboard/clientes/busqueda 200 in 167ms (compile: 9ms, render: 158ms)
+ GET /dashboard/clientes/busqueda 200 in 131ms (compile: 7ms, render: 124ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 4ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 159ms (compile: 6ms, render: 153ms)
+ GET /dashboard/clientes/busqueda 200 in 173ms (compile: 10ms, render: 163ms)
+ GET /dashboard/clientes/busqueda 200 in 197ms (compile: 3ms, render: 194ms)
+ GET /dashboard/clientes/busqueda 200 in 199ms (compile: 4ms, render: 195ms)
+ GET /dashboard/clientes/busqueda 200 in 147ms (compile: 4ms, render: 144ms)
+ GET /dashboard/clientes/busqueda 200 in 147ms (compile: 14ms, render: 133ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 4ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 124ms (compile: 6ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 4ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 126ms (compile: 4ms, render: 122ms)
+ GET /dashboard/clientes/busqueda 200 in 127ms (compile: 4ms, render: 123ms)
+ GET /dashboard/clientes/busqueda 200 in 123ms (compile: 4ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 132ms (compile: 2ms, render: 130ms)
+ GET /dashboard/clientes/busqueda 200 in 124ms (compile: 2ms, render: 122ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 2ms, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 3ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 3ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 5ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 5ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 75ms (compile: 5ms, render: 71ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 12ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 9ms, render: 87ms)
+ GET /dashboard/clientes/busqueda 200 in 90ms (compile: 2ms, render: 88ms)
+ GET /dashboard/clientes/busqueda 200 in 90ms (compile: 3ms, render: 87ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 5ms, render: 114ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 3ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 121ms (compile: 3ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 4ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 4ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 4ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 129ms (compile: 6ms, render: 123ms)
+ GET /dashboard/clientes/busqueda 200 in 137ms (compile: 5ms, render: 132ms)
+ GET /dashboard/clientes/busqueda 200 in 134ms (compile: 6ms, render: 128ms)
+ GET /dashboard/clientes/busqueda 200 in 134ms (compile: 5ms, render: 129ms)
+ GET /dashboard/clientes/busqueda 200 in 129ms (compile: 3ms, render: 127ms)
+ GET /dashboard/clientes/busqueda 200 in 124ms (compile: 6ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 130ms (compile: 3ms, render: 127ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 3ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 115ms (compile: 4ms, render: 111ms)
+ GET /dashboard/clientes/busqueda 200 in 186ms (compile: 3ms, render: 183ms)
+ GET /dashboard/clientes/busqueda 200 in 185ms (compile: 11ms, render: 174ms)
+ GET /dashboard/clientes/busqueda 200 in 182ms (compile: 7ms, render: 175ms)
+ GET /dashboard/clientes/busqueda 200 in 149ms (compile: 4ms, render: 145ms)
+ GET /dashboard/clientes/busqueda 200 in 155ms (compile: 3ms, render: 152ms)
+ GET /dashboard/clientes/busqueda 200 in 123ms (compile: 8ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 142ms (compile: 5ms, render: 137ms)
+ GET /dashboard/clientes/busqueda 200 in 135ms (compile: 12ms, render: 123ms)
+ GET /dashboard/clientes/busqueda 200 in 127ms (compile: 4ms, render: 123ms)
+ GET /dashboard/clientes/busqueda 200 in 121ms (compile: 3ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 130ms (compile: 2ms, render: 128ms)
+ GET /dashboard/clientes/busqueda 200 in 182ms (compile: 3ms, render: 179ms)
+ GET /dashboard/clientes/busqueda 200 in 178ms (compile: 4ms, render: 174ms)
+ GET /dashboard/clientes/busqueda 200 in 182ms (compile: 9ms, render: 174ms)
+ GET /dashboard/clientes/busqueda 200 in 123ms (compile: 4ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 121ms (compile: 4ms, render: 117ms)
+ GET /dashboard/clientes/busqueda 200 in 127ms (compile: 5ms, render: 123ms)
+ GET /dashboard/clientes/busqueda 200 in 148ms (compile: 3ms, render: 145ms)
+ GET /dashboard/clientes/busqueda 200 in 173ms (compile: 4ms, render: 169ms)
+ GET /dashboard/clientes/busqueda 200 in 236ms (compile: 2ms, render: 233ms)
+ GET /dashboard/clientes/busqueda 200 in 240ms (compile: 9ms, render: 232ms)
+ GET /dashboard/clientes/busqueda 200 in 207ms (compile: 9ms, render: 199ms)
+ GET /dashboard/clientes/busqueda 200 in 185ms (compile: 3ms, render: 182ms)
+ GET /dashboard/clientes/busqueda 200 in 114ms (compile: 4ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 111ms (compile: 2ms, render: 109ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 4ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 3ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 2ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 4ms, render: 109ms)
+ GET /dashboard/clientes/busqueda 200 in 114ms (compile: 3ms, render: 111ms)
+ GET /dashboard/clientes/busqueda 200 in 115ms (compile: 5ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 114ms (compile: 2ms, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 115ms (compile: 3ms, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 115ms (compile: 4ms, render: 111ms)
+ GET /dashboard/clientes/busqueda 200 in 127ms (compile: 3ms, render: 124ms)
+ GET /dashboard/clientes/busqueda 200 in 146ms (compile: 3ms, render: 143ms)
+ GET /dashboard/clientes/busqueda 200 in 122ms (compile: 3ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 130ms (compile: 4ms, render: 126ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 20ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 3ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 3ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 2ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 2ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 4ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 2ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 4ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 2ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 2ms, render: 105ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 2ms, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 2ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 3ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 2ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 2ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 3ms, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 3ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 2ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 3ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 3ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 2ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 2ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 3ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 3ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 3ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 4ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 3ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 2ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 4ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 2ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 2ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 2ms, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 4ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 3ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 114ms (compile: 1974µs, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 115ms (compile: 3ms, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 2ms, render: 90ms)
+ GET /dashboard/clientes/busqueda 200 in 65ms (compile: 2ms, render: 63ms)
+ GET /dashboard/clientes/busqueda 200 in 35ms (compile: 4ms, render: 31ms)
+ GET /api/job-searches-mock 200 in 395ms (compile: 375ms, render: 21ms)
+ POST /api/job-searches-mock 200 in 10ms (compile: 3ms, render: 6ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 67ms (compile: 61ms, render: 6ms)
+ GET /dashboard/clientes/busqueda 200 in 243ms (compile: 143ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 161ms (compile: 2ms, render: 159ms)
+ GET /dashboard/clientes/busqueda 200 in 293ms (compile: 2ms, render: 290ms)
+ GET /dashboard/clientes/busqueda 200 in 318ms (compile: 3ms, render: 315ms)
+ GET /dashboard/clientes/busqueda 200 in 243ms (compile: 11ms, render: 232ms)
+ GET /dashboard/clientes/busqueda 200 in 156ms (compile: 12ms, render: 143ms)
+ GET /dashboard/clientes/busqueda 200 in 130ms (compile: 3ms, render: 127ms)
+ GET /dashboard/clientes/busqueda 200 in 121ms (compile: 2ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 2ms, render: 117ms)
+ GET /dashboard/clientes/busqueda 200 in 141ms (compile: 3ms, render: 137ms)
+ GET /dashboard/clientes/busqueda 200 in 284ms (compile: 3ms, render: 282ms)
+ GET /dashboard/clientes/busqueda 200 in 293ms (compile: 2ms, render: 291ms)
+ GET /dashboard/clientes/busqueda 200 in 303ms (compile: 3ms, render: 301ms)
+ GET /dashboard/clientes/busqueda 200 in 318ms (compile: 114ms, render: 204ms)
+ GET /dashboard/clientes/busqueda 200 in 176ms (compile: 3ms, render: 173ms)
+ GET /dashboard/clientes/busqueda 200 in 174ms (compile: 5ms, render: 169ms)
+ GET /dashboard/clientes/busqueda 200 in 184ms (compile: 2ms, render: 181ms)
+ GET /dashboard/clientes/busqueda 200 in 164ms (compile: 4ms, render: 160ms)
+ GET /dashboard/clientes/busqueda 200 in 147ms (compile: 3ms, render: 144ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 3ms, render: 117ms)
+ GET /dashboard/clientes/busqueda 200 in 73ms (compile: 3ms, render: 70ms)
+ GET /dashboard/clientes/busqueda 200 in 191ms (compile: 79ms, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 125ms (compile: 3ms, render: 122ms)
+ GET /dashboard/clientes/busqueda 200 in 126ms (compile: 2ms, render: 124ms)
+ GET /dashboard/clientes/busqueda 200 in 126ms (compile: 5ms, render: 121ms)
+ GET /dashboard/clientes/busqueda 200 in 124ms (compile: 3ms, render: 121ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 3ms, render: 117ms)
+ GET /dashboard/clientes/busqueda 200 in 125ms (compile: 5ms, render: 120ms)
+ GET /dashboard/clientes/busqueda 200 in 124ms (compile: 5ms, render: 120ms)
+ GET /dashboard/clientes/busqueda 200 in 128ms (compile: 4ms, render: 124ms)
+ GET /dashboard/clientes/busqueda 200 in 131ms (compile: 3ms, render: 128ms)
+ GET /dashboard/clientes/busqueda 200 in 129ms (compile: 3ms, render: 125ms)
+ GET /dashboard/clientes/busqueda 200 in 137ms (compile: 3ms, render: 133ms)
+ GET /dashboard/clientes/busqueda 200 in 135ms (compile: 3ms, render: 133ms)
+ GET /dashboard/clientes/busqueda 200 in 133ms (compile: 3ms, render: 130ms)
+ GET /dashboard/clientes/busqueda 200 in 132ms (compile: 3ms, render: 129ms)
+ GET /dashboard/clientes/busqueda 200 in 129ms (compile: 4ms, render: 126ms)
+ GET /dashboard/clientes/busqueda 200 in 144ms (compile: 5ms, render: 140ms)
+ GET /dashboard/clientes/busqueda 200 in 146ms (compile: 3ms, render: 143ms)
+ GET /dashboard/clientes/busqueda 200 in 150ms (compile: 3ms, render: 147ms)
+ GET /dashboard/clientes/busqueda 200 in 146ms (compile: 9ms, render: 137ms)
+ GET /dashboard/clientes/busqueda 200 in 133ms (compile: 3ms, render: 130ms)
+ GET /dashboard/clientes/busqueda 200 in 146ms (compile: 2ms, render: 144ms)
+ GET /dashboard/clientes/busqueda 200 in 147ms (compile: 4ms, render: 144ms)
+ GET /dashboard/clientes/busqueda 200 in 149ms (compile: 3ms, render: 146ms)
+ GET /dashboard/clientes/busqueda 200 in 145ms (compile: 3ms, render: 142ms)
+ GET /dashboard/clientes/busqueda 200 in 133ms (compile: 3ms, render: 131ms)
+ GET /dashboard/clientes/busqueda 200 in 132ms (compile: 3ms, render: 129ms)
+ GET /dashboard/clientes/busqueda 200 in 128ms (compile: 4ms, render: 125ms)
+ GET /dashboard/clientes/busqueda 200 in 128ms (compile: 3ms, render: 125ms)
+ GET /dashboard/clientes/busqueda 200 in 121ms (compile: 2ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 3ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 122ms (compile: 3ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 152ms (compile: 3ms, render: 149ms)
+ GET /dashboard/clientes/busqueda 200 in 155ms (compile: 5ms, render: 150ms)
+ GET /dashboard/clientes/busqueda 200 in 155ms (compile: 4ms, render: 151ms)
+ GET /dashboard/clientes/busqueda 200 in 152ms (compile: 5ms, render: 147ms)
+ GET /dashboard/clientes/busqueda 200 in 123ms (compile: 3ms, render: 120ms)
+ GET /dashboard/clientes/busqueda 200 in 121ms (compile: 3ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 122ms (compile: 4ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 2ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 139ms (compile: 4ms, render: 135ms)
+ GET /dashboard/clientes/busqueda 200 in 159ms (compile: 3ms, render: 156ms)
+ GET /dashboard/clientes/busqueda 200 in 158ms (compile: 3ms, render: 156ms)
+ GET /dashboard/clientes/busqueda 200 in 158ms (compile: 3ms, render: 156ms)
+ GET /dashboard/clientes/busqueda 200 in 141ms (compile: 14ms, render: 127ms)
+ GET /dashboard/clientes/busqueda 200 in 195ms (compile: 3ms, render: 192ms)
+ GET /dashboard/clientes/busqueda 200 in 206ms (compile: 3ms, render: 203ms)
+ GET /dashboard/clientes/busqueda 200 in 206ms (compile: 5ms, render: 201ms)
+ GET /dashboard/clientes/busqueda 200 in 127ms (compile: 4ms, render: 123ms)
+ GET /dashboard/clientes/busqueda 200 in 125ms (compile: 3ms, render: 123ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 2ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 125ms (compile: 2ms, render: 123ms)
+ GET /dashboard/clientes/busqueda 200 in 127ms (compile: 3ms, render: 124ms)
+ GET /dashboard/clientes/busqueda 200 in 126ms (compile: 4ms, render: 122ms)
+ GET /dashboard/clientes/busqueda 200 in 122ms (compile: 4ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 4ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 5ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 4ms, render: 109ms)
+ GET /dashboard/clientes/busqueda 200 in 123ms (compile: 2ms, render: 120ms)
+ GET /dashboard/clientes/busqueda 200 in 130ms (compile: 3ms, render: 127ms)
+ GET /dashboard/clientes/busqueda 200 in 174ms (compile: 3ms, render: 171ms)
+ GET /dashboard/clientes/busqueda 200 in 163ms (compile: 5ms, render: 158ms)
+ GET /dashboard/clientes/busqueda 200 in 152ms (compile: 4ms, render: 148ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 2ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 2ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 4ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 2ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 115ms (compile: 5ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 2ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 117ms (compile: 3ms, render: 114ms)
+ GET /dashboard/clientes/busqueda 200 in 115ms (compile: 4ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 2ms, render: 90ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 3ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 126ms (compile: 2ms, render: 123ms)
+ GET /dashboard/clientes/busqueda 200 in 269ms (compile: 2ms, render: 266ms)
+ GET /dashboard/clientes/busqueda 200 in 300ms (compile: 3ms, render: 297ms)
+ GET /dashboard/clientes/busqueda 200 in 315ms (compile: 7ms, render: 308ms)
+ GET /dashboard/clientes/busqueda 200 in 292ms (compile: 4ms, render: 287ms)
+ GET /dashboard/clientes/busqueda 200 in 156ms (compile: 7ms, render: 149ms)
+ GET /dashboard/clientes/busqueda 200 in 125ms (compile: 3ms, render: 122ms)
+ GET /dashboard/clientes/busqueda 200 in 158ms (compile: 3ms, render: 155ms)
+ GET /dashboard/clientes/busqueda 200 in 160ms (compile: 3ms, render: 157ms)
+ GET /dashboard/clientes/busqueda 200 in 157ms (compile: 3ms, render: 154ms)
+ GET /dashboard/clientes/busqueda 200 in 164ms (compile: 3ms, render: 160ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 4ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 3ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 3ms, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 2ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 2ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 3ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 91ms (compile: 2ms, render: 89ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 2ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 2ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 3ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 2ms, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 2ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 3ms, render: 105ms)
+ GET /dashboard/clientes/busqueda 200 in 109ms (compile: 2ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 3ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 3ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 2ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 80ms (compile: 2ms, render: 77ms)
+ GET /dashboard/clientes/busqueda 200 in 58ms (compile: 3ms, render: 55ms)
+ GET /dashboard/clientes/busqueda 200 in 30ms (compile: 5ms, render: 25ms)
+🚀 SCRAPING COMPLETO para: "diseño ux ui" (1 páginas)
+🔥 SCRAPER REAL: Obteniendo datos reales de InfoJobs para: "diseño ux ui"
+📄 Cargando página 1: https://www.infojobs.net/ofertas-trabajo?keyword=dise%C3%B1o%20ux%20ui&page=1&sortBy=RELEVANCE
+⚠️ No se pudieron obtener ofertas reales, generando datos realistas como fallback...
+✅ SCRAPER REAL: Se obtuvieron 3 ofertas reales de InfoJobs
+ POST /api/real-scraper 200 in 6.7s (compile: 237ms, render: 6.5s)
+✅ SCRAPING COMPLETO: 3 ofertas obtenidas para "diseño ux ui"
+ POST /api/complete-scraping 200 in 7.1s (compile: 383ms, render: 6.8s)
+🚀 SCRAPING COMPLETO para: "desarrollador python" (1 páginas)
+📋 Generando datos mock realistas...
+✅ SCRAPING COMPLETO: 2 ofertas obtenidas para "desarrollador python"
+ POST /api/complete-scraping 200 in 9ms (compile: 3ms, render: 6ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 47ms (compile: 40ms, render: 7ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 8ms (compile: 3ms, render: 6ms)
+ GET /dashboard/clientes/busqueda 200 in 293ms (compile: 175ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 3ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 242ms (compile: 9ms, render: 233ms)
+ GET /dashboard/clientes/busqueda 200 in 295ms (compile: 2ms, render: 293ms)
+ GET /dashboard/clientes/busqueda 200 in 299ms (compile: 10ms, render: 289ms)
+ GET /dashboard/clientes/busqueda 200 in 203ms (compile: 10ms, render: 193ms)
+ GET /dashboard/clientes/busqueda 200 in 208ms (compile: 3ms, render: 205ms)
+ GET /dashboard/clientes/busqueda 200 in 150ms (compile: 3ms, render: 147ms)
+ GET /dashboard/clientes/busqueda 200 in 192ms (compile: 4ms, render: 188ms)
+ GET /dashboard/clientes/busqueda 200 in 173ms (compile: 3ms, render: 170ms)
+ GET /dashboard/clientes/busqueda 200 in 149ms (compile: 3ms, render: 146ms)
+ GET /dashboard/clientes/busqueda 200 in 128ms (compile: 34ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 136ms (compile: 2ms, render: 134ms)
+ GET /dashboard/clientes/busqueda 200 in 210ms (compile: 2ms, render: 208ms)
+ GET /dashboard/clientes/busqueda 200 in 219ms (compile: 2ms, render: 217ms)
+ GET /dashboard/clientes/busqueda 200 in 262ms (compile: 3ms, render: 259ms)
+ GET /dashboard/clientes/busqueda 200 in 245ms (compile: 16ms, render: 229ms)
+ GET /dashboard/clientes/busqueda 200 in 189ms (compile: 3ms, render: 187ms)
+ GET /dashboard/clientes/busqueda 200 in 184ms (compile: 4ms, render: 180ms)
+ GET /dashboard/clientes/busqueda 200 in 143ms (compile: 12ms, render: 131ms)
+ GET /dashboard/clientes/busqueda 200 in 123ms (compile: 5ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 4ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 114ms (compile: 3ms, render: 111ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 4ms, render: 114ms)
+ GET /dashboard/clientes/busqueda 200 in 130ms (compile: 4ms, render: 126ms)
+ GET /dashboard/clientes/busqueda 200 in 142ms (compile: 2ms, render: 140ms)
+ GET /dashboard/clientes/busqueda 200 in 141ms (compile: 2ms, render: 139ms)
+ GET /dashboard/clientes/busqueda 200 in 115ms (compile: 3ms, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 90ms (compile: 4ms, render: 86ms)
+ GET /dashboard/clientes/busqueda 200 in 55ms (compile: 2ms, render: 53ms)
+ GET /dashboard/clientes/busqueda 200 in 327ms (compile: 253ms, render: 73ms)
+ GET /dashboard/clientes/busqueda 200 in 61ms (compile: 1557µs, render: 60ms)
+ GET /dashboard/clientes/busqueda 200 in 80ms (compile: 1957µs, render: 78ms)
+ GET /dashboard/clientes/busqueda 200 in 66ms (compile: 3ms, render: 63ms)
+ GET /dashboard/clientes/busqueda 200 in 79ms (compile: 2ms, render: 76ms)
+ GET /dashboard/clientes/busqueda 200 in 87ms (compile: 1751µs, render: 85ms)
+✓ Compiled in 254ms
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 3ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 1935µs, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 3ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 83ms (compile: 4ms, render: 79ms)
+ GET /dashboard/clientes/busqueda 200 in 89ms (compile: 2ms, render: 86ms)
+ GET /dashboard/clientes/busqueda 200 in 88ms (compile: 2ms, render: 86ms)
+ GET /dashboard/clientes/busqueda 200 in 88ms (compile: 3ms, render: 85ms)
+ GET /dashboard/clientes/busqueda 200 in 85ms (compile: 3ms, render: 82ms)
+ GET /dashboard/clientes/busqueda 200 in 76ms (compile: 2ms, render: 74ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 2ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 1794µs, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 1674µs, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 83ms (compile: 6ms, render: 78ms)
+ GET /dashboard/clientes/busqueda 200 in 80ms (compile: 2ms, render: 78ms)
+ GET /dashboard/clientes/busqueda 200 in 80ms (compile: 1929µs, render: 78ms)
+ GET /dashboard/clientes/busqueda 200 in 80ms (compile: 2ms, render: 78ms)
+ GET /dashboard/clientes/busqueda 200 in 78ms (compile: 2ms, render: 76ms)
+ GET /dashboard/clientes/busqueda 200 in 75ms (compile: 2ms, render: 73ms)
+ GET /dashboard/clientes/busqueda 200 in 79ms (compile: 1958µs, render: 77ms)
+ GET /dashboard/clientes/busqueda 200 in 78ms (compile: 2ms, render: 76ms)
+ GET /dashboard/clientes/busqueda 200 in 78ms (compile: 2ms, render: 76ms)
+ GET /dashboard/clientes/busqueda 200 in 77ms (compile: 3ms, render: 75ms)
+ GET /dashboard/clientes/busqueda 200 in 72ms (compile: 2ms, render: 70ms)
+ GET /dashboard/clientes/busqueda 200 in 75ms (compile: 2ms, render: 73ms)
+ GET /dashboard/clientes/busqueda 200 in 77ms (compile: 1947µs, render: 75ms)
+ GET /dashboard/clientes/busqueda 200 in 78ms (compile: 1980µs, render: 76ms)
+ GET /dashboard/clientes/busqueda 200 in 79ms (compile: 1915µs, render: 77ms)
+ GET /dashboard/clientes/busqueda 200 in 75ms (compile: 3ms, render: 72ms)
+ GET /dashboard/clientes/busqueda 200 in 77ms (compile: 1997µs, render: 75ms)
+ GET /dashboard/clientes/busqueda 200 in 76ms (compile: 2ms, render: 74ms)
+ GET /dashboard/clientes/busqueda 200 in 92ms (compile: 1971µs, render: 90ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 1720µs, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 1584µs, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 3ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 81ms (compile: 2ms, render: 79ms)
+ GET /dashboard/clientes/busqueda 200 in 81ms (compile: 2ms, render: 78ms)
+ GET /dashboard/clientes/busqueda 200 in 85ms (compile: 2ms, render: 83ms)
+ GET /dashboard/clientes/busqueda 200 in 84ms (compile: 1885µs, render: 82ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 4ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 89ms (compile: 3ms, render: 86ms)
+ GET /dashboard/clientes/busqueda 200 in 91ms (compile: 3ms, render: 88ms)
+ GET /dashboard/clientes/busqueda 200 in 90ms (compile: 3ms, render: 87ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 2ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 91ms (compile: 2ms, render: 88ms)
+ GET /dashboard/clientes/busqueda 200 in 86ms (compile: 2ms, render: 84ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 3ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 1993µs, render: 105ms)
+ GET /dashboard/clientes/busqueda 200 in 111ms (compile: 2ms, render: 109ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 5ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 6ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 3ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 1872µs, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 1978µs, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 3ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 84ms (compile: 5ms, render: 79ms)
+ GET /dashboard/clientes/busqueda 200 in 83ms (compile: 2ms, render: 81ms)
+ GET /dashboard/clientes/busqueda 200 in 83ms (compile: 2ms, render: 81ms)
+ GET /dashboard/clientes/busqueda 200 in 84ms (compile: 3ms, render: 81ms)
+ GET /dashboard/clientes/busqueda 200 in 82ms (compile: 2ms, render: 80ms)
+ GET /dashboard/clientes/busqueda 200 in 78ms (compile: 2ms, render: 76ms)
+ GET /dashboard/clientes/busqueda 200 in 81ms (compile: 1870µs, render: 79ms)
+ GET /dashboard/clientes/busqueda 200 in 79ms (compile: 2ms, render: 77ms)
+ GET /dashboard/clientes/busqueda 200 in 80ms (compile: 2ms, render: 78ms)
+ GET /dashboard/clientes/busqueda 200 in 82ms (compile: 1779µs, render: 81ms)
+ GET /dashboard/clientes/busqueda 200 in 80ms (compile: 1796µs, render: 78ms)
+ GET /dashboard/clientes/busqueda 200 in 84ms (compile: 2ms, render: 81ms)
+ GET /dashboard/clientes/busqueda 200 in 85ms (compile: 2ms, render: 82ms)
+ GET /dashboard/clientes/busqueda 200 in 87ms (compile: 1851µs, render: 85ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 1697µs, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 3ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 217ms (compile: 3ms, render: 214ms)
+ GET /dashboard/clientes/busqueda 200 in 224ms (compile: 2ms, render: 222ms)
+ GET /dashboard/clientes/busqueda 200 in 217ms (compile: 5ms, render: 212ms)
+ GET /dashboard/clientes/busqueda 200 in 200ms (compile: 5ms, render: 195ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 3ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 92ms (compile: 4ms, render: 88ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 2ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 3ms, render: 90ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 1669µs, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 1953µs, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 1989µs, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 78ms (compile: 3ms, render: 75ms)
+ GET /dashboard/clientes/busqueda 200 in 109ms (compile: 2ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 5ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 4ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 89ms (compile: 2ms, render: 87ms)
+ GET /dashboard/clientes/busqueda 200 in 91ms (compile: 2ms, render: 89ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 1832µs, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 1797µs, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 4ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 1652µs, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 3ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 89ms (compile: 2ms, render: 86ms)
+ GET /dashboard/clientes/busqueda 200 in 83ms (compile: 4ms, render: 79ms)
+ GET /dashboard/clientes/busqueda 200 in 77ms (compile: 4ms, render: 73ms)
+ GET /dashboard/clientes/busqueda 200 in 71ms (compile: 1663µs, render: 69ms)
+ GET /dashboard/clientes/busqueda 200 in 74ms (compile: 2ms, render: 72ms)
+ GET /dashboard/clientes/busqueda 200 in 78ms (compile: 3ms, render: 75ms)
+ GET /dashboard/clientes/busqueda 200 in 81ms (compile: 1623µs, render: 80ms)
+ GET /dashboard/clientes/busqueda 200 in 88ms (compile: 1868µs, render: 86ms)
+ GET /dashboard/clientes/busqueda 200 in 70ms (compile: 1783µs, render: 68ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 2ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 92ms (compile: 2ms, render: 89ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 3ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 3ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 3ms, render: 90ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 1784µs, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 1961µs, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 2ms, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 4ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 131ms (compile: 1927µs, render: 129ms)
+ GET /dashboard/clientes/busqueda 200 in 139ms (compile: 4ms, render: 135ms)
+ GET /dashboard/clientes/busqueda 200 in 149ms (compile: 2ms, render: 147ms)
+ GET /dashboard/clientes/busqueda 200 in 144ms (compile: 12ms, render: 132ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 6ms, render: 114ms)
+ GET /dashboard/clientes/busqueda 200 in 89ms (compile: 6ms, render: 83ms)
+ GET /dashboard/clientes/busqueda 200 in 54ms (compile: 3ms, render: 51ms)
+ GET /dashboard/clientes/busqueda 200 in 28ms (compile: 2ms, render: 26ms)
+🔥 SCRAPING REAL EXCLUSIVO: "desarrollador javascript" - Solo datos reales de InfoJobs
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 36ms (compile: 29ms, render: 6ms)
+📄 Extrayendo página 1 de InfoJobs...
+❌ Error en scraping real exclusivo: TypeError: page.waitForTimeout is not a function
+    at POST (src/app/api/only-real-data/route.ts:55:20)
+  53 |         
+  54 |         // Esperar que cargue completamente
+> 55 |         await page.waitForTimeout(4000)
+     |                    ^
+  56 |         
+  57 |         const html = await page.content()
+  58 |         const $ = cheerio.load(html)
+ POST /api/only-real-data 500 in 5.4s (compile: 518ms, render: 4.9s)
+🔥 SCRAPING REAL EXCLUSIVO: "programador" - Solo datos reales de InfoJobs
+ GET /dashboard/clientes/busqueda 200 in 329ms (compile: 134ms, render: 195ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 2ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 117ms (compile: 2ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 125ms (compile: 3ms, render: 122ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 3ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 4ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 184ms (compile: 2ms, render: 181ms)
+ GET /dashboard/clientes/busqueda 200 in 258ms (compile: 3ms, render: 255ms)
+ GET /dashboard/clientes/busqueda 200 in 254ms (compile: 5ms, render: 249ms)
+ GET /dashboard/clientes/busqueda 200 in 166ms (compile: 9ms, render: 157ms)
+ GET /dashboard/clientes/busqueda 200 in 143ms (compile: 5ms, render: 138ms)
+ GET /dashboard/clientes/busqueda 200 in 131ms (compile: 3ms, render: 128ms)
+ GET /dashboard/clientes/busqueda 200 in 148ms (compile: 2ms, render: 146ms)
+ GET /dashboard/clientes/busqueda 200 in 153ms (compile: 10ms, render: 143ms)
+📄 Extrayendo página 1 de InfoJobs...
+ GET /dashboard/clientes/busqueda 200 in 145ms (compile: 3ms, render: 142ms)
+ GET /dashboard/clientes/busqueda 200 in 130ms (compile: 3ms, render: 127ms)
+ GET /dashboard/clientes/busqueda 200 in 89ms (compile: 3ms, render: 86ms)
+ GET /dashboard/clientes/busqueda 200 in 109ms (compile: 2ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 128ms (compile: 3ms, render: 125ms)
+ GET /dashboard/clientes/busqueda 200 in 141ms (compile: 5ms, render: 137ms)
+ GET /dashboard/clientes/busqueda 200 in 116ms (compile: 3ms, render: 113ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 3ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 2ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 3ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 135ms (compile: 5ms, render: 130ms)
+ GET /dashboard/clientes/busqueda 200 in 167ms (compile: 3ms, render: 163ms)
+ GET /dashboard/clientes/busqueda 200 in 179ms (compile: 2ms, render: 177ms)
+ GET /dashboard/clientes/busqueda 200 in 198ms (compile: 4ms, render: 193ms)
+ GET /dashboard/clientes/busqueda 200 in 203ms (compile: 4ms, render: 198ms)
+ GET /dashboard/clientes/busqueda 200 in 228ms (compile: 7ms, render: 220ms)
+ GET /dashboard/clientes/busqueda 200 in 270ms (compile: 8ms, render: 262ms)
+ GET /dashboard/clientes/busqueda 200 in 285ms (compile: 22ms, render: 263ms)
+ GET /dashboard/clientes/busqueda 200 in 336ms (compile: 35ms, render: 302ms)
+ GET /dashboard/clientes/busqueda 200 in 294ms (compile: 42ms, render: 252ms)
+ GET /dashboard/clientes/busqueda 200 in 244ms (compile: 5ms, render: 239ms)
+ GET /dashboard/clientes/busqueda 200 in 333ms (compile: 89ms, render: 244ms)
+ GET /dashboard/clientes/busqueda 200 in 249ms (compile: 4ms, render: 245ms)
+ GET /dashboard/clientes/busqueda 200 in 261ms (compile: 20ms, render: 242ms)
+ GET /dashboard/clientes/busqueda 200 in 168ms (compile: 3ms, render: 165ms)
+ GET /dashboard/clientes/busqueda 200 in 171ms (compile: 3ms, render: 169ms)
+ GET /dashboard/clientes/busqueda 200 in 180ms (compile: 5ms, render: 176ms)
+ GET /dashboard/clientes/busqueda 200 in 181ms (compile: 9ms, render: 172ms)
+ GET /dashboard/clientes/busqueda 200 in 132ms (compile: 4ms, render: 128ms)
+ GET /dashboard/clientes/busqueda 200 in 123ms (compile: 3ms, render: 120ms)
+ GET /dashboard/clientes/busqueda 200 in 114ms (compile: 7ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 140ms (compile: 5ms, render: 135ms)
+ GET /dashboard/clientes/busqueda 200 in 133ms (compile: 4ms, render: 129ms)
+ GET /dashboard/clientes/busqueda 200 in 125ms (compile: 4ms, render: 121ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 3ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 5ms, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 117ms (compile: 3ms, render: 113ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 3ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 4ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 2ms, render: 117ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 2ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 115ms (compile: 3ms, render: 113ms)
+ GET /dashboard/clientes/busqueda 200 in 116ms (compile: 4ms, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 116ms (compile: 3ms, render: 113ms)
+ GET /dashboard/clientes/busqueda 200 in 117ms (compile: 3ms, render: 114ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 3ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 4ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 116ms (compile: 3ms, render: 113ms)
+ GET /dashboard/clientes/busqueda 200 in 115ms (compile: 3ms, render: 113ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 4ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 2ms, render: 111ms)
+ GET /dashboard/clientes/busqueda 200 in 160ms (compile: 3ms, render: 157ms)
+ GET /dashboard/clientes/busqueda 200 in 162ms (compile: 3ms, render: 159ms)
+ GET /dashboard/clientes/busqueda 200 in 166ms (compile: 4ms, render: 163ms)
+ GET /dashboard/clientes/busqueda 200 in 164ms (compile: 32ms, render: 132ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 3ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 131ms (compile: 4ms, render: 127ms)
+ GET /dashboard/clientes/busqueda 200 in 135ms (compile: 3ms, render: 132ms)
+ GET /dashboard/clientes/busqueda 200 in 146ms (compile: 4ms, render: 142ms)
+ GET /dashboard/clientes/busqueda 200 in 165ms (compile: 2ms, render: 163ms)
+ GET /dashboard/clientes/busqueda 200 in 168ms (compile: 4ms, render: 164ms)
+ GET /dashboard/clientes/busqueda 200 in 168ms (compile: 3ms, render: 165ms)
+ GET /dashboard/clientes/busqueda 200 in 197ms (compile: 6ms, render: 191ms)
+ GET /dashboard/clientes/busqueda 200 in 198ms (compile: 3ms, render: 196ms)
+ GET /dashboard/clientes/busqueda 200 in 196ms (compile: 3ms, render: 193ms)
+ GET /dashboard/clientes/busqueda 200 in 159ms (compile: 3ms, render: 156ms)
+ GET /dashboard/clientes/busqueda 200 in 170ms (compile: 4ms, render: 166ms)
+ GET /dashboard/clientes/busqueda 200 in 153ms (compile: 11ms, render: 142ms)
+ GET /dashboard/clientes/busqueda 200 in 160ms (compile: 3ms, render: 157ms)
+ GET /dashboard/clientes/busqueda 200 in 138ms (compile: 2ms, render: 136ms)
+ GET /dashboard/clientes/busqueda 200 in 139ms (compile: 3ms, render: 136ms)
+ GET /dashboard/clientes/busqueda 200 in 136ms (compile: 4ms, render: 131ms)
+ GET /dashboard/clientes/busqueda 200 in 135ms (compile: 2ms, render: 132ms)
+ GET /dashboard/clientes/busqueda 200 in 135ms (compile: 2ms, render: 133ms)
+ GET /dashboard/clientes/busqueda 200 in 139ms (compile: 3ms, render: 136ms)
+❌ Error en scraping real exclusivo: TypeError: page.waitForTimeout is not a function
+    at POST (src/app/api/only-real-data/route.ts:55:20)
+  53 |         
+  54 |         // Esperar que cargue completamente
+> 55 |         await page.waitForTimeout(4000)
+     |                    ^
+  56 |         
+  57 |         const html = await page.content()
+  58 |         const $ = cheerio.load(html)
+ POST /api/only-real-data 500 in 4.9s (compile: 1854µs, render: 4.9s)
+ GET /dashboard/clientes/busqueda 200 in 221ms (compile: 3ms, render: 218ms)
+ GET /dashboard/clientes/busqueda 200 in 219ms (compile: 5ms, render: 214ms)
+ GET /dashboard/clientes/busqueda 200 in 219ms (compile: 4ms, render: 215ms)
+ GET /dashboard/clientes/busqueda 200 in 220ms (compile: 5ms, render: 214ms)
+ GET /dashboard/clientes/busqueda 200 in 115ms (compile: 3ms, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 4ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 2ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 2ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 3ms, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 2ms, render: 105ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 3ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 2ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 5ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 4ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 2ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 2ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 3ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 2ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 3ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 2ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 3ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 2ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 111ms (compile: 3ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 3ms, render: 109ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 6ms, render: 114ms)
+ GET /dashboard/clientes/busqueda 200 in 125ms (compile: 3ms, render: 122ms)
+ GET /dashboard/clientes/busqueda 200 in 142ms (compile: 3ms, render: 139ms)
+ GET /dashboard/clientes/busqueda 200 in 152ms (compile: 2ms, render: 149ms)
+ GET /dashboard/clientes/busqueda 200 in 150ms (compile: 3ms, render: 146ms)
+ GET /dashboard/clientes/busqueda 200 in 136ms (compile: 7ms, render: 129ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 3ms, render: 117ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 3ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 117ms (compile: 3ms, render: 114ms)
+ GET /dashboard/clientes/busqueda 200 in 117ms (compile: 2ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 116ms (compile: 3ms, render: 113ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 4ms, render: 109ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 3ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 3ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 4ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 91ms (compile: 2ms, render: 89ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 2ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 1874µs, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 3ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 90ms (compile: 3ms, render: 87ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 3ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 92ms (compile: 2ms, render: 90ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 2ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 91ms (compile: 2ms, render: 89ms)
+ GET /dashboard/clientes/busqueda 200 in 89ms (compile: 1778µs, render: 87ms)
+ GET /dashboard/clientes/busqueda 200 in 92ms (compile: 3ms, render: 89ms)
+ GET /dashboard/clientes/busqueda 200 in 91ms (compile: 2ms, render: 89ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 1898µs, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 2ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 5ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 2ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 1891µs, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 2ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 2ms, render: 90ms)
+ GET /dashboard/clientes/busqueda 200 in 73ms (compile: 2ms, render: 71ms)
+ GET /dashboard/clientes/busqueda 200 in 51ms (compile: 1940µs, render: 49ms)
+ GET /dashboard/clientes/busqueda 200 in 30ms (compile: 3ms, render: 27ms)
+🔍 VALIDANDO URL REAL: https://www.infojobs.net/ofertas-trabajo?keyword=programador&page=1
+ POST /api/validate-real-url 200 in 2.7s (compile: 144ms, render: 2.6s)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 56ms (compile: 46ms, render: 10ms)
+🔥 SCRAPING REAL EXCLUSIVO: "diseño" - Solo datos reales de InfoJobs
+📄 Extrayendo página 1 de InfoJobs...
+❌ Error en scraping real exclusivo: TypeError: page.waitForTimeout is not a function
+    at POST (src/app/api/only-real-data/route.ts:55:20)
+  53 |         
+  54 |         // Esperar que cargue completamente
+> 55 |         await page.waitForTimeout(4000)
+     |                    ^
+  56 |         
+  57 |         const html = await page.content()
+  58 |         const $ = cheerio.load(html)
+ POST /api/only-real-data 500 in 4.2s (compile: 239ms, render: 3.9s)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 12ms (compile: 4ms, render: 8ms)
+🔥 SCRAPING REAL EXCLUSIVO: "programador" - Solo datos reales de InfoJobs
+📄 Extrayendo página 1 de InfoJobs...
+⚠️ No se encontraron ofertas en página 1 con ningún selector
+ POST /api/only-real-data 404 in 7.9s (compile: 211ms, render: 7.7s)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 5ms (compile: 1605µs, render: 4ms)
+🔥 SCRAPING REAL EXCLUSIVO: "desarrollador" - Solo datos reales de InfoJobs
+📄 Extrayendo página 1 de InfoJobs...
+⚠️ No se encontraron ofertas en página 1 con ningún selector
+ POST /api/only-real-data 404 in 7.1s (compile: 1458µs, render: 7.1s)
+ GET /dashboard/clientes/busqueda 200 in 395ms (compile: 238ms, render: 157ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 7ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 117ms (compile: 2ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 125ms (compile: 2ms, render: 122ms)
+ GET /dashboard/clientes/busqueda 200 in 123ms (compile: 3ms, render: 120ms)
+ GET /dashboard/clientes/busqueda 200 in 128ms (compile: 1944µs, render: 126ms)
+ GET /dashboard/clientes/busqueda 200 in 126ms (compile: 8ms, render: 117ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 3ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 154ms (compile: 2ms, render: 151ms)
+ GET /dashboard/clientes/busqueda 200 in 133ms (compile: 2ms, render: 131ms)
+ GET /dashboard/clientes/busqueda 200 in 154ms (compile: 24ms, render: 130ms)
+ GET /dashboard/clientes/busqueda 200 in 142ms (compile: 3ms, render: 139ms)
+ GET /dashboard/clientes/busqueda 200 in 166ms (compile: 3ms, render: 163ms)
+ GET /dashboard/clientes/busqueda 200 in 163ms (compile: 4ms, render: 159ms)
+ GET /dashboard/clientes/busqueda 200 in 151ms (compile: 3ms, render: 148ms)
+ GET /dashboard/clientes/busqueda 200 in 131ms (compile: 3ms, render: 128ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 1883µs, render: 105ms)
+ GET /dashboard/clientes/busqueda 200 in 109ms (compile: 3ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 3ms, render: 105ms)
+ GET /dashboard/clientes/busqueda 200 in 122ms (compile: 2ms, render: 120ms)
+ GET /dashboard/clientes/busqueda 200 in 123ms (compile: 2ms, render: 121ms)
+ GET /dashboard/clientes/busqueda 200 in 132ms (compile: 2ms, render: 129ms)
+ GET /dashboard/clientes/busqueda 200 in 130ms (compile: 5ms, render: 125ms)
+ GET /dashboard/clientes/busqueda 200 in 114ms (compile: 3ms, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 10ms, render: 109ms)
+ GET /dashboard/clientes/busqueda 200 in 201ms (compile: 2ms, render: 199ms)
+ GET /dashboard/clientes/busqueda 200 in 177ms (compile: 2ms, render: 175ms)
+ GET /dashboard/clientes/busqueda 200 in 153ms (compile: 7ms, render: 146ms)
+ GET /dashboard/clientes/busqueda 200 in 214ms (compile: 126ms, render: 88ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 1915µs, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 1999µs, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 2ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 1942µs, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 4ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 2ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 4ms, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 129ms (compile: 2ms, render: 127ms)
+ GET /dashboard/clientes/busqueda 200 in 132ms (compile: 2ms, render: 130ms)
+ GET /dashboard/clientes/busqueda 200 in 130ms (compile: 3ms, render: 127ms)
+ GET /dashboard/clientes/busqueda 200 in 115ms (compile: 6ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 3ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 2ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 2ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 3ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 2ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 2ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 3ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 2ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 3ms, render: 90ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 3ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 3ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 1889µs, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 3ms, render: 109ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 3ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 2ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 3ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 4ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 156ms (compile: 1921µs, render: 154ms)
+ GET /dashboard/clientes/busqueda 200 in 168ms (compile: 4ms, render: 164ms)
+ GET /dashboard/clientes/busqueda 200 in 167ms (compile: 3ms, render: 164ms)
+ GET /dashboard/clientes/busqueda 200 in 168ms (compile: 3ms, render: 165ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 4ms, render: 109ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 3ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 2ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 3ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 3ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 2ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 125ms (compile: 3ms, render: 122ms)
+ GET /dashboard/clientes/busqueda 200 in 127ms (compile: 3ms, render: 125ms)
+ GET /dashboard/clientes/busqueda 200 in 126ms (compile: 3ms, render: 123ms)
+ GET /dashboard/clientes/busqueda 200 in 122ms (compile: 2ms, render: 120ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 3ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 3ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 3ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 122ms (compile: 2ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 127ms (compile: 3ms, render: 124ms)
+ GET /dashboard/clientes/busqueda 200 in 121ms (compile: 4ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 124ms (compile: 3ms, render: 121ms)
+ GET /dashboard/clientes/busqueda 200 in 129ms (compile: 3ms, render: 126ms)
+ GET /dashboard/clientes/busqueda 200 in 124ms (compile: 3ms, render: 121ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 3ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 4ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 3ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 2ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 3ms, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 2ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 3ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 80ms (compile: 2ms, render: 78ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 72ms (compile: 3ms, render: 69ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 3ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 2ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 1869µs, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 2ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 1943µs, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 111ms (compile: 2ms, render: 109ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 2ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 3ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 3ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 2ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 3ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 3ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 1940µs, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 3ms, render: 105ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 2ms, render: 105ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 3ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 109ms (compile: 3ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 132ms (compile: 2ms, render: 130ms)
+ GET /dashboard/clientes/busqueda 200 in 155ms (compile: 3ms, render: 152ms)
+ GET /dashboard/clientes/busqueda 200 in 172ms (compile: 3ms, render: 170ms)
+ GET /dashboard/clientes/busqueda 200 in 186ms (compile: 2ms, render: 183ms)
+ GET /dashboard/clientes/busqueda 200 in 162ms (compile: 2ms, render: 159ms)
+ GET /dashboard/clientes/busqueda 200 in 142ms (compile: 4ms, render: 138ms)
+ GET /dashboard/clientes/busqueda 200 in 130ms (compile: 5ms, render: 125ms)
+ GET /dashboard/clientes/busqueda 200 in 116ms (compile: 2ms, render: 114ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 3ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 3ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 2ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 2ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 127ms (compile: 2ms, render: 125ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 4ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 2ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 127ms (compile: 5ms, render: 121ms)
+ GET /dashboard/clientes/busqueda 200 in 130ms (compile: 5ms, render: 125ms)
+ GET /dashboard/clientes/busqueda 200 in 224ms (compile: 6ms, render: 218ms)
+ GET /dashboard/clientes/busqueda 200 in 224ms (compile: 8ms, render: 216ms)
+ GET /dashboard/clientes/busqueda 200 in 215ms (compile: 2ms, render: 213ms)
+ GET /dashboard/clientes/busqueda 200 in 204ms (compile: 5ms, render: 199ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 3ms, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 2ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 2ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 3ms, render: 90ms)
+ GET /dashboard/clientes/busqueda 200 in 71ms (compile: 2ms, render: 68ms)
+ GET /dashboard/clientes/busqueda 200 in 51ms (compile: 3ms, render: 48ms)
+ GET /dashboard/clientes/busqueda 200 in 28ms (compile: 2ms, render: 26ms)
+🎯 DATOS ULTRA-REALES para: "react developer"
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 41ms (compile: 34ms, render: 6ms)
+✅ GENERADAS 8 ofertas ultra-realistas para "react developer"
+ POST /api/ultra-real-data 200 in 2.6s (compile: 218ms, render: 2.4s)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 86ms (compile: 40ms, render: 46ms)
+ GET /dashboard 200 in 473ms (compile: 155ms, render: 318ms)
+UserId en tenants: demo-user
+ GET /api/tenants 200 in 153ms (compile: 139ms, render: 13ms)
+ GET /dashboard/clientes/busqueda 200 in 64ms (compile: 20ms, render: 44ms)
+GET job-searches - userId: user-1 page: 1 limit: 10
+GET job-searches/stats - userId: user-1
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=user-1 200 in 343ms (compile: 134ms, render: 209ms)
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches/stats?userId=user-1 200 in 346ms (compile: 186ms, render: 160ms)
+GET job-searches - userId: user-1 page: 1 limit: 10
+GET job-searches/stats - userId: user-1
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=user-1 200 in 96ms (compile: 9ms, render: 87ms)
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches/stats?userId=user-1 200 in 94ms (compile: 9ms, render: 86ms)
+POST job-searches - body: {
+  keywords: 'web',
+  portals: [ 'infojobs' ],
+  frequencyMinutes: 240,
+  userId: 'user-1'
+}
+⚠️ Supabase connection failed: 
+🚫 DATABASE_URL no configurada - No se pueden crear búsquedas
+ POST /api/job-searches 400 in 125ms (compile: 11ms, render: 114ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 15ms (compile: 5ms, render: 10ms)
+ GET /dashboard/clientes/busqueda 200 in 752ms (compile: 221ms, render: 531ms)
+ GET /dashboard/clientes/busqueda 200 in 583ms (compile: 25ms, render: 558ms)
+ GET /dashboard/clientes/busqueda 200 in 560ms (compile: 27ms, render: 534ms)
+ GET /dashboard/clientes/busqueda 200 in 279ms (compile: 33ms, render: 246ms)
+ GET /dashboard/clientes/busqueda 200 in 199ms (compile: 6ms, render: 193ms)
+ GET /dashboard/clientes/busqueda 200 in 208ms (compile: 5ms, render: 203ms)
+ GET /dashboard/clientes/busqueda 200 in 196ms (compile: 7ms, render: 188ms)
+ GET /dashboard/clientes/busqueda 200 in 209ms (compile: 4ms, render: 205ms)
+ GET /dashboard/clientes/busqueda 200 in 186ms (compile: 12ms, render: 174ms)
+ GET /dashboard/clientes/busqueda 200 in 171ms (compile: 4ms, render: 167ms)
+ GET /dashboard/clientes/busqueda 200 in 165ms (compile: 7ms, render: 158ms)
+ GET /dashboard/clientes/busqueda 200 in 221ms (compile: 7ms, render: 214ms)
+ GET /dashboard/clientes/busqueda 200 in 224ms (compile: 6ms, render: 218ms)
+ GET /dashboard/clientes/busqueda 200 in 216ms (compile: 3ms, render: 213ms)
+ GET /dashboard/clientes/busqueda 200 in 231ms (compile: 3ms, render: 228ms)
+ GET /dashboard/clientes/busqueda 200 in 144ms (compile: 2ms, render: 142ms)
+ GET /dashboard/clientes/busqueda 200 in 141ms (compile: 3ms, render: 138ms)
+ GET /dashboard/clientes/busqueda 200 in 146ms (compile: 5ms, render: 142ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 4ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 3ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 3ms, render: 117ms)
+ GET /dashboard/clientes/busqueda 200 in 116ms (compile: 5ms, render: 111ms)
+ GET /dashboard/clientes/busqueda 200 in 125ms (compile: 4ms, render: 121ms)
+ GET /dashboard/clientes/busqueda 200 in 131ms (compile: 2ms, render: 129ms)
+ GET /dashboard/clientes/busqueda 200 in 132ms (compile: 2ms, render: 130ms)
+ GET /dashboard/clientes/busqueda 200 in 133ms (compile: 3ms, render: 130ms)
+ GET /dashboard/clientes/busqueda 200 in 85ms (compile: 2ms, render: 83ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 3ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 134ms (compile: 3ms, render: 130ms)
+ GET /dashboard/clientes/busqueda 200 in 136ms (compile: 3ms, render: 133ms)
+ GET /dashboard/clientes/busqueda 200 in 135ms (compile: 3ms, render: 132ms)
+ GET /dashboard/clientes/busqueda 200 in 131ms (compile: 2ms, render: 129ms)
+ GET /dashboard/clientes/busqueda 200 in 111ms (compile: 5ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 129ms (compile: 2ms, render: 127ms)
+ GET /dashboard/clientes/busqueda 200 in 141ms (compile: 4ms, render: 137ms)
+ GET /dashboard/clientes/busqueda 200 in 146ms (compile: 2ms, render: 144ms)
+ GET /dashboard/clientes/busqueda 200 in 159ms (compile: 3ms, render: 156ms)
+ GET /dashboard/clientes/busqueda 200 in 126ms (compile: 6ms, render: 121ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 6ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 2ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 1899µs, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 2ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 2ms, render: 111ms)
+ GET /dashboard/clientes/busqueda 200 in 117ms (compile: 2ms, render: 114ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 3ms, render: 111ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 3ms, render: 114ms)
+ GET /dashboard/clientes/busqueda 200 in 116ms (compile: 4ms, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 129ms (compile: 3ms, render: 126ms)
+ GET /dashboard/clientes/busqueda 200 in 129ms (compile: 3ms, render: 127ms)
+ GET /dashboard/clientes/busqueda 200 in 122ms (compile: 2ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 3ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 3ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 4ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 2ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 3ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 2ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 117ms (compile: 3ms, render: 114ms)
+ GET /dashboard/clientes/busqueda 200 in 125ms (compile: 3ms, render: 122ms)
+ GET /dashboard/clientes/busqueda 200 in 124ms (compile: 5ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 3ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 90ms (compile: 5ms, render: 85ms)
+ GET /dashboard/clientes/busqueda 200 in 59ms (compile: 6ms, render: 53ms)
+ GET /dashboard/clientes/busqueda 200 in 137ms (compile: 50ms, render: 87ms)
+ GET /dashboard/clientes/busqueda 200 in 90ms (compile: 1872µs, render: 88ms)
+ GET /dashboard/clientes/busqueda 200 in 90ms (compile: 2ms, render: 88ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 1747µs, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 89ms (compile: 2ms, render: 87ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 1853µs, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 4ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 3ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 1973µs, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 2ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 1798µs, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 2ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 2ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 4ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 92ms (compile: 1926µs, render: 90ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 2ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 1948µs, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 92ms (compile: 2ms, render: 90ms)
+ GET /dashboard/clientes/busqueda 200 in 92ms (compile: 2ms, render: 90ms)
+ GET /dashboard/clientes/busqueda 200 in 88ms (compile: 1978µs, render: 86ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 2ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 2ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 73ms (compile: 2ms, render: 71ms)
+ GET /dashboard/clientes/busqueda 200 in 81ms (compile: 2ms, render: 79ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 3ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 4ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 1887µs, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 85ms (compile: 1803µs, render: 83ms)
+ GET /dashboard/clientes/busqueda 200 in 81ms (compile: 2ms, render: 79ms)
+ GET /dashboard/clientes/busqueda 200 in 78ms (compile: 2ms, render: 76ms)
+ GET /dashboard/clientes/busqueda 200 in 91ms (compile: 3ms, render: 88ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 3ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 3ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 1858µs, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 3ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 73ms (compile: 2ms, render: 71ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 77ms (compile: 2ms, render: 75ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 3ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 109ms (compile: 2ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 115ms (compile: 3ms, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 3ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 3ms, render: 101ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 1986µs, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 2ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 2ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 2ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 2ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 2ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 2ms, render: 111ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 3ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 125ms (compile: 2ms, render: 122ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 3ms, render: 117ms)
+ GET /dashboard/clientes/busqueda 200 in 127ms (compile: 3ms, render: 124ms)
+ GET /dashboard/clientes/busqueda 200 in 233ms (compile: 3ms, render: 230ms)
+ GET /dashboard/clientes/busqueda 200 in 236ms (compile: 4ms, render: 231ms)
+ GET /dashboard/clientes/busqueda 200 in 234ms (compile: 2ms, render: 232ms)
+ GET /dashboard/clientes/busqueda 200 in 221ms (compile: 3ms, render: 218ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 2ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 3ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 2ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 1969µs, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 1950µs, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 2ms, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 1921µs, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 1940µs, render: 105ms)
+ GET /dashboard/clientes/busqueda 200 in 111ms (compile: 2ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 107ms (compile: 2ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 3ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 3ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 92ms (compile: 3ms, render: 89ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 1872µs, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 76ms (compile: 3ms, render: 73ms)
+ GET /dashboard/clientes/busqueda 200 in 55ms (compile: 1912µs, render: 53ms)
+ GET /dashboard/clientes/busqueda 200 in 31ms (compile: 1813µs, render: 29ms)
+🔥 EXTRACCIÓN DIRECTA de InfoJobs para: "desarrollador"
+📡 Consultando: https://www.infojobs.net/ofertas-trabajo?keyword=desarrollador&page=1&sortBy=RELEVANCE
+✅ InfoJobs respondió correctamente (1003070 chars)
+✅ DATOS REALES EXTRAÍDOS: 8 ofertas de InfoJobs
+ POST /api/direct-real-data 200 in 916ms (compile: 269ms, render: 647ms)
+🔥 SCRAPING REAL EXCLUSIVO: "programador" - Solo datos reales de InfoJobs
+📄 Extrayendo página 1 de InfoJobs...
+🔗 URL: https://www.infojobs.net/ofertas-trabajo?keyword=programador&page=1&sortBy=RELEVANCE
+🔍 VALIDANDO URL REAL: https://www.infojobs.net/ofertas-trabajo?keyword=desarrollador&page=1
+📝 HTML cargado, tamaño: 37470 caracteres
+🔍 Selector 'article': encontrados 0 elementos
+🔍 Selector '.offer': encontrados 0 elementos
+🔍 Selector '.job-offer': encontrados 0 elementos
+🔍 Selector '[class*="offer"]': encontrados 0 elementos
+🔍 Selector '[class*="job"]': encontrados 0 elementos
+🔍 Selector 'li[class*="item"]': encontrados 2 elementos
+🔍 Selector 'div[class*="card"]': encontrados 0 elementos
+⚠️ No se encontraron ofertas en página 1
+🔍 Texto de muestra de la página: 
+    
+
+	
+		document.getElementsByClassName("container")[0].style.display = "none";
+		
+		
+			
+			
+				
+				
+					
+					
+						
+					
+					
+				
+				
+			
+
+			
+				
+        
+
+        
+          ¿Eres hum...
+ POST /api/validate-real-url 200 in 650ms (compile: 33ms, render: 617ms)
+ POST /api/only-real-data 404 in 8.3s (compile: 264ms, render: 8.1s)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 49ms (compile: 41ms, render: 7ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 13ms (compile: 5ms, render: 8ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 9ms (compile: 3ms, render: 7ms)
+ GET /dashboard/clientes/busqueda 200 in 742ms (compile: 224ms, render: 518ms)
+ GET /dashboard/clientes/busqueda 200 in 557ms (compile: 1844µs, render: 556ms)
+ GET /dashboard/clientes/busqueda 200 in 545ms (compile: 18ms, render: 527ms)
+ GET /dashboard/clientes/busqueda 200 in 243ms (compile: 9ms, render: 234ms)
+ GET /dashboard/clientes/busqueda 200 in 175ms (compile: 6ms, render: 170ms)
+ GET /dashboard/clientes/busqueda 200 in 200ms (compile: 2ms, render: 197ms)
+ GET /dashboard/clientes/busqueda 200 in 220ms (compile: 4ms, render: 216ms)
+ GET /dashboard/clientes/busqueda 200 in 152ms (compile: 3ms, render: 149ms)
+ GET /dashboard/clientes/busqueda 200 in 165ms (compile: 10ms, render: 155ms)
+ GET /dashboard/clientes/busqueda 200 in 126ms (compile: 16ms, render: 111ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 3ms, render: 109ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 5ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 3ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 2ms, render: 111ms)
+ GET /dashboard/clientes/busqueda 200 in 114ms (compile: 2ms, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 128ms (compile: 2ms, render: 126ms)
+ GET /dashboard/clientes/busqueda 200 in 127ms (compile: 1865µs, render: 125ms)
+ GET /dashboard/clientes/busqueda 200 in 142ms (compile: 3ms, render: 139ms)
+ GET /dashboard/clientes/busqueda 200 in 126ms (compile: 3ms, render: 124ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 73ms (compile: 8ms, render: 66ms)
+ GET /dashboard/clientes/busqueda 200 in 215ms (compile: 96ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 7ms, render: 87ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 2ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 133ms (compile: 5ms, render: 128ms)
+ GET /dashboard/clientes/busqueda 200 in 129ms (compile: 6ms, render: 122ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 5ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 3ms, render: 105ms)
+ GET /dashboard/clientes/busqueda 200 in 116ms (compile: 3ms, render: 113ms)
+ GET /dashboard/clientes/busqueda 200 in 128ms (compile: 3ms, render: 126ms)
+ GET /dashboard/clientes/busqueda 200 in 136ms (compile: 3ms, render: 133ms)
+ GET /dashboard/clientes/busqueda 200 in 138ms (compile: 3ms, render: 135ms)
+ GET /dashboard/clientes/busqueda 200 in 134ms (compile: 5ms, render: 129ms)
+ GET /dashboard/clientes/busqueda 200 in 128ms (compile: 4ms, render: 125ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 3ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 3ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 116ms (compile: 3ms, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 109ms (compile: 2ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 121ms (compile: 4ms, render: 117ms)
+ GET /dashboard/clientes/busqueda 200 in 144ms (compile: 2ms, render: 142ms)
+ GET /dashboard/clientes/busqueda 200 in 152ms (compile: 2ms, render: 150ms)
+ GET /dashboard/clientes/busqueda 200 in 157ms (compile: 3ms, render: 155ms)
+ GET /dashboard/clientes/busqueda 200 in 150ms (compile: 5ms, render: 146ms)
+ GET /dashboard/clientes/busqueda 200 in 135ms (compile: 1885µs, render: 133ms)
+ GET /dashboard/clientes/busqueda 200 in 130ms (compile: 3ms, render: 127ms)
+ GET /dashboard/clientes/busqueda 200 in 128ms (compile: 2ms, render: 126ms)
+ GET /dashboard/clientes/busqueda 200 in 127ms (compile: 2ms, render: 125ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 5ms, render: 114ms)
+ GET /dashboard/clientes/busqueda 200 in 121ms (compile: 2ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 122ms (compile: 3ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 124ms (compile: 3ms, render: 121ms)
+ GET /dashboard/clientes/busqueda 200 in 126ms (compile: 4ms, render: 122ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 6ms, render: 112ms)
+ GET /dashboard/clientes/busqueda 200 in 121ms (compile: 4ms, render: 116ms)
+ GET /dashboard/clientes/busqueda 200 in 122ms (compile: 3ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 121ms (compile: 3ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 5ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 4ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 4ms, render: 107ms)
+ GET /dashboard/clientes/busqueda 200 in 89ms (compile: 2ms, render: 86ms)
+ GET /dashboard/clientes/busqueda 200 in 88ms (compile: 3ms, render: 85ms)
+ GET /dashboard/clientes/busqueda 200 in 82ms (compile: 4ms, render: 78ms)
+ GET /dashboard/clientes/busqueda 200 in 111ms (compile: 6ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 2ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 2ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 2ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 103ms (compile: 2ms, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 3ms, render: 105ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 2ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 4ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 2ms, render: 109ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 3ms, render: 105ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 2ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 126ms (compile: 2ms, render: 124ms)
+ GET /dashboard/clientes/busqueda 200 in 126ms (compile: 3ms, render: 123ms)
+ GET /dashboard/clientes/busqueda 200 in 123ms (compile: 4ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 3ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 7ms, render: 113ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 3ms, render: 115ms)
+ GET /dashboard/clientes/busqueda 200 in 118ms (compile: 4ms, render: 114ms)
+ GET /dashboard/clientes/busqueda 200 in 116ms (compile: 2ms, render: 113ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 2ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 2ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 111ms (compile: 3ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 2ms, render: 110ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 2ms, render: 111ms)
+ GET /dashboard/clientes/busqueda 200 in 109ms (compile: 3ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 120ms (compile: 3ms, render: 118ms)
+ GET /dashboard/clientes/busqueda 200 in 123ms (compile: 2ms, render: 121ms)
+ GET /dashboard/clientes/busqueda 200 in 123ms (compile: 3ms, render: 120ms)
+ GET /dashboard/clientes/busqueda 200 in 123ms (compile: 3ms, render: 121ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 4ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 112ms (compile: 4ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 108ms (compile: 2ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 3ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 105ms (compile: 3ms, render: 103ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 2ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 1946µs, render: 100ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 4ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 1969µs, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 1996µs, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 1832µs, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 2ms, render: 95ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 1955µs, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 2ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 2ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 91ms (compile: 2ms, render: 89ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 2ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 101ms (compile: 1861µs, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 135ms (compile: 2ms, render: 133ms)
+ GET /dashboard/clientes/busqueda 200 in 140ms (compile: 2ms, render: 138ms)
+ GET /dashboard/clientes/busqueda 200 in 158ms (compile: 2ms, render: 156ms)
+ GET /dashboard/clientes/busqueda 200 in 157ms (compile: 5ms, render: 153ms)
+ GET /dashboard/clientes/busqueda 200 in 157ms (compile: 5ms, render: 152ms)
+ GET /dashboard/clientes/busqueda 200 in 151ms (compile: 4ms, render: 147ms)
+ GET /dashboard/clientes/busqueda 200 in 139ms (compile: 4ms, render: 135ms)
+ GET /dashboard/clientes/busqueda 200 in 264ms (compile: 3ms, render: 261ms)
+ GET /dashboard/clientes/busqueda 200 in 250ms (compile: 2ms, render: 248ms)
+ GET /dashboard/clientes/busqueda 200 in 259ms (compile: 5ms, render: 254ms)
+ GET /dashboard/clientes/busqueda 200 in 264ms (compile: 4ms, render: 260ms)
+ GET /dashboard/clientes/busqueda 200 in 136ms (compile: 3ms, render: 133ms)
+ GET /dashboard/clientes/busqueda 200 in 124ms (compile: 3ms, render: 121ms)
+ GET /dashboard/clientes/busqueda 200 in 111ms (compile: 7ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 106ms (compile: 2ms, render: 104ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 2ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 97ms (compile: 2ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 102ms (compile: 3ms, render: 99ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 1966µs, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 1999µs, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 3ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 1981µs, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 104ms (compile: 2ms, render: 102ms)
+ GET /dashboard/clientes/busqueda 200 in 109ms (compile: 3ms, render: 106ms)
+ GET /dashboard/clientes/busqueda 200 in 113ms (compile: 1993µs, render: 111ms)
+ GET /dashboard/clientes/busqueda 200 in 110ms (compile: 2ms, render: 108ms)
+ GET /dashboard/clientes/busqueda 200 in 119ms (compile: 2ms, render: 117ms)
+ GET /dashboard/clientes/busqueda 200 in 122ms (compile: 3ms, render: 119ms)
+ GET /dashboard/clientes/busqueda 200 in 219ms (compile: 3ms, render: 217ms)
+ GET /dashboard/clientes/busqueda 200 in 218ms (compile: 2ms, render: 216ms)
+ GET /dashboard/clientes/busqueda 200 in 205ms (compile: 4ms, render: 201ms)
+ GET /dashboard/clientes/busqueda 200 in 199ms (compile: 2ms, render: 196ms)
+ GET /dashboard/clientes/busqueda 200 in 98ms (compile: 2ms, render: 96ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 2ms, render: 94ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 2ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 95ms (compile: 2ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 93ms (compile: 3ms, render: 90ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 1940µs, render: 92ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 2ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 1849µs, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 100ms (compile: 2ms, render: 98ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 3ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 99ms (compile: 2ms, render: 97ms)
+ GET /dashboard/clientes/busqueda 200 in 91ms (compile: 1756µs, render: 89ms)
+ GET /dashboard/clientes/busqueda 200 in 96ms (compile: 2ms, render: 93ms)
+ GET /dashboard/clientes/busqueda 200 in 94ms (compile: 2ms, render: 91ms)
+ GET /dashboard/clientes/busqueda 200 in 72ms (compile: 2ms, render: 70ms)
+ GET /dashboard/clientes/busqueda 200 in 52ms (compile: 2ms, render: 50ms)
+ GET /dashboard/clientes/busqueda 200 in 27ms (compile: 1803µs, render: 25ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 70ms (compile: 59ms, render: 11ms)
+ GET /api/guaranteed-real 200 in 340ms (compile: 334ms, render: 5ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 11ms (compile: 3ms, render: 8ms)
+🎯 GARANTÍA DE DATOS REALES para: "desarrollador"
+🔥 EXTRACCIÓN DIRECTA de InfoJobs para: "desarrollador"
+📡 Consultando: https://www.infojobs.net/ofertas-trabajo?keyword=desarrollador&page=1&sortBy=RELEVANCE
+✅ InfoJobs respondió correctamente (1003070 chars)
+✅ DATOS REALES VERIFICADOS: 8 ofertas auténticas de InfoJobs
+ POST /api/direct-real-data 200 in 676ms (compile: 71ms, render: 605ms)
+✅ DATOS REALES GARANTIZADOS: 8 ofertas verificadas
+ POST /api/guaranteed-real 200 in 697ms (compile: 2ms, render: 695ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 10ms (compile: 2ms, render: 8ms)
+ GET /api/guaranteed-real 200 in 11ms (compile: 3ms, render: 8ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 115ms (compile: 56ms, render: 59ms)
+ GET /api/guaranteed-real 200 in 34ms (compile: 17ms, render: 17ms)
+ GET /api/guaranteed-real 200 in 20ms (compile: 8ms, render: 13ms)
+ GET /api/guaranteed-real 200 in 15ms (compile: 6ms, render: 9ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 52ms (compile: 36ms, render: 16ms)
+ GET /api/guaranteed-real 200 in 23ms (compile: 17ms, render: 6ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 25ms (compile: 15ms, render: 10ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 283ms (compile: 239ms, render: 44ms)
+ GET / 307 in 877ms (compile: 329ms, render: 548ms)
+🎯 GARANTÍA DE DATOS REALES para: "desarrollador"
+🔥 EXTRACCIÓN DIRECTA de InfoJobs para: "desarrollador"
+📡 Consultando: https://www.infojobs.net/ofertas-trabajo?keyword=desarrollador&page=1&sortBy=RELEVANCE
+✅ InfoJobs respondió correctamente (1003070 chars)
+✅ DATOS REALES VERIFICADOS: 8 ofertas auténticas de InfoJobs
+ POST /api/direct-real-data 200 in 561ms (compile: 40ms, render: 521ms)
+✅ DATOS REALES GARANTIZADOS: 8 ofertas verificadas
+ POST /api/guaranteed-real 200 in 611ms (compile: 34ms, render: 576ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 10ms (compile: 3ms, render: 7ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 115ms (compile: 86ms, render: 29ms)
+ GET /test-api 200 in 1246ms (compile: 1107ms, render: 138ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 17ms (compile: 2ms, render: 14ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 24ms (compile: 7ms, render: 17ms)
+ GET /test-api?id=4cec3613-1f3e-4789-a647-fbaf80d7d191&vscodeBrowserReqId=1767964165516 200 in 63ms (compile: 4ms, render: 59ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 17ms (compile: 4ms, render: 12ms)
+ GET /api/guaranteed-real 200 in 52ms (compile: 44ms, render: 8ms)
+ GET /test-api 200 in 100ms (compile: 4ms, render: 96ms)
+🎯 GARANTÍA DE DATOS REALES para: "pagina web"
+🔥 EXTRACCIÓN DIRECTA de InfoJobs para: "pagina web"
+📡 Consultando: https://www.infojobs.net/ofertas-trabajo?keyword=pagina%20web&page=1&sortBy=RELEVANCE
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 9ms (compile: 2ms, render: 7ms)
+✅ InfoJobs respondió correctamente (1023418 chars)
+✅ DATOS REALES VERIFICADOS: 8 ofertas auténticas de InfoJobs
+ POST /api/direct-real-data 200 in 1788ms (compile: 42ms, render: 1745ms)
+✅ DATOS REALES GARANTIZADOS: 8 ofertas verificadas
+ POST /api/guaranteed-real 200 in 1993ms (compile: 11ms, render: 1982ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 13ms (compile: 4ms, render: 9ms)
+ GET /dashboard 200 in 173ms (compile: 91ms, render: 81ms)
+ GET /dashboard?id=4cec3613-1f3e-4789-a647-fbaf80d7d191&vscodeBrowserReqId=1767964342307 200 in 56ms (compile: 4ms, render: 52ms)
+UserId en tenants: demo-user
+ GET /api/tenants 200 in 95ms (compile: 88ms, render: 7ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 8ms (compile: 3ms, render: 6ms)
+ GET /dashboard/clientes/busqueda 200 in 89ms (compile: 69ms, render: 20ms)
+GET job-searches/stats - userId: user-1
+GET job-searches - userId: user-1 page: 1 limit: 10
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches/stats?userId=user-1 200 in 354ms (compile: 125ms, render: 229ms)
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=user-1 200 in 360ms (compile: 183ms, render: 177ms)
+GET job-searches - userId: user-1 page: 1 limit: 10
+GET job-searches/stats - userId: user-1
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=user-1 200 in 94ms (compile: 2ms, render: 92ms)
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches/stats?userId=user-1 200 in 98ms (compile: 14ms, render: 85ms)
+POST job-searches - body: {
+  keywords: 'web',
+  portals: [ 'infojobs' ],
+  frequencyMinutes: 240,
+  userId: 'user-1'
+}
+⚠️ Supabase connection failed: 
+🚫 DATABASE_URL no configurada - No se pueden crear búsquedas
+ POST /api/job-searches 400 in 111ms (compile: 1912µs, render: 109ms)
+POST job-searches - body: {
+  keywords: 'web',
+  portals: [ 'infojobs' ],
+  frequencyMinutes: 240,
+  userId: 'user-1'
+}
+⚠️ Supabase connection failed: 
+🚫 DATABASE_URL no configurada - No se pueden crear búsquedas
+ POST /api/job-searches 400 in 86ms (compile: 3ms, render: 82ms)
+ GET /dashboard 200 in 66ms (compile: 4ms, render: 61ms)
+UserId en tenants: demo-user
+ GET /api/tenants 200 in 10ms (compile: 5ms, render: 5ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 9ms (compile: 3ms, render: 6ms)
+ GET /dashboard/clientes/busqueda 200 in 28ms (compile: 4ms, render: 24ms)
+GET job-searches - userId: user-1 page: 1 limit: 10
+GET job-searches/stats - userId: user-1
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches/stats?userId=user-1 200 in 103ms (compile: 13ms, render: 90ms)
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=user-1 200 in 111ms (compile: 6ms, render: 105ms)
+GET job-searches/stats - userId: user-1
+GET job-searches - userId: user-1 page: 1 limit: 10
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches/stats?userId=user-1 200 in 114ms (compile: 2ms, render: 112ms)
+⚠️ Supabase connection failed: 
+🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL
+ GET /api/job-searches?userId=user-1 200 in 106ms (compile: 1689µs, render: 105ms)
+POST job-searches - body: {
+  keywords: 'web',
+  portals: [ 'infojobs' ],
+  frequencyMinutes: 240,
+  userId: 'user-1'
+}
+⚠️ Supabase connection failed: 
+🚫 DATABASE_URL no configurada - No se pueden crear búsquedas
+ POST /api/job-searches 400 in 84ms (compile: 1921µs, render: 82ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 10ms (compile: 3ms, render: 7ms)
+  Reload env: .env.local
+ GET /dashboard/clientes/busqueda 200 in 638ms (compile: 558ms, render: 80ms)
+🕒 [SCHEDULER] Verificando posts programados...
+📋 [SCHEDULER] Encontrados 0 posts para publicar
+ POST /api/execute-scheduled 200 in 102ms (compile: 91ms, render: 11ms)
 [?25h
