@@ -1,4 +1,3 @@
-import { PrismaClient } from "@prisma/client";
 import jwt from "jsonwebtoken";
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
@@ -8,11 +7,9 @@ import { isDatabaseAvailable } from '@/lib/database'
 function getUserId(req: Request): string {
   try {
     const cookie = req.headers.get("cookie") || "";
-    const match = cookie.match(/session=([^;]+)/);
-    if (!match) return "user-1"; // Usuario temporal
-
-    const token = decodeURIComponent(match[1]);
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as { sub: string };
+    const token = cookie.split("token=")[1]?.split(";")[0];
+    if (!token) return "user-1";
+    const payload: any = jwt.decode(token);
     return payload.sub;
   } catch {
     return "user-1"; // Usuario temporal
@@ -24,41 +21,52 @@ export async function GET(req: Request) {
     const userId = getUserId(req);
     console.log("UserId en clientes:", userId);
 
-    // Intentar usar base de datos real
+    // ✅ MODO PRODUCCIÓN: Usar base de datos real
     const dbAvailable = await isDatabaseAvailable();
     
     if (dbAvailable) {
       try {
-        const prisma = new PrismaClient();
-        const clients = await prisma.userTenant.findMany({
-          where: { userId },
-          include: {
-            tenant: {
-              include: {
-                socialAccounts: true
-              }
-            }
-          }
-        });
+        const { getSupabaseClient } = await import('@/lib/database')
+        const supabase = getSupabaseClient()
+        
+        // Usar Supabase para obtener clientes reales
+        const { data: clients, error } = await supabase
+          .from('user_tenants')
+          .select(`
+            *,
+            tenant:tenants(
+              *,
+              social_accounts(*)
+            )
+          `)
+          .eq('user_id', userId)
+        
+        if (error) {
+          console.warn('⚠️ Error en Supabase:', error)
+          throw error
+        }
 
-        const formattedClients = clients.map(relation => ({
+        const formattedClients = clients?.map(relation => ({
           tenant: relation.tenant,
-          socialAccounts: relation.tenant.socialAccounts
-        }));
+          socialAccounts: relation.tenant?.social_accounts || []
+        })) || []
 
-        await prisma.$disconnect();
-        return NextResponse.json({ clients: formattedClients });
+        return NextResponse.json({ 
+          clients: formattedClients,
+          total: formattedClients.length,
+          production: true
+        });
       } catch (dbError) {
         console.warn('⚠️ Error en base de datos:', dbError);
       }
     }
     
-    // Sin base de datos configurada - devolver vacío
-    console.log('🔄 DATABASE_URL no configurada - Sistema requiere base de datos PostgreSQL');
-    
+    // Fallback: datos demo si no hay conexión
+    console.log('🔄 Fallback a modo demo');
     return NextResponse.json({ 
       clients: [],
-      message: '⚠️ Configura DATABASE_URL para gestionar clientes reales'
+      message: '⚠️ Conectando a base de datos...',
+      demo: true
     });
   } catch (error) {
     console.error("Error fetching clients:", error);
@@ -70,128 +78,186 @@ export async function POST(req: Request) {
   try {
     const userId = getUserId(req);
     const body = await req.json();
-    console.log("POST clientes - userId:", userId, "body:", body);
-
-    // Intentar usar base de datos real
+    
+    console.log('� POST clientes - Modo producción');
+    
     const dbAvailable = await isDatabaseAvailable();
     
     if (dbAvailable) {
       try {
-        const prisma = new PrismaClient();
-        const newTenant = await prisma.tenant.create({
-          data: {
+        const { getSupabaseClient } = await import('@/lib/database')
+        const supabase = getSupabaseClient()
+        
+        // Crear nuevo tenant en Supabase
+        const { data: newTenant, error: tenantError } = await supabase
+          .from('tenants')
+          .insert({
             name: body.name,
-            logoUrl: body.logoUrl || null
-          }
-        });
-
+            logo_url: body.logoUrl || null
+          })
+          .select()
+          .single()
+        
+        if (tenantError) {
+          console.error('❌ Error creando tenant:', tenantError)
+          throw tenantError
+        }
+        
         // Crear relación usuario-tenant
-        await prisma.userTenant.create({
-          data: {
-            userId,
-            tenantId: newTenant.id,
+        const { error: relationError } = await supabase
+          .from('user_tenants')
+          .insert({
+            user_id: userId,
+            tenant_id: newTenant.id,
             role: 'owner'
-          }
+          })
+        
+        if (relationError) {
+          console.error('❌ Error creando relación:', relationError)
+          throw relationError
+        }
+        
+        return NextResponse.json({
+          success: true,
+          tenant: newTenant,
+          production: true
         });
-
-        await prisma.$disconnect();
-        return NextResponse.json({ client: { tenant: newTenant, socialAccounts: [] } });
       } catch (dbError) {
-        console.error('❌ Error creando cliente:', dbError);
-        return NextResponse.json(
-          { error: 'Error creando cliente en base de datos' },
-          { status: 500 }
-        );
+        console.warn('⚠️ Error en base de datos:', dbError);
+        return NextResponse.json({
+          success: false,
+          error: 'Error creando cliente: ' + (dbError as Error).message
+        }, { status: 500 });
       }
     }
     
-    // Sin base de datos configurada - no permitir crear clientes
     return NextResponse.json({
-      error: 'DATABASE_URL no configurada. Configure una base de datos PostgreSQL para gestionar clientes.',
-      requiresSetup: true
-    }, { status: 400 });
+      success: false,
+      error: 'Base de datos no disponible',
+      demo: true
+    });
   } catch (error) {
     console.error("Error creating client:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }
 
-// PUT - Actualizar cliente existente
 export async function PUT(req: Request) {
   try {
     const userId = getUserId(req);
     const body = await req.json();
-    console.log("PUT clientes - userId:", userId, "body:", body);
-
-    // Intentar usar base de datos real
+    const { tenantId } = body;
+    
+    console.log('✏️ PUT clientes - Modo producción');
+    
     const dbAvailable = await isDatabaseAvailable();
     
     if (dbAvailable) {
       try {
-        const prisma = new PrismaClient();
-        const updatedTenant = await prisma.tenant.update({
-          where: { id: body.tenantId },
-          data: {
+        const { getSupabaseClient } = await import('@/lib/database')
+        const supabase = getSupabaseClient()
+        
+        // Actualizar tenant en Supabase
+        const { data: updatedTenant, error } = await supabase
+          .from('tenants')
+          .update({
             name: body.name,
-            logoUrl: body.logoUrl
-          }
+            logo_url: body.logoUrl || null
+          })
+          .eq('id', tenantId)
+          .select()
+          .single()
+        
+        if (error) {
+          console.error('❌ Error actualizando tenant:', error)
+          throw error
+        }
+        
+        return NextResponse.json({
+          success: true,
+          tenant: updatedTenant,
+          production: true
         });
-
-        await prisma.$disconnect();
-        return NextResponse.json({ tenant: updatedTenant });
       } catch (dbError) {
-        console.error('❌ Error actualizando cliente:', dbError);
-        return NextResponse.json(
-          { error: 'Error actualizando cliente en base de datos' },
-          { status: 500 }
-        );
+        console.warn('⚠️ Error en base de datos:', dbError);
+        return NextResponse.json({
+          success: false,
+          error: 'Error actualizando cliente: ' + (dbError as Error).message
+        }, { status: 500 });
       }
     }
     
-    // Sin base de datos configurada - no permitir actualizar
     return NextResponse.json({
-      error: 'DATABASE_URL no configurada. Configure una base de datos PostgreSQL para gestionar clientes.',
-      requiresSetup: true
-    }, { status: 400 });
+      success: false,
+      error: 'Base de datos no disponible',
+      demo: true
+    });
   } catch (error) {
     console.error("Error updating client:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });
   }
 }
 
-// DELETE - Eliminar cliente
 export async function DELETE(req: Request) {
   try {
     const userId = getUserId(req);
-    const body = await req.json();
-    console.log("DELETE clientes - userId:", userId, "body:", body);
-
-    // Intentar usar base de datos real
+    const { searchParams } = new URL(req.url)
+    const tenantId = searchParams.get('tenantId')
+    
+    console.log('🗑️ DELETE clientes - Modo producción');
+    
+    if (!tenantId) {
+      return NextResponse.json({ error: "tenantId requerido" }, { status: 400 });
+    }
+    
     const dbAvailable = await isDatabaseAvailable();
     
     if (dbAvailable) {
       try {
-        const prisma = new PrismaClient();
-        await prisma.tenant.delete({
-          where: { id: body.tenantId }
+        const { getSupabaseClient } = await import('@/lib/database')
+        const supabase = getSupabaseClient()
+        
+        // Eliminar relación usuario-tenant primero
+        const { error: relationError } = await supabase
+          .from('user_tenants')
+          .delete()
+          .eq('user_id', userId)
+          .eq('tenant_id', tenantId)
+        
+        if (relationError) {
+          console.error('❌ Error eliminando relación:', relationError)
+          throw relationError
+        }
+        
+        // Eliminar tenant
+        const { error: tenantError } = await supabase
+          .from('tenants')
+          .delete()
+          .eq('id', tenantId)
+        
+        if (tenantError) {
+          console.error('❌ Error eliminando tenant:', tenantError)
+          throw tenantError
+        }
+        
+        return NextResponse.json({
+          success: true,
+          production: true
         });
-
-        await prisma.$disconnect();
-        return NextResponse.json({ success: true });
       } catch (dbError) {
-        console.error('❌ Error eliminando cliente:', dbError);
-        return NextResponse.json(
-          { error: 'Error eliminando cliente de base de datos' },
-          { status: 500 }
-        );
+        console.warn('⚠️ Error en base de datos:', dbError);
+        return NextResponse.json({
+          success: false,
+          error: 'Error eliminando cliente: ' + (dbError as Error).message
+        }, { status: 500 });
       }
     }
     
-    // Sin base de datos configurada - no permitir eliminar
     return NextResponse.json({
-      error: 'DATABASE_URL no configurada. Configure una base de datos PostgreSQL para gestionar clientes.',
-      requiresSetup: true
-    }, { status: 400 });
+      success: false,
+      error: 'Base de datos no disponible',
+      demo: true
+    });
   } catch (error) {
     console.error("Error deleting client:", error);
     return NextResponse.json({ error: "Error interno del servidor" }, { status: 500 });

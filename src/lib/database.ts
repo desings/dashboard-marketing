@@ -15,7 +15,8 @@ export async function isDatabaseAvailable(): Promise<boolean> {
       console.warn('⚠️ Using demo Supabase credentials')
       return false
     }
-    
+
+    // ✅ ACTIVADO: Conexiones reales a Supabase
     const supabase = createClient(supabaseUrl, supabaseKey)
     
     // Probar conexión haciendo una consulta simple
@@ -28,6 +29,7 @@ export async function isDatabaseAvailable(): Promise<boolean> {
       return false
     }
     
+    console.log('✅ Supabase conexión exitosa - Modo producción activado')
     return true
   } catch (error) {
     console.warn('⚠️ Database connection failed:', error)
